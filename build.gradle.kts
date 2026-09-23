@@ -1,4 +1,6 @@
+import com.sun.imageio.plugins.jpeg.JPEG.vendor
 import de.thetaphi.forbiddenapis.gradle.CheckForbiddenApis
+import jdk.internal.misc.PreviewFeatures.isEnabled
 import org.cyclonedx.Version
 import org.cyclonedx.model.Component
 import org.gradle.api.file.RegularFile
@@ -7,11 +9,11 @@ plugins {
     java
     idea
     checkstyle
-    id("org.springframework.boot") version "4.1.1"
-    id("io.spring.dependency-management") version "1.1.7"
-    id("io.freefair.lombok") version "9.7.0"
-    id("de.thetaphi.forbiddenapis") version "3.11"
-    id("org.cyclonedx.bom") version "3.4.1"
+    alias(libs.plugins.de.thetaphi.forbiddenapis)
+    alias(libs.plugins.io.freefair.lombok)
+    alias(libs.plugins.io.spring.dependencyManagement)
+    alias(libs.plugins.org.springframework.boot.springBoot)
+    alias(libs.plugins.org.cyclonedx.bom)
 }
 
 group = "com.colinmoerbe"
@@ -33,44 +35,26 @@ repositories {
     mavenCentral()
 }
 
-dependencyManagement {
-    imports {
-        mavenBom ("org.springframework.boot:spring-boot-dependencies:4.1.1")
-        mavenBom("org.junit:junit-bom:6.1.3")
-        mavenBom("com.google.guava:guava-bom:33.7.1-jre")
-    }
-}
-
-val slf4jVersion = "2.0.19"
-val jakartaVersion = "3.0.0"
 val archunitVersion = "1.5.0"
 
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.springframework.boot:spring-boot-docker-compose")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation("com.google.guava:guava")
-    implementation("org.slf4j:slf4j-api")
-    implementation("jakarta.annotation:jakarta.annotation-api:$jakartaVersion")
-    implementation("org.postgresql:postgresql")
-    implementation("org.apache.httpcomponents.client5:httpclient5") // Necessary so that PATCH requests work
+    implementation(libs.org.springframework.boot.springBootDockerCompose)
+    implementation(libs.org.springframework.boot.springBootStarterActuator)
+    implementation(libs.org.springframework.boot.springBootStarterDataJpa)
+    implementation(libs.org.springframework.boot.springBootStarterLiquibase)
+    implementation(libs.org.springframework.boot.springBootStarterValidation)
+    implementation(libs.org.springframework.boot.springBootStarterWeb)
 
-    developmentOnly("org.springframework.boot:spring-boot-devtools") // Ctrl+F9 for recompiling, this fast restarts the server
+    developmentOnly(libs.org.springframework.boot.springBootDevtools)
 
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    runtimeOnly(libs.org.postgresql.postgresql)
 
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-
-    // ArchitectureTests dependencies.
     testImplementation("com.tngtech.archunit:archunit:$archunitVersion")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.springframework.boot:spring-boot-testcontainers")
-    testImplementation("org.testcontainers:testcontainers-junit-jupiter")
-    testImplementation("org.junit.jupiter:junit-jupiter")
-    testImplementation("org.assertj:assertj-core:")
-    testImplementation("org.testcontainers:testcontainers-postgresql")
+    testImplementation(libs.org.springframework.boot.springBootStarterTest)
+    testImplementation(libs.org.springframework.boot.springBootStarterWebmvcTest)
+    testImplementation(libs.org.springframework.boot.springBootTestcontainers)
+    testImplementation(libs.org.testcontainers.junitJupiter)
+    testImplementation(libs.org.testcontainers.postgresql)
 }
 
 tasks.withType<Jar> {
@@ -100,7 +84,7 @@ tasks.named<CheckForbiddenApis>("forbiddenApisMain").configure {
 }
 
 tasks.named<CheckForbiddenApis>("forbiddenApisTest").configure {
-    bundledSignatures = setOf("jdk-unsafe", "jdk-deprecated", "jdk-internal", "jdk-non-portable", "jdk-reflection")
+    bundledSignatures = setOf("jdk-unsafe", "jdk-deprecated", "jdk-internal", "jdk-non-portable", "jdk-system-out", "jdk-reflection")
     signaturesFiles = project.files("config/forbidden-apis.txt")
     isEnabled = true
 }

@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: poe-companion
+  datasource:
+    url: jdbc:postgresql://${POE_COMPANION_DB_HOST}:${POE_COMPANION_DB_PORT}/${POE_COMPANION_DB_NAME}
+    username: ${POE_COMPANION_DB_USER}
+    password: ${POE_COMPANION_DB_PW}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate

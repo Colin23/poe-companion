@@ -1,0 +1,16 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0
+      author: Colin23
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            tableName: placeholder_table
+            columns:
+              - column:
+                  name: id
+                  type: bigserial
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: placeholder_table_id
