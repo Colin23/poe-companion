@@ -1,0 +1,8 @@
+* text=auto
+
+# Files that must have windows line endings (\r\n)
+*.bat text eol=crlf
+
+# Files that must have linux line endings (\n)
+*.sh text eol=lf
+/gradlew text eol=lf

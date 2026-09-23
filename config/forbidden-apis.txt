@@ -1,0 +1,6 @@
+# Format of this file is documented at https://github.com/policeman-tools/forbidden-apis/wiki/SignaturesSyntax
+
+java.util.Locale#<init>(java.lang.String) @ Don't define Locales with only the language. Always define the country too.
+
+java.lang.System#exit(int) @ Bad practice in production applications.
+java.lang.Runtime#exit(int) @ Bad practice in production applications.
