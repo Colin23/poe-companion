@@ -1,2 +1,2 @@
-# poe-companion
-A companion website for Path fo Exile
+# Path of Exile Companion
+A companion website for Path of Exile
