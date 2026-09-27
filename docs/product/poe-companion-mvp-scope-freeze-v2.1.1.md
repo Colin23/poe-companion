@@ -1,14 +1,14 @@
 # PoE Companion — MVP Scope Freeze V2.1.1
 
-**Target:** V0.1
-**Status:** Canonical scope freeze
-**Purpose:** Define the smallest product version that validates the core hypothesis while respecting the V2.1.1 domain semantics.
+**Target:** V0.1 **Status:** Canonical scope freeze **Purpose:** Define the smallest product version that validates the
+core hypothesis while respecting the V2.1.1 domain semantics.
 
 ## 1. Product Hypothesis
 
 V0.1 tests:
 
-> **Is it useful and enjoyable to represent an SSF account through owned Uniques, curated BuildVariant requirements and target-farming probabilities?**
+> **Is it useful and enjoyable to represent an SSF account through owned Uniques, curated BuildVariant requirements and
+target-farming probabilities?**
 
 Core validation chain:
 
@@ -29,7 +29,8 @@ Single application user
 Desktop-first
 ```
 
-Public signup, organizations, roles, tenancy and password-recovery infrastructure are out of scope. Reasonable internet-facing security is required.
+Public signup, organizations, roles, tenancy and password-recovery infrastructure are out of scope. Reasonable
+internet-facing security is required.
 
 ## 3. V0.1 Functional Areas
 
@@ -43,11 +44,14 @@ Public signup, organizations, roles, tenancy and password-recovery infrastructur
 
 ## 4. Version and Account Context
 
-V0.1 supports manual configuration/selection of `CompatibilityVersion`, primary `AccountContext`, and the explicit EvaluationContext used for account/build/acquisition evaluation. AccountContext identity is not permanently bound to one CompatibilityVersion.
+V0.1 supports manual configuration/selection of `CompatibilityVersion`, primary `AccountContext`, and the explicit
+EvaluationContext used for account/build/acquisition evaluation. AccountContext identity is not permanently bound to one
+CompatibilityVersion.
 
 Primary context: current temporary Softcore SSF, normal ruleset.
 
-Automatic GGG league discovery is not required. Previous manually created contexts may remain accessible. Ruthless is unsupported.
+Automatic GGG league discovery is not required. Previous manually created contexts may remain accessible. Ruthless is
+unsupported.
 
 ## 5. Unique Catalog — Required
 
@@ -77,7 +81,8 @@ Catalog browsing must not require PoE Wiki to be online at runtime.
 
 ## 6. Catalog Import — Required
 
-V0.1 includes a developer-triggered import from PoE Wiki Cargo as the source. RePoE integration is **OUT of V0.1** and may be reconsidered later as enrichment/cross-reference.
+V0.1 includes a developer-triggered import from PoE Wiki Cargo as the source. RePoE integration is **OUT of V0.1** and
+may be reconsidered later as enrichment/cross-reference.
 
 Import requirements:
 
@@ -91,13 +96,18 @@ surface ambiguous identity rather than guessing
 re-apply persistent app-owned catalog corrections
 ```
 
-Any unresolved identity conflict invalidates the complete candidate CatalogRevision; V0.1 does not partially activate unaffected records. Active corrections persist across imports and are never silently overwritten by provider data. Candidate activation also requires completeness validation for the configured provider scope; incomplete pagination/batches fail activation. Provider-record absence alone never deletes a stable UniqueDefinition or implies retirement/drop-disablement.
+Any unresolved identity conflict invalidates the complete candidate CatalogRevision; V0.1 does not partially activate
+unaffected records. Active corrections persist across imports and are never silently overwritten by provider data.
+Candidate activation also requires completeness validation for the configured provider scope; incomplete
+pagination/batches fail activation. Provider-record absence alone never deletes a stable UniqueDefinition or implies
+retirement/drop-disablement.
 
 A sophisticated approval UI is not required.
 
 ## 7. Catalog Revision — Minimal Required Support
 
-Track enough to answer what was imported, when, from which provider/source revision, for which relevant compatibility/version context, and which revision is active.
+Track enough to answer what was imported, when, from which provider/source revision, for which relevant
+compatibility/version context, and which revision is active.
 
 A failed import leaves the previous active catalog usable.
 
@@ -137,7 +147,8 @@ Missing
 
 Basic search/filtering only.
 
-Unique Detail includes at least name/useful metadata, ownership quantity, known Build associations, known AcquisitionSources and external references.
+Unique Detail includes at least name/useful metadata, ownership quantity, known Build associations, known
+AcquisitionSources and external references.
 
 ## 11. Build Model — Required
 
@@ -150,9 +161,13 @@ BuildVariantRevision
 BuildReference
 ```
 
-A current BuildVariantRevision is verified for the EvaluationContext's CompatibilityVersion. For each `(BuildVariantId, CompatibilityVersion)`, `0..1` revisions may be active/eligible for matching. Activated/verified readiness semantics are immutable; semantic changes create a new revision and supersede the previous active revision rather than editing historical truth in place.
+A current BuildVariantRevision is verified for the EvaluationContext's CompatibilityVersion. For each
+`(BuildVariantId, CompatibilityVersion)`, `0..1` revisions may be active/eligible for matching. Activated/verified
+readiness semantics are immutable; semantic changes create a new revision and supersede the previous active revision
+rather than editing historical truth in place.
 
-An old revision is `OUTDATED`, excluded from current matching by default, and optionally inspectable. Manual re-verification is supported.
+An old revision is `OUTDATED`, excluded from current matching by default, and optionally inspectable. Manual
+re-verification is supported.
 
 ## 12. BuildReference — Minimal Support
 
@@ -177,11 +192,14 @@ ALL
 ANY
 ```
 
-Each V0.1 Requirement references a `UniqueDefinition` and `requiredQuantity > 0`. Every RequirementGroup contains at least one Requirement, and the same UniqueDefinition appears at most once within one group; repeated physical need uses `requiredQuantity > 1`.
+Each V0.1 Requirement references a `UniqueDefinition` and `requiredQuantity > 0`. Every RequirementGroup contains at
+least one Requirement, and the same UniqueDefinition appears at most once within one group; repeated physical need uses
+`requiredQuantity > 1`.
 
 ## 14. Requirement Evaluation Semantics — Required
 
-Across builds, each BuildVariantRevision is evaluated independently against full CurrentOwnership. No item reservation across builds.
+Across builds, each BuildVariantRevision is evaluated independently against full CurrentOwnership. No item reservation
+across builds.
 
 Within one build, V0.1 groups are independent non-consuming predicates.
 
@@ -193,7 +211,8 @@ Known unsupported physical-allocation case:
 A AND (A OR B)
 ```
 
-V0.1 does not implement an allocation solver or nested-expression engine. If real curated data requires a form that cannot be represented honestly, do not silently encode known-wrong readiness.
+V0.1 does not implement an allocation solver or nested-expression engine. If real curated data requires a form that
+cannot be represented honestly, do not silently encode known-wrong readiness.
 
 ## 15. Advanced Requirement Constraints — Out of V0.1
 
@@ -230,7 +249,8 @@ No-required-Unique case displays `No required Uniques`.
 
 Build Browser groups current variants by readiness.
 
-Build Detail shows Archetype/Variant, CompatibilityVersion/verification state, readiness, ENABLING/CORE/UPGRADE groups, owned/missing details and references.
+Build Detail shows Archetype/Variant, CompatibilityVersion/verification state, readiness, ENABLING/CORE/UPGRADE groups,
+owned/missing details and references.
 
 V0.1 does not evaluate build strength, DPS, mapping, bossing or defenses.
 
@@ -238,7 +258,9 @@ V0.1 does not evaluate build strength, DPS, mapping, bossing or defenses.
 
 V0.1 implements `BOSS_ENCOUNTER` as the only product-required AcquisitionSource type.
 
-Other acquisition categories may exist as future domain concepts, but V0.1 has **no product requirement** to store, curate or display them. AcquisitionSources are independently browsable. Normal/Uber are separate sources when relevant behaviour differs.
+Other acquisition categories may exist as future domain concepts, but V0.1 has **no product requirement** to store,
+curate or display them. AcquisitionSources are independently browsable. Normal/Uber are separate sources when relevant
+behaviour differs.
 
 ## 19. DropRelationship — Required
 
@@ -248,7 +270,8 @@ Many-to-many relationship:
 AcquisitionSource ↔ UniqueDefinition
 ```
 
-The relationship may exist without known probability. The relationship itself has EvaluationContext/applicability semantics because whether a source can produce an item may change by CompatibilityVersion/GamePatch/Ruleset/League.
+The relationship may exist without known probability. The relationship itself has EvaluationContext/applicability
+semantics because whether a source can produce an item may change by CompatibilityVersion/GamePatch/Ruleset/League.
 
 ## 20. Fixed DropEstimate — Required Where Known
 
@@ -281,13 +304,17 @@ Some encounter Unique probabilities depend on conditions such as area item quant
 
 V0.1 does not implement these effective-probability models.
 
-For such a relationship the product may show the source and explanatory condition information, but must not knowingly present a misleading fixed probability.
+For such a relationship the product may show the source and explanatory condition information, but must not knowingly
+present a misleading fixed probability.
 
 ## 22. Personal Drop-Rate Override — Required for Supported Fixed Model
 
 A user may store a personal fixed probability for a supported relationship/model context.
 
-Canonical estimate remains unchanged. The user chooses default vs personal input. For an exact `(DropRelationship, ProbabilityModel, applicability/conditions)` key there is at most one active canonical estimate and at most one active personal override. The override carries the relevant probability applicability context and becomes `STALE` whenever that context no longer matches the active EvaluationContext, including relevant GamePatch changes.
+Canonical estimate remains unchanged. The user chooses default vs personal input. For an exact
+`(DropRelationship, ProbabilityModel, applicability/conditions)` key there is at most one active canonical estimate and
+at most one active personal override. The override carries the relevant probability applicability context and becomes
+`STALE` whenever that context no longer matches the active EvaluationContext, including relevant GamePatch changes.
 
 ## 23. Available Attempts — Required
 
@@ -349,7 +376,9 @@ No generic dependency graph. GoalTemplates/favorites are **POST-MVP**, not V0.1 
 
 ## 26. Curator/Admin Capability — Required but Minimal
 
-The developer needs a practical way to curate BuildArchetypes, BuildVariants, BuildVariantRevisions, Requirements, BuildReferences, AcquisitionSources, DropRelationships, DropEstimates and catalog corrections/identity conflicts where needed.
+The developer needs a practical way to curate BuildArchetypes, BuildVariants, BuildVariantRevisions, Requirements,
+BuildReferences, AcquisitionSources, DropRelationships, DropEstimates and catalog corrections/identity conflicts where
+needed.
 
 It may be ugly and developer-oriented.
 
@@ -412,7 +441,8 @@ After `C = 1`, Build X becomes `UNIQUE_READY`.
 8. Supported fixed DropEstimates include attempt semantics/provenance.
 9. Manual AvailableAttempts persist.
 10. Fixed probability results/thresholds handle specified edge cases.
-11. Personal fixed overrides coexist with canonical estimates, canonical/personal selection works, and stale applicability is represented correctly.
+11. Personal fixed overrides coexist with canonical estimates, canonical/personal selection works, and stale
+    applicability is represented correctly.
 12. Basic Goals support zero/one typed target.
 13. Complete A/B/C vertical slice works through the browser.
 14. Application access, migrations, tests, container packaging and backup strategy are sufficient for early hosted use.
@@ -461,6 +491,7 @@ Their exact order depends on actual use.
 
 ## 32. Scope Rule
 
-A feature enters V0.1 only if it is necessary to prove the core hypothesis or keep implementation/security/data semantics honest.
+A feature enters V0.1 only if it is necessary to prove the core hypothesis or keep implementation/security/data
+semantics honest.
 
 Known future requirements are documented without automatically becoming MVP scope.

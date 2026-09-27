@@ -1,7 +1,7 @@
 # PoE Companion — Core User Journeys V2.1.1
 
-**Status:** Canonical behavioural specification
-**Purpose:** Describe observable end-to-end behaviour without prescribing database schema or frontend framework.
+**Status:** Canonical behavioural specification **Purpose:** Describe observable end-to-end behaviour without
+prescribing database schema or frontend framework.
 
 ---
 
@@ -55,7 +55,9 @@ SSF 3.29
 
 Internal flags/IDs are not exposed as the primary UI.
 
-Previous AccountContexts preserve their own historical state. Every build/acquisition evaluation also uses an explicit EvaluationContext (CompatibilityVersion plus any relevant patch/ruleset/league applicability) so historical or Standard account state is never accidentally evaluated against unrelated current knowledge.
+Previous AccountContexts preserve their own historical state. Every build/acquisition evaluation also uses an explicit
+EvaluationContext (CompatibilityVersion and Ruleset, plus patch and league applicability when relevant) so historical or
+Standard account state is never accidentally evaluated against unrelated current knowledge.
 
 Ruthless may be visible as unsupported but never silently treated as normal ruleset.
 
@@ -80,7 +82,8 @@ Post-MVP, reusable GoalTemplates may be copied with fresh progress. V0.1 does no
 
 # Journey 4 — Current vs. OUTDATED Builds
 
-If the EvaluationContext's CompatibilityVersion is `3.31` and a Variant was last verified for `3.30`, its current revision is `OUTDATED`.
+If the EvaluationContext's CompatibilityVersion is `3.31` and a Variant was last verified for `3.30`, its current
+revision is `OUTDATED`.
 
 By default it is excluded from:
 
@@ -325,7 +328,8 @@ Drop chance: Unknown
 
 No fake calculator result is shown.
 
-Likewise, if the real drop probability materially depends on modifiers that V0.1 cannot model, the product should mark the calculation unsupported/conditional rather than flattening it into a misleading fixed `p`.
+Likewise, if the real drop probability materially depends on modifiers that V0.1 cannot model, the product should mark
+the calculation unsupported/conditional rather than flattening it into a misleading fixed `p`.
 
 ---
 
@@ -342,7 +346,8 @@ The user selects which supported value powers the calculator.
 
 The personal override never overwrites canonical data.
 
-If its probability applicability context no longer matches the active EvaluationContext — including a relevant mid-cycle GamePatch change — it displays `STALE` until reviewed.
+If its probability applicability context no longer matches the active EvaluationContext — including a relevant mid-cycle
+GamePatch change — it displays `STALE` until reviewed.
 
 ---
 
@@ -411,11 +416,14 @@ Validating
 Updating collection
 ```
 
-The sync adapter enumerates every supported observable item container and applies an explicit contribution policy. Transferable stash/inventory/equipment/rucksack/passive-jewel contents contribute to CurrentOwnership; permanently bound/consumed containers such as Animate Guardian equipment do not.
+The sync adapter enumerates every supported observable item container and applies an explicit contribution policy.
+Transferable stash/inventory/equipment/rucksack/passive-jewel contents contribute to CurrentOwnership; permanently
+bound/consumed containers such as Animate Guardian equipment do not.
 
 Only after complete validation does the new snapshot become active.
 
-OwnershipMode becomes/uses SYNCHRONIZED according to the future explicit transition workflow; manual and synchronized quantities are never implicitly added.
+OwnershipMode becomes/uses SYNCHRONIZED according to the future explicit transition workflow; manual and synchronized
+quantities are never implicitly added.
 
 ---
 
@@ -517,7 +525,8 @@ resolvable UniqueDefinition references
 clear warning/documentation for unsupported combinatorial physical-allocation cases
 ```
 
-If a real build cannot be represented honestly, the model should be extended later rather than encoding known-wrong readiness.
+If a real build cannot be represented honestly, the model should be extended later rather than encoding known-wrong
+readiness.
 
 ---
 
@@ -525,7 +534,11 @@ If a real build cannot be represented honestly, the model should be extended lat
 
 A new CompatibilityVersion makes the old revision OUTDATED.
 
-Curator review may create/verify a new revision. Draft revisions may be edited while being prepared. Once activated/verified, readiness-relevant semantic contents are immutable; a later semantic correction creates a new revision which atomically supersedes the previous active revision. For each `(BuildVariantId, CompatibilityVersion)`, at most one revision may remain active/eligible for matching. Older/superseded revisions remain inspectable for historical contexts.
+Curator review may create/verify a new revision. Draft revisions may be edited while being prepared. Once
+activated/verified, readiness-relevant semantic contents are immutable; a later semantic correction creates a new
+revision which atomically supersedes the previous active revision. For each `(BuildVariantId, CompatibilityVersion)`, at
+most one revision may remain active/eligible for matching. Older/superseded revisions remain inspectable for historical
+contexts.
 
 ---
 
@@ -544,7 +557,10 @@ identity conflict visible to curator
 previous active CatalogRevision remains active
 ```
 
-V0.1 does not partially activate the unaffected records. The curator resolves the mapping and rebuilds/retries the candidate import. The same fail-safe applies when the importer cannot prove that the configured provider result is complete, for example because pagination/batches are incomplete or unexpectedly truncated. Mere disappearance of a previously observed provider record never silently deletes the existing UniqueDefinition or marks it retired.
+V0.1 does not partially activate the unaffected records. The curator resolves the mapping and rebuilds/retries the
+candidate import. The same fail-safe applies when the importer cannot prove that the configured provider result is
+complete, for example because pagination/batches are incomplete or unexpectedly truncated. Mere disappearance of a
+previously observed provider record never silently deletes the existing UniqueDefinition or marks it retired.
 
 ---
 
@@ -572,9 +588,10 @@ A provider refresh never silently removes the correction.
 
 A source/item relationship has drop probability influenced by encounter conditions such as item quantity.
 
-V0.1 may display the relationship and explanatory note but does not use the fixed calculator unless an applicable fixed estimate is valid.
+V0.1 may display the relationship and explanatory note but does not use the fixed calculator unless an applicable fixed
+estimate is valid.
 
-Future UX may collect/modell relevant conditions and calculate effective per-attempt probabilities.
+Future UX may collect/model relevant conditions and calculate effective per-attempt probabilities.
 
 The exact interaction is deliberately deferred until the first concrete implementation.
 
@@ -633,4 +650,5 @@ Player decides what to do
 
 ## Guiding Behaviour Rule
 
-> **The UI should make domain state and uncertainty understandable without inventing certainty or making the player's decision for them.**
+> **The UI should make domain state and uncertainty understandable without inventing certainty or making the player's
+decision for them.**

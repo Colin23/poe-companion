@@ -1,7 +1,7 @@
 # PoE Companion — Product Decisions V2.1.1
 
-**Status:** Canonical accepted decisions
-**Purpose:** Record current cross-cutting product/domain decisions. Detailed definitions belong to `Domain Model V2.1.1`; V0.1 inclusion belongs to `MVP Scope Freeze V2.1.1`.
+**Status:** Canonical accepted decisions **Purpose:** Record current cross-cutting product/domain decisions. Detailed
+definitions belong to `Domain Model V2.1.1`; V0.1 inclusion belongs to `MVP Scope Freeze V2.1.1`.
 
 ---
 
@@ -68,7 +68,8 @@ No regular Trade-price integration is part of the core product.
 
 ## 6. Ownership
 
-An item is currently owned if it exists anywhere in the authoritative observable account state for the selected AccountContext.
+An item is currently owned if it exists anywhere in the authoritative observable account state for the selected
+AccountContext.
 
 Locations may include:
 
@@ -96,9 +97,12 @@ The product does not ask whether all displayed ready builds can be equipped simu
 
 ## 8. CurrentOwnership and Ownership Authority
 
-`CurrentOwnership` means transferable account-owned items that are available to satisfy Build Readiness requirements. An item being observable through an external API does not by itself make it part of CurrentOwnership.
+`CurrentOwnership` means transferable account-owned items that are available to satisfy Build Readiness requirements. An
+item being observable through an external API does not by itself make it part of CurrentOwnership.
 
-Future sync must explicitly classify supported observable containers. Transferable stash/inventory/equipment/passive-jewel/rucksack contents contribute; permanently bound or consumed containers such as Animate Guardian equipment do not.
+Future sync must explicitly classify supported observable containers. Transferable
+stash/inventory/equipment/passive-jewel/rucksack contents contribute; permanently bound or consumed containers such as
+Animate Guardian equipment do not.
 
 Manual and synchronized ownership are alternative authoritative modes.
 
@@ -138,9 +142,14 @@ External provider identities map to it.
 
 Ambiguous import identity is a curator conflict, not an invitation to guess.
 
-An unresolved identity conflict invalidates the whole candidate CatalogRevision in V0.1. No partial activation occurs; the previous active revision remains authoritative.
+An unresolved identity conflict invalidates the whole candidate CatalogRevision in V0.1. No partial activation occurs;
+the previous active revision remains authoritative.
 
-Developer-owned catalog corrections are persistent app-owned overlays with provenance. They are reapplied on future imports and are never silently overwritten by provider refreshes. A candidate CatalogRevision must also pass completeness validation for its configured import scope; partial pagination/batch observations cannot activate. A provider record merely disappearing does not delete a stable UniqueDefinition or imply retirement/drop-disablement without positive evidence or curator action.
+Developer-owned catalog corrections are persistent app-owned overlays with provenance. They are reapplied on future
+imports and are never silently overwritten by provider refreshes. A candidate CatalogRevision must also pass
+completeness validation for its configured import scope; partial pagination/batch observations cannot activate. A
+provider record merely disappearing does not delete a stable UniqueDefinition or imply retirement/drop-disablement
+without positive evidence or curator action.
 
 
 ---
@@ -173,7 +182,11 @@ BuildVariantRevision verification primarily targets a CompatibilityVersion.
 
 More precise effective versions can be attached to knowledge that changes mid-cycle.
 
-Evaluations use an explicit `EvaluationContext` rather than an implicit global current version. It contains the applicable CompatibilityVersion and, where needed, GamePatch/Ruleset/League facts. AccountContext identity is not itself tied permanently to one CompatibilityVersion; Standard is the obvious counterexample. Applicability matching is strict: unconstrained fact dimensions are broad, explicitly constrained dimensions must be present and match, and missing precision is never silently treated as a match.
+Evaluations use an explicit `EvaluationContext` rather than an implicit global current version. It contains the
+applicable CompatibilityVersion and required Ruleset, plus GamePatch and LeagueDefinition when applicable.
+AccountContext identity is not itself tied permanently to one CompatibilityVersion; Standard is the obvious
+counterexample. Applicability matching is strict: unconstrained fact dimensions are broad, explicitly constrained
+dimensions must be present and match, and missing precision is never silently treated as a match.
 
 ---
 
@@ -215,7 +228,10 @@ A BuildVariantRevision that is not verified for the active EvaluationContext's C
 
 Outdated revisions remain inspectable but are excluded from current account matching/readiness.
 
-For each `(BuildVariantId, CompatibilityVersion)`, at most one revision may be active/eligible for matching. Historical revisions can coexist but cannot create two current truths. Draft revisions may be edited; once activated/verified, readiness-relevant semantic contents are immutable. A semantic change creates and atomically activates a new revision that supersedes the previous active revision rather than rewriting history.
+For each `(BuildVariantId, CompatibilityVersion)`, at most one revision may be active/eligible for matching. Historical
+revisions can coexist but cannot create two current truths. Draft revisions may be edited; once activated/verified,
+readiness-relevant semantic contents are immutable. A semantic change creates and atomically activates a new revision
+that supersedes the previous active revision rather than rewriting history.
 
 `STALE` is reserved for data whose continued validity is questionable, such as old personal estimates.
 
@@ -251,7 +267,8 @@ ANY
 quantity
 ```
 
-Every RequirementGroup contains at least one Requirement. The same UniqueDefinition appears at most once inside one group; duplicate physical need is represented by `requiredQuantity > 1`.
+Every RequirementGroup contains at least one Requirement. The same UniqueDefinition appears at most once inside one
+group; duplicate physical need is represented by `requiredQuantity > 1`.
 
 Requirement semantics belong to BuildVariantRevision.
 
@@ -321,7 +338,8 @@ Normal and Uber encounter variants are separate sources when access, drops, rate
 
 Items and sources have a many-to-many relationship through `DropRelationship`/acquisition relationships.
 
-A DropRelationship has an applicability context: whether a source can produce an item may change between CompatibilityVersions/GamePatches/Rulesets/Leagues. It is not an eternal source→item fact.
+A DropRelationship has an applicability context: whether a source can produce an item may change between
+CompatibilityVersions/GamePatches/Rulesets/Leagues. It is not an eternal source→item fact.
 
 AcquisitionSource is independently browsable.
 
@@ -338,7 +356,9 @@ source is known
 probability is unknown
 ```
 
-For one exact `(DropRelationship, ProbabilityModel, applicability/conditions)` key, at most one canonical DropEstimate may be active. Historical evidence/estimates may remain stored. Likewise, at most one personal DropRateOverride may be active for the same exact key.
+For one exact `(DropRelationship, ProbabilityModel, applicability/conditions)` key, at most one canonical DropEstimate
+may be active. Historical evidence/estimates may remain stored. Likewise, at most one personal DropRateOverride may be
+active for the same exact key.
 
 A canonical DropEstimate has real provenance such as:
 
@@ -421,7 +441,8 @@ A personal DropRateOverride never overwrites the canonical estimate.
 
 It can be selected as calculator input.
 
-It becomes `STALE` whenever its probability applicability context no longer matches the active EvaluationContext, including relevant mid-cycle GamePatch changes, unless explicitly reviewed/reused.
+It becomes `STALE` whenever its probability applicability context no longer matches the active EvaluationContext,
+including relevant mid-cycle GamePatch changes, unless explicitly reviewed/reused.
 
 ---
 
@@ -479,7 +500,8 @@ Initial future sync is user-triggered.
 
 GGG/API failure leaves the last successful snapshot active.
 
-Item movement between stash and character should ideally preserve instance continuity where IDs allow it, but exact instance tracking is not required for correct aggregate ownership.
+Item movement between stash and character should ideally preserve instance continuity where IDs allow it, but exact
+instance tracking is not required for correct aggregate ownership.
 
 ---
 
@@ -505,7 +527,8 @@ The UI should be information-dense, explainable and functional rather than desig
 
 The first deployment is for one user and does not require public signup, roles, tenancy or password recovery.
 
-It still requires reasonable security: HTTPS, protected access, secure sessions/cookies, secret hygiene, DB protection, backup, and safe future OAuth-token handling.
+It still requires reasonable security: HTTPS, protected access, secure sessions/cookies, secret hygiene, DB protection,
+backup, and safe future OAuth-token handling.
 
 ---
 
@@ -537,4 +560,5 @@ DROP PROBABILITY
 
 ## 35. Design Principle
 
-> **Model only what we can explain clearly, keep unknown data unknown, and add complexity only when a real PoE use case requires it.**
+> **Model only what we can explain clearly, keep unknown data unknown, and add complexity only when a real PoE use case
+requires it.**

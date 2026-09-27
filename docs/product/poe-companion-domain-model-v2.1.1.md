@@ -1,7 +1,7 @@
 # PoE Companion — Domain Model V2.1.1
 
-**Status:** Canonical domain definition
-**Purpose:** Define the core business concepts, relationships and invariants independently of framework, database schema and UI technology.
+**Status:** Canonical domain definition **Purpose:** Define the core business concepts, relationships and invariants
+independently of framework, database schema and UI technology.
 
 ---
 
@@ -121,7 +121,8 @@ These categories must not be collapsed into each other.
 
 ## 3. CompatibilityVersion
 
-`CompatibilityVersion` identifies the normal review boundary for knowledge that is generally validated at major PoE version/league-cycle granularity.
+`CompatibilityVersion` identifies the normal review boundary for knowledge that is generally validated at major PoE
+version/league-cycle granularity.
 
 Examples:
 
@@ -178,15 +179,21 @@ optional GamePatch
 optional LeagueDefinition when genuinely league-specific
 ```
 
-An AccountContext does not permanently embed one CompatibilityVersion. Instead, viewing/evaluating an AccountContext uses an explicit EvaluationContext appropriate to that state/view.
+An AccountContext does not permanently embed one CompatibilityVersion. Instead, viewing/evaluating an AccountContext
+uses an explicit EvaluationContext appropriate to that state/view.
 
-This prevents historical account state from being evaluated against today's build/acquisition knowledge and supports long-lived contexts such as Standard across many CompatibilityVersions.
+This prevents historical account state from being evaluated against today's build/acquisition knowledge and supports
+long-lived contexts such as Standard across many CompatibilityVersions.
 
 ### EvaluationContext applicability matching
 
-Knowledge applicability is strict and dimension-aware. A knowledge fact that does not constrain a dimension is broad for that dimension. If a fact explicitly constrains `CompatibilityVersion`, `GamePatch`, `Ruleset` or `LeagueDefinition`, the EvaluationContext must contain sufficient information and satisfy that constraint.
+Knowledge applicability is strict and dimension-aware. A knowledge fact that does not constrain a dimension is broad for
+that dimension. If a fact explicitly constrains `CompatibilityVersion`, `GamePatch`, `Ruleset` or `LeagueDefinition`,
+the EvaluationContext must contain sufficient information and satisfy that constraint.
 
-Missing precision is never treated as an implicit match. For example, a fact known to apply only from `3.30.1` cannot be applied to a historical EvaluationContext that is known only as `3.30` without a sufficiently precise patch. In that case applicability is unknown/not established rather than assumed.
+Missing precision is never treated as an implicit match. For example, a fact known to apply only from `3.30.1` cannot be
+applied to a historical EvaluationContext that is known only as `3.30` without a sufficiently precise patch. In that
+case applicability is unknown/not established rather than assumed.
 
 ---
 
@@ -245,7 +252,9 @@ progress
 personal drop overrides where applicable
 ```
 
-Every readiness/acquisition evaluation also uses an explicit EvaluationContext. For a current challenge league this is normally derived from the league/current patch; for Standard and historical views it must not be inferred from a global active version.
+Every readiness/acquisition evaluation also uses an explicit EvaluationContext. For a current challenge league this is
+normally derived from the league/current patch; for Standard and historical views it must not be inferred from a global
+active version.
 
 GoalTemplates may intentionally be reusable across contexts.
 
@@ -404,25 +413,36 @@ Partial catalog activation is not supported in V0.1.
 
 ### Catalog completeness and disappearance
 
-A candidate revision must be demonstrably complete enough for its configured provider/import scope before activation. Completeness validation must detect conditions such as incomplete pagination, unexpectedly truncated result sets, failed required batches, unresolved continuation state, or other evidence that the provider observation is partial.
+A candidate revision must be demonstrably complete enough for its configured provider/import scope before activation.
+Completeness validation must detect conditions such as incomplete pagination, unexpectedly truncated result sets, failed
+required batches, unresolved continuation state, or other evidence that the provider observation is partial.
 
-Provider absence is not deletion evidence. If a previously known provider record is absent from a later successful import, the application does **not** automatically delete the stable `UniqueDefinition` or infer `RETIRED` / `DROP_DISABLED`. Such lifecycle/availability changes require positive provider evidence, another trusted source, or explicit curator action.
+Provider absence is not deletion evidence. If a previously known provider record is absent from a later successful
+import, the application does **not** automatically delete the stable `UniqueDefinition` or infer `RETIRED` /
+`DROP_DISABLED`. Such lifecycle/availability changes require positive provider evidence, another trusted source, or
+explicit curator action.
 
 ---
 
 ## 16A. CatalogCorrection
 
-`CatalogCorrection` is app-owned curated knowledge that overrides/corrects imported provider facts without mutating upstream data.
+`CatalogCorrection` is app-owned curated knowledge that overrides/corrects imported provider facts without mutating
+upstream data.
 
-It has provenance and persists independently of any single import run. Future catalog candidates re-apply active corrections after provider normalization/identity reconciliation and before final validation.
+It has provenance and persists independently of any single import run. Future catalog candidates re-apply active
+corrections after provider normalization/identity reconciliation and before final validation.
 
-A later provider refresh must never silently erase a correction. Corrections change only through deliberate curator action.
+A later provider refresh must never silently erase a correction. Corrections change only through deliberate curator
+action.
 
 ---
 
 ## 17. OwnedItem
 
-`OwnedItem` represents a normalized **transferable** physical item instance included in a synchronized AccountSnapshot for ownership purposes. Provider-observed items from non-contributing containers (for example Animate Guardian equipment) are not modeled as OwnedItems merely because the API exposes them; they may remain only in raw sync diagnostics/provider data if useful.
+`OwnedItem` represents a normalized **transferable** physical item instance included in a synchronized AccountSnapshot
+for ownership purposes. Provider-observed items from non-contributing containers (for example Animate Guardian
+equipment) are not modeled as OwnedItems merely because the API exposes them; they may remain only in raw sync
+diagnostics/provider data if useful.
 
 It may reference a UniqueDefinition and contain observational metadata such as:
 
@@ -440,9 +460,11 @@ V0.1 manual ownership does not require OwnedItem instances.
 
 ## 18. Aggregate Ownership
 
-`CurrentOwnership` is the authoritative aggregate quantity map of **transferable account-owned gear** consumed by Build logic.
+`CurrentOwnership` is the authoritative aggregate quantity map of **transferable account-owned gear** consumed by Build
+logic.
 
-An item being observable through an API is insufficient: it contributes only when the container's contents remain available to move/use as player gear.
+An item being observable through an API is insufficient: it contributes only when the container's contents remain
+available to move/use as player gear.
 
 Conceptually:
 
@@ -450,7 +472,8 @@ Conceptually:
 UniqueDefinitionId → quantity >= 0
 ```
 
-For contributing containers, physical location is irrelevant to readiness. Future sync must explicitly classify every supported observable container.
+For contributing containers, physical location is irrelevant to readiness. Future sync must explicitly classify every
+supported observable container.
 
 Expected policy examples:
 
@@ -471,7 +494,8 @@ character equipment: 1 Ring A
 → current quantity: 2
 ```
 
-Animate Guardian gear may be provider-observable but is permanently bound/consumed for normal player gearing purposes and therefore must not increase CurrentOwnership.
+Animate Guardian gear may be provider-observable but is permanently bound/consumed for normal player gearing purposes
+and therefore must not increase CurrentOwnership.
 
 ---
 
@@ -500,7 +524,8 @@ It produces `CurrentOwnership` directly.
 
 ## 21. AccountSnapshot
 
-`AccountSnapshot` represents one complete authoritative synchronized observation of an AccountContext at a point in time.
+`AccountSnapshot` represents one complete authoritative synchronized observation of an AccountContext at a point in
+time.
 
 Conceptually:
 
@@ -532,7 +557,8 @@ It may retain diagnostic sub-step state.
 
 ## 23. Atomic Synchronization Invariant
 
-A SyncRun may replace the active AccountSnapshot only after every required source succeeds and completeness validation passes.
+A SyncRun may replace the active AccountSnapshot only after every required source succeeds and completeness validation
+passes.
 
 Example:
 
@@ -586,7 +612,8 @@ It does not own version-specific requirements.
 
 ## 27. BuildVariant
 
-`BuildVariant` represents a materially different form of a BuildArchetype **from the Companion's tracked requirement perspective**.
+`BuildVariant` represents a materially different form of a BuildArchetype **from the Companion's tracked requirement
+perspective**.
 
 A new Variant is generally warranted when the relevant Unique requirement structure changes meaningfully.
 
@@ -616,13 +643,19 @@ for each (BuildVariantId, CompatibilityVersion)
 0..1 revisions may be active/eligible for matching
 ```
 
-Historical/superseded revisions may coexist, but the evaluator must never have to choose between two active revisions for the same tuple.
+Historical/superseded revisions may coexist, but the evaluator must never have to choose between two active revisions
+for the same tuple.
 
 ### Revision lifecycle and immutability
 
-Draft BuildVariantRevisions may be edited. Once a revision is activated/verified, its readiness-relevant semantic contents are immutable. This includes RequirementGroups, Requirement importance/logic, required quantities and other facts that affect readiness semantics.
+Draft BuildVariantRevisions may be edited. Once a revision is activated/verified, its readiness-relevant semantic
+contents are immutable. This includes RequirementGroups, Requirement importance/logic, required quantities and other
+facts that affect readiness semantics.
 
-A semantic correction or change creates a new revision. Activating the new revision transactionally supersedes the previously active revision for the same `(BuildVariantId, CompatibilityVersion)`. Historical active revisions are never rewritten in place. Purely editorial metadata that cannot affect semantic evaluation may be corrected separately where useful.
+A semantic correction or change creates a new revision. Activating the new revision transactionally supersedes the
+previously active revision for the same `(BuildVariantId, CompatibilityVersion)`. Historical active revisions are never
+rewritten in place. Purely editorial metadata that cannot affect semantic evaluation may be corrected separately where
+useful.
 
 ---
 
@@ -759,7 +792,8 @@ Build readiness calculations are independent.
 
 Ownership is never reserved by another build.
 
-One physical copy may satisfy the readiness calculation for any number of separate BuildVariantRevisions because the product asks whether each build could be assembled, not whether all builds could be simultaneously equipped.
+One physical copy may satisfy the readiness calculation for any number of separate BuildVariantRevisions because the
+product asks whether each build could be assembled, not whether all builds could be simultaneously equipped.
 
 ---
 
@@ -814,9 +848,11 @@ only one A
 
 This is a known future requirement.
 
-The future solution may use nested expressions, equipment-slot constraints or allocation-aware evaluation. V2.1.1 intentionally does not choose the mechanism yet.
+The future solution may use nested expressions, equipment-slot constraints or allocation-aware evaluation. V2.1.1
+intentionally does not choose the mechanism yet.
 
-The important invariant is that this future within-build allocation problem must not be confused with cross-build ownership reservation.
+The important invariant is that this future within-build allocation problem must not be confused with cross-build
+ownership reservation.
 
 ---
 
@@ -873,7 +909,8 @@ UNIQUE_READY
 
 UPGRADE is evaluated separately.
 
-If there are no ENABLING and no CORE groups, required Unique conditions are vacuously satisfied but UI should communicate `No required Uniques`.
+If there are no ENABLING and no CORE groups, required Unique conditions are vacuously satisfied but UI should
+communicate `No required Uniques`.
 
 ---
 
@@ -959,7 +996,8 @@ The relationship may exist without a known probability.
 
 ## 45. AttemptDefinition
 
-An encounter-style AcquisitionSource must define what one calculator attempt means whenever probability calculations are supported.
+An encounter-style AcquisitionSource must define what one calculator attempt means whenever probability calculations are
+supported.
 
 Example:
 
@@ -973,7 +1011,8 @@ Attempt semantics belong to the source/probability model, not to the UI label al
 
 ## 46. DropEstimate
 
-`DropEstimate` is canonical best-known probability knowledge for one applicable DropRelationship under defined conditions and a defined probability model.
+`DropEstimate` is canonical best-known probability knowledge for one applicable DropRelationship under defined
+conditions and a defined probability model.
 
 Conceptual fields:
 
@@ -988,7 +1027,10 @@ optional exact effective GamePatch
 review metadata
 ```
 
-For one exact probability applicability key — conceptually `(DropRelationship, ProbabilityModel, applicability/conditions)` — there may be at most `0..1` active canonical DropEstimate. Older estimates/evidence may remain historical, but probability selection must never require choosing arbitrarily between multiple active canonical values for the same key.
+For one exact probability applicability key — conceptually
+`(DropRelationship, ProbabilityModel, applicability/conditions)` — there may be at most `0..1` active canonical
+DropEstimate. Older estimates/evidence may remain historical, but probability selection must never require choosing
+arbitrarily between multiple active canonical values for the same key.
 
 ---
 
@@ -1062,15 +1104,21 @@ The exact future model is intentionally deferred until concrete mechanics are im
 
 It never overwrites canonical DropEstimate.
 
-The user may select canonical or personal input for supported calculations. For one exact `(DropRelationship, ProbabilityModel, applicability/conditions)` key there may be at most `0..1` active personal override. Historical/replaced overrides may remain stored but cannot create two simultaneous personal inputs for the same calculation context.
+The user may select canonical or personal input for supported calculations. For one exact
+`(DropRelationship, ProbabilityModel, applicability/conditions)` key there may be at most `0..1` active personal
+override. Historical/replaced overrides may remain stored but cannot create two simultaneous personal inputs for the
+same calculation context.
 
-An override becomes `STALE` when its probability applicability context no longer matches the active EvaluationContext. This includes relevant CompatibilityVersion, GamePatch, Ruleset or League-specific changes rather than only major-version changes.
+An override becomes `STALE` when its probability applicability context no longer matches the active EvaluationContext.
+This includes relevant CompatibilityVersion, GamePatch, Ruleset or League-specific changes rather than only
+major-version changes.
 
 ---
 
 ## 50. AvailableAttempts
 
-`AvailableAttempts` represents how many currently available attempts the user has for an encounter-like AcquisitionSource.
+`AvailableAttempts` represents how many currently available attempts the user has for an encounter-like
+AcquisitionSource.
 
 V0.1 stores a manually entered non-negative integer per:
 
@@ -1195,7 +1243,8 @@ No BuildVariantRevision reserves ownership from another BuildVariantRevision's r
 
 ### I6 — V0.1 requirement predicate semantics
 
-V0.1 groups do not consume quantities across groups; unsupported combinatorial equipment constraints must not be silently approximated as correct.
+V0.1 groups do not consume quantities across groups; unsupported combinatorial equipment constraints must not be
+silently approximated as correct.
 
 ### I7 — ENABLING hard gate
 
@@ -1259,7 +1308,8 @@ The Companion presents possibilities and probabilities; the player decides what 
 
 ### Build optionality
 
-> Given this AccountContext's CurrentOwnership and current verified BuildVariantRevisions, what is the UniqueReadiness of each Variant?
+> Given this AccountContext's CurrentOwnership and current verified BuildVariantRevisions, what is the UniqueReadiness
+> of each Variant?
 
 ### Missing-item acquisition
 

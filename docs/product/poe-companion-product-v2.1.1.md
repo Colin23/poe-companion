@@ -1,9 +1,8 @@
 # PoE Companion — Product V2.1.1
 
-**Status:** Canonical product vision
-**Target Game:** Path of Exile 1
-**Primary Mode:** Solo Self-Found
-**Purpose:** Describe why the product exists, who it serves, and the long-term product shape without duplicating detailed domain or MVP rules.
+**Status:** Canonical product vision **Target Game:** Path of Exile 1 **Primary Mode:** Solo Self-Found **Purpose:**
+Describe why the product exists, who it serves, and the long-term product shape without duplicating detailed domain or
+MVP rules.
 
 ---
 
@@ -13,7 +12,8 @@ PoE Companion answers one central question:
 
 > **What can my Path of Exile account do right now, and what can it become next?**
 
-Path of Exile already exposes enormous information about individual items, characters, encounters and builds. SSF creates a different information problem: the value of an item depends heavily on the state of one specific account.
+Path of Exile already exposes enormous information about individual items, characters, encounters and builds. SSF
+creates a different information problem: the value of an item depends heavily on the state of one specific account.
 
 The Companion connects:
 
@@ -147,7 +147,8 @@ Maintain knowledge of all relevant Uniques, not only owned ones.
 
 ### Build Knowledge
 
-Represent curated BuildArchetypes, meaningful BuildVariants, versioned BuildVariantRevisions and their Unique requirements.
+Represent curated BuildArchetypes, meaningful BuildVariants, versioned BuildVariantRevisions and their Unique
+requirements.
 
 ### Unique Readiness
 
@@ -165,7 +166,8 @@ This is **Unique Readiness**, not full character readiness or build quality.
 
 ### Acquisition & Target Farming
 
-Connect missing Uniques to possible AcquisitionSources and model target-drop probabilities where the game mechanics are sufficiently understood.
+Connect missing Uniques to possible AcquisitionSources and model target-drop probabilities where the game mechanics are
+sufficiently understood.
 
 ### Goals
 
@@ -175,7 +177,8 @@ Allow the player to keep account intentions visible without turning the product 
 
 ## 6. Build Optionality / Reroll Capital
 
-A core long-term idea is that an SSF account accumulates **reroll capital**: assets that expand the set of plausible future characters.
+A core long-term idea is that an SSF account accumulates **reroll capital**: assets that expand the set of plausible
+future characters.
 
 The Companion should not assign a permanent intrinsic value to an item.
 
@@ -192,7 +195,8 @@ Unique A + B + C
 → Build X becomes UNIQUE_READY
 ```
 
-A Unique with no current Build association is not “useless”. It merely has no known association in the current curated corpus.
+A Unique with no current Build association is not “useless”. It merely has no known association in the current curated
+corpus.
 
 ---
 
@@ -238,7 +242,8 @@ References are evidence.
 
 Curated BuildVariantRevision requirements define the semantic Unique setup.
 
-Population popularity, item co-occurrence and PoB equipment may help discovery later but do not automatically define requirements.
+Population popularity, item co-occurrence and PoB equipment may help discovery later but do not automatically define
+requirements.
 
 ---
 
@@ -273,19 +278,24 @@ Expected attempts are shown as expectation, not guarantee.
 
 Probability is conditional on the assumptions of the selected estimate.
 
-Some real PoE drops are affected by encounter modifiers such as area quantity. The long-term product therefore needs probability models richer than one universal fixed percentage, but V0.1 intentionally implements only the fixed independent-attempt case.
+Some real PoE drops are affected by encounter modifiers such as area quantity. The long-term product therefore needs
+probability models richer than one universal fixed percentage, but V0.1 intentionally implements only the fixed
+independent-attempt case.
 
 ---
 
 ## 11. Account Synchronization Direction
 
-The long-term preferred account experience uses official GGG account APIs to observe stash and character inventory/equipment.
+The long-term preferred account experience uses official GGG account APIs to observe stash and character
+inventory/equipment.
 
 However, the product hypothesis must not depend on external OAuth access.
 
 Manual ownership is a first-class V0.1 mode.
 
-Future synchronized ownership produces the same conceptual `CurrentOwnership` consumed by downstream product logic. `CurrentOwnership` represents transferable account gear available to satisfy build requirements; provider-observable but permanently bound/consumed gear is not counted merely because it is visible to the API.
+Future synchronized ownership produces the same conceptual `CurrentOwnership` consumed by downstream product logic.
+`CurrentOwnership` represents transferable account gear available to satisfy build requirements; provider-observable but
+permanently bound/consumed gear is not counted merely because it is visible to the API.
 
 ---
 
@@ -321,7 +331,8 @@ Goals
 Curator views
 ```
 
-Exact interaction design is specified as each screen is implemented. Product behaviour matters more than pixel-perfect upfront layout.
+Exact interaction design is specified as each screen is implemented. Product behaviour matters more than pixel-perfect
+upfront layout.
 
 ---
 

@@ -1,8 +1,7 @@
 # PoE Companion — Technology & Engineering Baseline V2.1.1
 
-**Status:** Canonical implementation technology baseline
-**Verified:** 2026-09-22
-**Purpose:** Record the concrete stack selected after the technology and JVM-language evaluation.
+**Status:** Canonical implementation technology baseline **Verified:** 2026-09-22 **Purpose:** Record the concrete stack
+selected after the technology and JVM-language evaluation.
 
 ## 1. Executive Summary
 
@@ -64,7 +63,8 @@ Gradle             9.7.1
 PostgreSQL         18.6
 ```
 
-Exact dependency versions should be rechecked at repository bootstrap/update time. Prefer stable compatible releases, not preview versions merely because they are newer.
+Exact dependency versions should be rechecked at repository bootstrap/update time. Prefer stable compatible releases,
+not preview versions merely because they are newer.
 
 Spring Boot 4.1.1 supports Java 17 through 26, so JDK 25 is a supported LTS baseline.
 
@@ -137,7 +137,8 @@ kotlin-spring
 kotlin-jpa
 ```
 
-Modern Kotlin JPA support automatically handles the relevant JPA no-arg/all-open behaviour through the JPA compiler plugin.
+Modern Kotlin JPA support automatically handles the relevant JPA no-arg/all-open behaviour through the JPA compiler
+plugin.
 
 Coding rules:
 
@@ -157,7 +158,8 @@ Preferred style:
 
 > **Boring Kotlin.**
 
-Avoid custom DSLs, operator magic, deep functional abstractions or coroutine architecture without a demonstrated problem.
+Avoid custom DSLs, operator magic, deep functional abstractions or coroutine architecture without a demonstrated
+problem.
 
 ## 6. Spring Application Model
 
@@ -237,7 +239,8 @@ small state changes
 
 A Vue/TypeScript application would add a second application/toolchain/API boundary without current product value.
 
-Vue remains possible later if genuinely complex client-side interaction appears. Application/domain services must therefore stay presentation-independent.
+Vue remains possible later if genuinely complex client-side interaction appears. Application/domain services must
+therefore stay presentation-independent.
 
 ## 10. Frontend Tooling Principle
 
@@ -251,7 +254,8 @@ Do not start a design-system/component-framework project.
 
 Use PostgreSQL.
 
-Reference current stable major/minor at bootstrap; PostgreSQL 18.6 is the current 18.x maintenance release as of this document.
+Reference current stable major/minor at bootstrap; PostgreSQL 18.6 is the current 18.x maintenance release as of this
+document.
 
 The domain is relational and benefits from:
 
@@ -289,7 +293,8 @@ Application services own transaction boundaries. Lazy DB access must not leak in
 
 Do not add jOOQ at repository bootstrap.
 
-Add it when a real read/query problem becomes substantially clearer in SQL, e.g. complex readiness/reporting/dashboard queries.
+Add it when a real read/query problem becomes substantially clearer in SQL, e.g. complex readiness/reporting/dashboard
+queries.
 
 Intended future hybrid:
 
@@ -538,7 +543,8 @@ account.integration.ggg
 build.integration.pob
 ```
 
-Avoid a top-level Kotlin `import` package and avoid global technical folders such as one application-wide `controller/`, `service/`, `repository/` hierarchy.
+Avoid a top-level Kotlin `import` package and avoid global technical folders such as one application-wide `controller/`,
+`service/`, `repository/` hierarchy.
 
 ## 28. Curator UI
 
@@ -583,4 +589,5 @@ fixed probability → additional probability models without changing acquisition
 
 ## 31. Engineering Principle
 
-> **Use the smallest boring stack that strongly protects the domain, and make every additional dependency or distributed boundary earn its place.**
+> **Use the smallest boring stack that strongly protects the domain, and make every additional dependency or distributed
+boundary earn its place.**

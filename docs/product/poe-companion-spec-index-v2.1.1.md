@@ -1,12 +1,16 @@
 # PoE Companion — Specification Index V2.1.1
 
-**Status:** Canonical — Frozen for implementation
-**Date:** 2026-09-22
-**Purpose:** Define the authoritative V2.1.1 specification set, document responsibilities, conflict resolution, terminology, and the decisions resolved during the canonization pass.
+**Status:** Canonical — Frozen for implementation **Date:** 2026-09-22 **Purpose:** Define the authoritative V2.1.1
+specification set, document responsibilities, conflict resolution, terminology, and the decisions resolved during the
+canonization pass.
 
-**V2.1.1 micro-release:** closes four final implementation ambiguities without changing product architecture or V0.1 scope: activated BuildVariantRevision semantic immutability, strict EvaluationContext applicability matching, catalog completeness/disappearance policy, and active probability-input uniqueness. It also records a non-blocking provider-compliance checkpoint for future public deployment.
+**V2.1.1 micro-release:** closes four final implementation ambiguities without changing product architecture or V0.1
+scope: activated BuildVariantRevision semantic immutability, strict EvaluationContext applicability matching, catalog
+completeness/disappearance policy, and active probability-input uniqueness. It also records a non-blocking
+provider-compliance checkpoint for future public deployment.
 
-After V2.1.1 the Canon is frozen for Vertical Slice 1. New information discovered during implementation should be fed back deliberately; it is not a reason to restart broad architecture planning.
+After V2.1.1 the Canon is frozen for Vertical Slice 1. New information discovered during implementation should be fed
+back deliberately; it is not a reason to restart broad architecture planning.
 
 ---
 
@@ -14,17 +18,17 @@ After V2.1.1 the Canon is frozen for Vertical Slice 1. New information discovere
 
 The active specification consists of these documents:
 
-| Document | Authority |
-|---|---|
-| `poe-companion-product-v2.1.1.md` | Product vision, philosophy, target user, long-term direction |
-| `poe-companion-decision-v2.1.1.md` | Accepted product/domain decisions that cut across documents |
-| `poe-companion-domain-model-v2.1.1.md` | Domain terminology, semantics, relationships, and invariants |
-| `poe-companion-journeys-v2.1.1.md` | Observable user behaviour and end-to-end flows |
-| `poe-companion-mvp-scope-freeze-v2.1.1.md` | Exact V0.1 scope and non-scope |
-| `poe-companion-feasibility-spikes-v2.1.1.md` | External research and feasibility evidence; time-sensitive |
-| `poe-companion-technical-design-v2.1.1.md` | Technology-neutral architecture, module boundaries, consistency and integration rules |
-| `poe-companion-tech-stack-decision-v2.1.1.md` | Concrete implementation technology and engineering baseline |
-| `poe-companion-bootstrap-impl-plan-v2.1.1.md` | Implementation order and first vertical slices |
+| Document                                      | Authority                                                                             |
+|-----------------------------------------------|---------------------------------------------------------------------------------------|
+| `poe-companion-product-v2.1.1.md`             | Product vision, philosophy, target user, long-term direction                          |
+| `poe-companion-decision-v2.1.1.md`            | Accepted product/domain decisions that cut across documents                           |
+| `poe-companion-domain-model-v2.1.1.md`        | Domain terminology, semantics, relationships, and invariants                          |
+| `poe-companion-journeys-v2.1.1.md`            | Observable user behaviour and end-to-end flows                                        |
+| `poe-companion-mvp-scope-freeze-v2.1.1.md`    | Exact V0.1 scope and non-scope                                                        |
+| `poe-companion-feasibility-spikes-v2.1.1.md`  | External research and feasibility evidence; time-sensitive                            |
+| `poe-companion-technical-design-v2.1.1.md`    | Technology-neutral architecture, module boundaries, consistency and integration rules |
+| `poe-companion-tech-stack-decision-v2.1.1.md` | Concrete implementation technology and engineering baseline                           |
+| `poe-companion-bootstrap-impl-plan-v2.1.1.md` | Implementation order and first vertical slices                                        |
 
 The V1, V2 and V2.1 documents are historical context and are **superseded** where they conflict with this set.
 
@@ -88,11 +92,13 @@ Answer comes from `Core User Journeys V2.1.1`, constrained by Domain invariants.
 
 ### External feasibility/current-provider fact
 
-`Feasibility Spikes V2.1.1` is the evidence source, but it is explicitly time-sensitive and must be reverified when material.
+`Feasibility Spikes V2.1.1` is the evidence source, but it is explicitly time-sensitive and must be reverified when
+material.
 
 ### Vision or motivation
 
-`Product V2.1.1` provides context, but it must never override a later accepted decision, Domain invariant, or MVP scope rule.
+`Product V2.1.1` provides context, but it must never override a later accepted decision, Domain invariant, or MVP scope
+rule.
 
 ---
 
@@ -154,7 +160,8 @@ There is no `NEARLY_READY`, `READY`, `WELL_SUPPLIED`, or readiness percentage in
 OUTDATED
 ```
 
-`OUTDATED` is used for a BuildVariantRevision that is not verified for the active EvaluationContext's CompatibilityVersion.
+`OUTDATED` is used for a BuildVariantRevision that is not verified for the active EvaluationContext's
+CompatibilityVersion.
 
 ### Stale personal knowledge
 
@@ -162,7 +169,8 @@ OUTDATED
 STALE
 ```
 
-`STALE` is used for data that exists but whose continued validity is questionable, such as an old personal DropRateOverride.
+`STALE` is used for data that exists but whose continued validity is questionable, such as an old personal
+DropRateOverride.
 
 ### Unknown drop probability
 
@@ -206,11 +214,13 @@ Example:
 
 BuildVariantRevision verification primarily targets a `CompatibilityVersion`.
 
-Catalog facts, DropRelationships, DropEstimates and personal probability overrides may additionally carry more precise applicability when a mid-cycle patch matters.
+Catalog facts, DropRelationships, DropEstimates and personal probability overrides may additionally carry more precise
+applicability when a mid-cycle patch matters.
 
 ### EvaluationContext
 
-Account knowledge is never evaluated against an unqualified global "current version". An `EvaluationContext` defines the knowledge context used for one evaluation, minimally:
+Account knowledge is never evaluated against an unqualified global "current version". An `EvaluationContext` defines the
+knowledge context used for one evaluation, minimally:
 
 ```text
 CompatibilityVersion
@@ -219,7 +229,9 @@ Ruleset
 optional LeagueDefinition when genuinely league-specific
 ```
 
-An `AccountContext` selects or determines the appropriate EvaluationContext for the view/evaluation. This is especially important for historical contexts and Standard, whose AccountContext identity survives across many CompatibilityVersions.
+An `AccountContext` selects or determines the appropriate EvaluationContext for the view/evaluation. This is especially
+important for historical contexts and Standard, whose AccountContext identity survives across many
+CompatibilityVersions.
 
 V0.1 does **not** require a generic temporal rule engine.
 
@@ -250,7 +262,8 @@ The application does **not** attempt to determine whether all displayed ready bu
 
 ### 6.3 V0.1 requirement groups are non-consuming predicates
 
-Within one BuildVariantRevision, V0.1 evaluates each requirement group against aggregate ownership without resource allocation between groups.
+Within one BuildVariantRevision, V0.1 evaluates each requirement group against aggregate ownership without resource
+allocation between groups.
 
 Explicit simultaneous duplicate need is represented with quantity where possible:
 
@@ -294,7 +307,8 @@ The application owns a stable opaque `UniqueDefinitionId`.
 
 External identities are mappings to that identity, not the identity itself.
 
-Imports must not invent a merge when identity matching is ambiguous. Ambiguity becomes an import conflict requiring curator review.
+Imports must not invent a merge when identity matching is ambiguous. Ambiguity becomes an import conflict requiring
+curator review.
 
 ### 6.6 PoB deduplication
 
@@ -357,7 +371,8 @@ For `n = 0`, probability of at least one drop is `0`.
 
 For `p = 1`, expected attempts and every positive probability threshold are `1`.
 
-For `0 < p < 1`, threshold attempts use the smallest integer `n` whose probability reaches or exceeds the requested target.
+For `0 < p < 1`, threshold attempts use the smallest integer `n` whose probability reaches or exceeds the requested
+target.
 
 ### 6.10 Provider boundaries
 
@@ -377,9 +392,11 @@ build.integration.pob
 
 ### 6.12 CurrentOwnership means transferable gear
 
-`CurrentOwnership` contains account-owned items that remain transferable and can actually satisfy Build Readiness requirements.
+`CurrentOwnership` contains account-owned items that remain transferable and can actually satisfy Build Readiness
+requirements.
 
-Future synchronization must enumerate every supported observable item container and explicitly classify whether its contents contribute to CurrentOwnership.
+Future synchronization must enumerate every supported observable item container and explicitly classify whether its
+contents contribute to CurrentOwnership.
 
 Examples:
 
@@ -392,7 +409,8 @@ rucksack                → contributes
 Animate Guardian gear  → does not contribute
 ```
 
-Animate Guardian items may be observable through the provider but are not available as transferable player gear and therefore must not inflate Unique Readiness.
+Animate Guardian items may be observable through the provider but are not available as transferable player gear and
+therefore must not inflate Unique Readiness.
 
 ### 6.13 Build revision uniqueness
 
@@ -410,7 +428,8 @@ Historical/superseded revisions may coexist, but matching must never choose betw
 
 A DropRelationship is versioned/applicable knowledge, not an eternal fact.
 
-It must be possible to state that a source produced an item in one EvaluationContext but not another. Probability versioning alone is insufficient.
+It must be possible to state that a source produced an item in one EvaluationContext but not another. Probability
+versioning alone is insufficient.
 
 ### 6.15 Catalog conflict activation rule
 
@@ -429,14 +448,15 @@ V0.1 has no partial catalog activation.
 
 Developer-owned catalog corrections are app-owned data with provenance.
 
-They are re-applied when building later import candidates and are never silently overwritten by new provider data. A correction changes only when deliberately edited/removed.
+They are re-applied when building later import candidates and are never silently overwritten by new provider data. A
+correction changes only when deliberately edited/removed.
 
 ### 6.17 RequirementGroup structural invariants
 
 Every RequirementGroup contains at least one Requirement.
 
-Within one group, the same UniqueDefinition appears at most once. Multiple simultaneously required copies are expressed with `requiredQuantity > 1`.
-
+Within one group, the same UniqueDefinition appears at most once. Multiple simultaneously required copies are expressed
+with `requiredQuantity > 1`.
 
 Shared low-level HTTP infrastructure may exist separately.
 

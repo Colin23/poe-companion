@@ -1,7 +1,8 @@
 # PoE Companion — Technical Design V2.1.1
 
-**Status:** Canonical technology-neutral architecture
-**Purpose:** Define system shape, module boundaries, data ownership, consistency rules and integration patterns without binding them to a concrete programming language/framework/database product.
+**Status:** Canonical technology-neutral architecture **Purpose:** Define system shape, module boundaries, data
+ownership, consistency rules and integration patterns without binding them to a concrete programming
+language/framework/database product.
 
 ## 1. Architectural Goals
 
@@ -193,11 +194,13 @@ Web/Application orchestration → composes module APIs/read models
 
 No module may reach directly into another module's persistence internals.
 
-Exact allowed dependencies should be enforced once code exists, not via speculative interfaces for every possible future interaction.
+Exact allowed dependencies should be enforced once code exists, not via speculative interfaces for every possible future
+interaction.
 
 ## 6A. EvaluationContext Boundary
 
-Mutable game/build/acquisition knowledge is always evaluated inside an explicit EvaluationContext rather than against an implicit global current version.
+Mutable game/build/acquisition knowledge is always evaluated inside an explicit EvaluationContext rather than against an
+implicit global current version.
 
 Conceptually:
 
@@ -208,9 +211,13 @@ optional GamePatch
 optional LeagueDefinition when genuinely league-specific
 ```
 
-AccountContext owns personalized isolation; EvaluationContext owns the knowledge applicability used for a particular evaluation. Long-lived Standard contexts can therefore be evaluated under different CompatibilityVersions over time, and historical views can retain/use their historical context.
+AccountContext owns personalized isolation; EvaluationContext owns the knowledge applicability used for a particular
+evaluation. Long-lived Standard contexts can therefore be evaluated under different CompatibilityVersions over time, and
+historical views can retain/use their historical context.
 
-Applicability matching is strict. A knowledge record that omits a dimension is broad on that dimension. If it specifies CompatibilityVersion/GamePatch/Ruleset/League constraints, the EvaluationContext must contain sufficient precision and satisfy them. Unknown/missing precision yields not-applicable/unknown rather than a permissive implicit match.
+Applicability matching is strict. A knowledge record that omits a dimension is broad on that dimension. If it specifies
+CompatibilityVersion/GamePatch/Ruleset/League constraints, the EvaluationContext must contain sufficient precision and
+satisfy them. Unknown/missing precision yields not-applicable/unknown rather than a permissive implicit match.
 
 ---
 
@@ -223,7 +230,8 @@ CurrentOwnership
 UniqueDefinitionId → transferable quantity
 ```
 
-`CurrentOwnership` includes only account-owned gear that remains transferable and available to satisfy player Build Readiness requirements.
+`CurrentOwnership` includes only account-owned gear that remains transferable and available to satisfy player Build
+Readiness requirements.
 
 V0.1:
 
@@ -269,13 +277,15 @@ Evaluation is deterministic and side-effect free.
 
 ### Cross-build semantics
 
-No allocation across builds. Every BuildVariantRevision sees the full CurrentOwnership. For each `(BuildVariantId, CompatibilityVersion)`, at most one revision is active/eligible for matching.
+No allocation across builds. Every BuildVariantRevision sees the full CurrentOwnership. For each
+`(BuildVariantId, CompatibilityVersion)`, at most one revision is active/eligible for matching.
 
 ### V0.1 within-build semantics
 
 RequirementGroups are independent predicates. No allocation solver.
 
-The architecture must not expose this V0.1 implementation shortcut as a permanent guarantee that richer requirement expressions can never exist.
+The architecture must not expose this V0.1 implementation shortcut as a permanent guarantee that richer requirement
+expressions can never exist.
 
 ## 10. Future Rich Requirement Boundary
 
@@ -289,7 +299,8 @@ This allows later support for combinatorial/nested/allocation-aware requirements
 
 ## 11. Acquisition and Probability Boundary
 
-Probability calculation consumes a supported probability model rather than assuming every DropEstimate is one scalar forever.
+Probability calculation consumes a supported probability model rather than assuming every DropEstimate is one scalar
+forever.
 
 V0.1 model:
 
@@ -299,7 +310,8 @@ FIXED_BERNOULLI
 
 Future model families may be condition-dependent.
 
-A `DropRelationship` can exist with no calculable DropEstimate. The relationship itself has explicit EvaluationContext/applicability semantics because source→item availability can change independently of probability.
+A `DropRelationship` can exist with no calculable DropEstimate. The relationship itself has explicit
+EvaluationContext/applicability semantics because source→item availability can change independently of probability.
 
 The UI/application layer must be able to represent:
 
@@ -362,11 +374,16 @@ fetch provider data
 → atomically activate
 ```
 
-Any unresolved identity conflict invalidates the complete candidate CatalogRevision in V0.1; the importer never invents a merge and does not partially activate unaffected records.
+Any unresolved identity conflict invalidates the complete candidate CatalogRevision in V0.1; the importer never invents
+a merge and does not partially activate unaffected records.
 
-Completeness validation is also mandatory before activation. The importer must be able to prove that all required pages/batches for its configured scope completed successfully and should reject implausible/unexplained truncation rather than treating a partial provider observation as a complete catalog.
+Completeness validation is also mandatory before activation. The importer must be able to prove that all required
+pages/batches for its configured scope completed successfully and should reject implausible/unexplained truncation
+rather than treating a partial provider observation as a complete catalog.
 
-Absence is not lifecycle evidence: a previously known provider record disappearing from a later observation does not automatically delete a stable UniqueDefinition or mark it RETIRED/DROP_DISABLED. Those changes require positive evidence or explicit curator action.
+Absence is not lifecycle evidence: a previously known provider record disappearing from a later observation does not
+automatically delete a stable UniqueDefinition or mark it RETIRED/DROP_DISABLED. Those changes require positive evidence
+or explicit curator action.
 
 The previous active revision stays usable on failure.
 
@@ -374,7 +391,9 @@ The previous active revision stays usable on failure.
 
 Imported knowledge may be incomplete or wrong.
 
-Developer-owned corrections are persisted as an app-owned overlay with provenance rather than mutating upstream source data. Every later candidate import re-applies active corrections after normalization/identity reconciliation and before final validation. Provider refreshes never silently overwrite them.
+Developer-owned corrections are persisted as an app-owned overlay with provenance rather than mutating upstream source
+data. Every later candidate import re-applies active corrections after normalization/identity reconciliation and before
+final validation. Provider refreshes never silently overwrite them.
 
 Exact storage shape can remain lightweight in V0.1, but persistence/reapplication semantics are fixed.
 
@@ -396,11 +415,13 @@ user triggers sync
 → derive CurrentOwnership
 ```
 
-Partial results never replace current state. Provider-visible Animate Guardian equipment is explicitly non-contributing to CurrentOwnership; stash/inventory/equipment/rucksack/passive-tree jewels contribute when successfully observed.
+Partial results never replace current state. Provider-visible Animate Guardian equipment is explicitly non-contributing
+to CurrentOwnership; stash/inventory/equipment/rucksack/passive-tree jewels contribute when successfully observed.
 
 ## 17. GGG Rate-Limit and Failure Rule
 
-GGG request pacing must follow server-provided rate-limit state/Retry-After rather than fixed architectural RPS assumptions.
+GGG request pacing must follow server-provided rate-limit state/Retry-After rather than fixed architectural RPS
+assumptions.
 
 Failures leave the last successful local state available.
 
@@ -433,7 +454,8 @@ The core domain is relational.
 
 Prefer explicit relationships/constraints for core semantics.
 
-Avoid generic `entity_type/entity_id/json_blob` patterns for central relationships unless a real requirement justifies them.
+Avoid generic `entity_type/entity_id/json_blob` patterns for central relationships unless a real requirement justifies
+them.
 
 Semi-structured storage is acceptable for provider raw payloads, diagnostics and uninterpreted future metadata.
 
@@ -487,7 +509,9 @@ active AccountSnapshot
 0..1 active personal DropRateOverride per exact probability applicability/model key
 ```
 
-Activation of important revisions/snapshots is transactional. Activated BuildVariantRevision readiness semantics are immutable; semantic edits are performed by creating and atomically activating a superseding revision. Historical active revisions remain historical facts rather than mutable editor state.
+Activation of important revisions/snapshots is transactional. Activated BuildVariantRevision readiness semantics are
+immutable; semantic edits are performed by creating and atomically activating a superseding revision. Historical active
+revisions remain historical facts rather than mutable editor state.
 
 ## 23. Command vs. Query Separation
 
@@ -613,7 +637,8 @@ Future GGG OAuth tokens remain server-side.
 
 V0.1 does not need a user-management domain.
 
-It still requires protected application access and secure session/cookie/CSRF handling appropriate to the selected stack.
+It still requires protected application access and secure session/cookie/CSRF handling appropriate to the selected
+stack.
 
 ## 31. Observability and Debuggability
 
@@ -628,7 +653,8 @@ Why is probability unsupported?
 Why did a future sync fail?
 ```
 
-Structured logs should cover imports, normalization failures, external requests and security-relevant failures without leaking secrets.
+Structured logs should cover imports, normalization failures, external requests and security-relevant failures without
+leaking secrets.
 
 ## 32. Search and Cache
 
@@ -680,10 +706,10 @@ Verify intended module boundaries and no cycles/internal leakage.
 
 Cover central end-to-end journeys rather than every branch.
 
-
 ## 33A. Provider Compliance Boundary
 
-Provider adapters must also respect provider-specific access and attribution requirements. Before any public/broad deployment, reverify current terms rather than relying on this design snapshot.
+Provider adapters must also respect provider-specific access and attribution requirements. Before any public/broad
+deployment, reverify current terms rather than relying on this design snapshot.
 
 Known current examples include:
 
@@ -696,6 +722,7 @@ PoE Wiki content/data → current license/attribution obligations reviewed befor
 These are deployment/provider compliance concerns, not reasons to expand V0.1 architecture.
 
 ---
+
 ## 34. Vertical Slice 1
 
 Must prove:
@@ -762,4 +789,6 @@ generic rule engine for all future PoE mechanics
 
 ## 39. Architecture Success Criterion
 
-The architecture is successful if the product can evolve from manual V0.1 state to richer requirements, conditional drop models and GGG synchronization **without changing the meaning of CurrentOwnership, UniqueReadiness, canonical identity or player intent**.
+The architecture is successful if the product can evolve from manual V0.1 state to richer requirements, conditional drop
+models and GGG synchronization **without changing the meaning of CurrentOwnership, UniqueReadiness, canonical identity
+or player intent**.

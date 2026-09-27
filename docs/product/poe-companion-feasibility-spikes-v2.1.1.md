@@ -1,8 +1,8 @@
 # PoE Companion — Feasibility Spikes V2.1.1
 
-**Status:** Research snapshot
-**Verified:** 2026-09-22
-**Purpose:** Record external/provider feasibility facts that materially influence product or architecture. This file is time-sensitive and should be reverified before relying on changing external conditions.
+**Status:** Research snapshot **Verified:** 2026-09-22 **Purpose:** Record external/provider feasibility facts that
+materially influence product or architecture. This file is time-sensitive and should be reverified before relying on
+changing external conditions.
 
 ## 1. Summary
 
@@ -19,7 +19,8 @@ No spike invalidates V0.1. V0.1 remains fully useful without GGG OAuth.
 
 ## 2. Unique Catalog — GREEN
 
-PoE Wiki explicitly recommends Cargo API use to tool developers for structured item/mod/game data instead of scraping rendered pages.
+PoE Wiki explicitly recommends Cargo API use to tool developers for structured item/mod/game data instead of scraping
+rendered pages.
 
 Useful catalog data includes concepts such as:
 
@@ -49,11 +50,13 @@ Runtime browsing never depends on live Wiki availability.
 
 ### Identity caveat
 
-Do not collapse source rows by displayed name. The application owns `UniqueDefinitionId` and stores provider identity mappings. Ambiguous reconciliation requires curator review.
+Do not collapse source rows by displayed name. The application owns `UniqueDefinitionId` and stores provider identity
+mappings. Ambiguous reconciliation requires curator review.
 
 ### RePoE
 
-Technically useful as a possible future enrichment/cross-reference source, but explicitly **out of V0.1**. PoE Wiki remains the only planned V0.1 catalog provider.
+Technically useful as a possible future enrichment/cross-reference source, but explicitly **out of V0.1**. PoE Wiki
+remains the only planned V0.1 catalog provider.
 
 ### poe.ninja
 
@@ -83,11 +86,13 @@ Verified 2026-09-22: GGG's current developer documentation explicitly states:
 
 > **We are currently unable to process new applications.**
 
-Therefore new OAuth/API application registration is currently unavailable through the documented process. This is an external dependency outside the project team's control.
+Therefore new OAuth/API application registration is currently unavailable through the documented process. This is an
+external dependency outside the project team's control.
 
 ### V0.1 decision
 
-Manual CompatibilityVersion/LeagueDefinition/AccountContext activation remains the V0.1 mechanism because application approval is an unnecessary critical-path dependency.
+Manual CompatibilityVersion/LeagueDefinition/AccountContext activation remains the V0.1 mechanism because application
+approval is an unnecessary critical-path dependency.
 
 Automatic discovery remains post-MVP or opportunistic if credentials are obtained naturally.
 
@@ -121,9 +126,11 @@ jewels
 guardian
 ```
 
-Therefore future sync must not hard-code only stash + equipment + inventory. It must enumerate every supported observable item container and classify whether its contents contribute to transferable CurrentOwnership.
+Therefore future sync must not hard-code only stash + equipment + inventory. It must enumerate every supported
+observable item container and classify whether its contents contribute to transferable CurrentOwnership.
 
-Expected product policy: stash/inventory/equipment/rucksack/passive-tree jewels contribute; Animate Guardian equipment does not because it is not transferable player gear.
+Expected product policy: stash/inventory/equipment/rucksack/passive-tree jewels contribute; Animate Guardian equipment
+does not because it is not transferable player gear.
 
 Future complete observation:
 
@@ -137,13 +144,16 @@ all supported character item containers
 
 ### Item identity
 
-GGG Item `id` is optional. Physical-instance movement tracking is useful when available but must not be required for correct aggregate ownership.
+GGG Item `id` is optional. Physical-instance movement tracking is useful when available but must not be required for
+correct aggregate ownership.
 
 ### Registration/access status
 
-Account sync is technically feasible but **currently externally blocked for a new application** because GGG states it cannot process new applications.
+Account sync is technically feasible but **currently externally blocked for a new application** because GGG states it
+cannot process new applications.
 
-It remains YELLOW rather than RED because the APIs themselves match the architecture and the blocker is external/temporary rather than conceptual. It stays outside the V0.1 critical path.
+It remains YELLOW rather than RED because the APIs themselves match the architecture and the blocker is
+external/temporary rather than conceptual. It stays outside the V0.1 critical path.
 
 ## 5. GGG Robustness Requirements
 
@@ -161,7 +171,8 @@ last valid local state remains usable
 partial sync never activates
 ```
 
-GGG documents websites/web apps as the safest application shape for OAuth/API integration, supporting the hosted-web architecture.
+GGG documents websites/web apps as the safest application shape for OAuth/API integration, supporting the hosted-web
+architecture.
 
 Only documented APIs/data exports should be used.
 
@@ -194,7 +205,8 @@ URL-safe Base64
 
 JVM support is routine. The hard problem is semantic classification, not decoding.
 
-A normalized representation can be hashed to detect repeated **exact normalized references**. It cannot by itself detect semantic or near-duplicate builds.
+A normalized representation can be hashed to detect repeated **exact normalized references**. It cannot by itself detect
+semantic or near-duplicate builds.
 
 ## 8. Fixed Probability Math — GREEN
 
@@ -226,7 +238,8 @@ Current PoE Wiki documentation records concrete Eldritch examples:
 - Forbidden Flesh/Forbidden Flame from Eater/Exarch have documented quantity-scaling behaviour.
 - Eldritch invitations state that item quantity modifiers affect boss rewards.
 
-Therefore the long-term domain must support probability models whose effective probability depends on encounter conditions.
+Therefore the long-term domain must support probability models whose effective probability depends on encounter
+conditions.
 
 ### V0.1 consequence
 
@@ -334,8 +347,12 @@ No external result justifies expanding V0.1 before the first vertical slices are
 
 Current provider documentation also creates operational/compliance requirements that do not alter the V0.1 architecture:
 
-- GGG API clients must follow current API policy, including an identifiable User-Agent and provider-required request/rate-limit behaviour.
-- Before a public/broadly available release, verify and display any current GGG-required non-affiliation/non-endorsement notice.
-- PoE Wiki Cargo is appropriate for tooling, but public redistribution/use of Wiki-derived content must be reviewed against the Wiki's current license/attribution terms.
+- GGG API clients must follow current API policy, including an identifiable User-Agent and provider-required
+  request/rate-limit behaviour.
+- Before a public/broadly available release, verify and display any current GGG-required non-affiliation/non-endorsement
+  notice.
+- PoE Wiki Cargo is appropriate for tooling, but public redistribution/use of Wiki-derived content must be reviewed
+  against the Wiki's current license/attribution terms.
 
-These requirements are time-sensitive and should be reverified at the point they become relevant. They do not block the private single-user V0.1.
+These requirements are time-sensitive and should be reverified at the point they become relevant. They do not block the
+private single-user V0.1.

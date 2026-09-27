@@ -1,7 +1,7 @@
 # PoE Companion — Repository Bootstrap & Vertical Slice Plan V2.1.1
 
-**Status:** Canonical initial implementation plan
-**Purpose:** Turn the V2.1.1 product/domain/architecture decisions into a concrete first repository and implementation sequence.
+**Status:** Canonical initial implementation plan **Purpose:** Turn the V2.1.1 product/domain/architecture decisions
+into a concrete first repository and implementation sequence.
 
 ## 1. Starting Principle
 
@@ -69,7 +69,8 @@ entity/
 
 hierarchy.
 
-A module may internally introduce `application`, `persistence`, `web`, `integration`, etc. once its complexity makes those subdivisions useful.
+A module may internally introduce `application`, `persistence`, `web`, `integration`, etc. once its complexity makes
+those subdivisions useful.
 
 ## 4. Spring Modulith Bootstrap
 
@@ -329,7 +330,8 @@ Owned A = 1
 → both groups satisfied
 ```
 
-Also document/test that this is not an allocation solver and does not claim support for `A AND (A OR B)` physical-slot semantics.
+Also document/test that this is not an allocation solver and does not claim support for `A AND (A OR B)` physical-slot
+semantics.
 
 ### Probability
 
@@ -415,7 +417,8 @@ This is the meaningful stack validation point.
 
 ## 22A. Complete V0.1 Probability Personalization
 
-Immediately after the core A/B/C/Boss-Y flow works, complete the required personal estimate path before treating V0.1 as done:
+Immediately after the core A/B/C/Boss-Y flow works, complete the required personal estimate path before treating V0.1 as
+done:
 
 ```text
 persist DropRateOverride
@@ -487,9 +490,11 @@ supported fixed DropEstimates
 
 Use this slice to discover the first real modelling exceptions.
 
-If a build requires unsupported combinatorial requirement allocation, do not distort it to fit V0.1. Record it as the trigger for the future requirement-model extension.
+If a build requires unsupported combinatorial requirement allocation, do not distort it to fit V0.1. Record it as the
+trigger for the future requirement-model extension.
 
-If a boss drop is modifier-dependent, do not insert a misleading fixed rate. Mark probability unsupported/conditional until modeled.
+If a boss drop is modifier-dependent, do not insert a misleading fixed rate. Mark probability unsupported/conditional
+until modeled.
 
 ## 26. Minimal Curator UI
 
@@ -653,4 +658,5 @@ using real PostgreSQL, Flyway, application services, domain tests and server-ren
 
 ## 35. Guiding Implementation Principle
 
-> **Specify the semantics we already know, prove them through vertical slices, and let real PoE cases earn the next layer of complexity.**
+> **Specify the semantics we already know, prove them through vertical slices, and let real PoE cases earn the next
+layer of complexity.**
