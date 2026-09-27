@@ -1,9 +1,12 @@
 [versions]
 # library versions
+ktlint = "1.8.0"
 spring-modulith = "2.1.1"
 
 # plugin versions
+spotless = "8.10.2"
 forbiddenapis = "3.11"
+detekt = "2.0.0-alpha.3"
 cyclonedx-bom = "3.4.1"
 kotlin = "2.3.21"
 spring-boot = "4.1.1"
@@ -43,7 +46,9 @@ org-testcontainers-postgresql = { group = "org.testcontainers", name = "testcont
 org-junit-platform-junitPlatformLauncher = { group = "org.junit.platform", name = "junit-platform-launcher" }
 
 [plugins]
+com-diffplug-spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 de-thetaphi-forbiddenapis = { id = "de.thetaphi.forbiddenapis", version.ref = "forbiddenapis" }
+dev-detekt = { id = "dev.detekt", version.ref = "detekt" }
 org-cyclonedx-bom = { id = "org.cyclonedx.bom", version.ref = "cyclonedx-bom" }
 org-jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 org-jetbrains-kotlin-plugin-jpa = { id = "org.jetbrains.kotlin.plugin.jpa", version.ref = "kotlin" }

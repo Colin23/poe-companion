@@ -339,4 +339,3 @@ Current provider documentation also creates operational/compliance requirements 
 - PoE Wiki Cargo is appropriate for tooling, but public redistribution/use of Wiki-derived content must be reviewed against the Wiki's current license/attribution terms.
 
 These requirements are time-sensitive and should be reverified at the point they become relevant. They do not block the private single-user V0.1.
-

@@ -7,18 +7,21 @@ import org.springframework.boot.gradle.plugin.SpringBootPlugin
 plugins {
     java
     idea
-    alias(libs.plugins.org.jetbrains.kotlin.jvm)
-    alias(libs.plugins.org.jetbrains.kotlin.plugin.spring)
-    alias(libs.plugins.org.jetbrains.kotlin.plugin.jpa)
+    alias(libs.plugins.com.diffplug.spotless)
     alias(libs.plugins.de.thetaphi.forbiddenapis)
-    alias(libs.plugins.org.springframework.boot.springBoot)
+    alias(libs.plugins.dev.detekt)
     alias(libs.plugins.org.cyclonedx.bom)
+    alias(libs.plugins.org.jetbrains.kotlin.jvm)
+    alias(libs.plugins.org.jetbrains.kotlin.plugin.jpa)
+    alias(libs.plugins.org.jetbrains.kotlin.plugin.spring)
+    alias(libs.plugins.org.springframework.boot.springBoot)
 }
 
 group = "com.colinmoerbe"
 version = "0.0.1-SNAPSHOT"
 
-springBoot { // Exposed additional information about the application to the /info actuator endpoint.
+springBoot {
+    // Exposed additional information about the application to the /info actuator endpoint.
     buildInfo()
 }
 
@@ -73,6 +76,61 @@ kotlin {
             "-Xannotation-default-target=param-property",
         )
     }
+}
+
+spotless {
+    kotlin {
+        target("src/**/*.kt")
+        ktlint(libs.versions.ktlint.get())
+            .editorConfigOverride(
+                mapOf(
+                    "ktlint_code_style" to "intellij_idea",
+                ),
+            )
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+
+    kotlinGradle {
+        target("*.gradle.kts", "gradle/**/*.gradle.kts")
+        ktlint(libs.versions.ktlint.get())
+            .editorConfigOverride(
+                mapOf(
+                    "ktlint_code_style" to "intellij_idea",
+                ),
+            )
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+
+    format("misc") {
+        target(
+            "*.md",
+            "*.yml",
+            "*.yaml",
+            "*.toml",
+            "*.properties",
+            ".editorconfig",
+            ".gitattributes",
+            ".gitignore",
+            "docs/**/*.md",
+            ".github/**/*.yml",
+            ".github/**/*.yaml",
+        )
+        targetExclude(
+            "build/**",
+            ".gradle/**",
+            ".idea/**",
+            ".kotlin/**",
+        )
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+}
+
+detekt {
+    buildUponDefaultConfig = true
+    parallel = true
 }
 
 tasks.withType<Jar> {

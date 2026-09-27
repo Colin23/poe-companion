@@ -9,7 +9,5 @@ import org.springframework.context.annotation.Import
 class PoeCompanionApplicationTests {
 
     @Test
-    fun contextLoads() {
-    }
-
+    fun contextLoads() = Unit
 }
