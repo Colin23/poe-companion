@@ -3,7 +3,6 @@ package com.colinmoerbe.poecompanion.security.internal
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.security.config.Customizer.withDefaults
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetailsService
@@ -43,8 +42,17 @@ internal class SecurityConfiguration {
                 .authenticated()
         }
 
-        http.formLogin(withDefaults())
-        http.logout(withDefaults())
+        http.formLogin { formLogin ->
+            formLogin.defaultSuccessUrl("/", true)
+        }
+
+        http.logout { logout ->
+            logout
+                .logoutSuccessUrl("/login?logout")
+                .invalidateHttpSession(true)
+                .clearAuthentication(true)
+                .deleteCookies("JSESSIONID")
+        }
 
         return http.build()
     }

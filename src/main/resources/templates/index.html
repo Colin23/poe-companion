@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${page.title}">PoE Companion</title>
+    <link rel="stylesheet" th:href="@{/css/application.css}">
+</head>
+<body>
+<header class="site-header">
+    <div>
+        <h1 th:text="${page.title}">PoE Companion</h1>
+        <p class="session-details">
+            Signed in as <strong th:text="${page.username}">user</strong>
+        </p>
+    </div>
+
+    <form th:action="@{/logout}" method="post">
+        <input
+            type="hidden"
+            th:name="${_csrf.parameterName}"
+            th:value="${_csrf.token}"
+        >
+        <button type="submit">Log out</button>
+    </form>
+</header>
+
+<main>
+    <section class="panel">
+        <h2>Application bootstrap operational</h2>
+        <p>
+            Authentication, PostgreSQL, Flyway, Spring Modulith, Thymeleaf,
+            Testcontainers, formatting, and static analysis are configured.
+        </p>
+        <p>
+            Product implementation has not started yet.
+        </p>
+    </section>
+</main>
+</body>
+</html>
