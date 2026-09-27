@@ -1,4 +1,4 @@
-# PoE SSF Companion — Specification Index V2.1.1
+# PoE Companion — Specification Index V2.1.1
 
 **Status:** Canonical — Frozen for implementation
 **Date:** 2026-09-22

@@ -1,4 +1,4 @@
-# PoE SSF Companion — Feasibility Spikes V2.1.1
+# PoE Companion — Feasibility Spikes V2.1.1
 
 **Status:** Research snapshot
 **Verified:** 2026-09-22

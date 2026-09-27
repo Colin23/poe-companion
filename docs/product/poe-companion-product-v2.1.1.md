@@ -1,4 +1,4 @@
-# PoE SSF Companion — Product V2.1.1
+# PoE Companion — Product V2.1.1
 
 **Status:** Canonical product vision
 **Target Game:** Path of Exile 1
@@ -9,7 +9,7 @@
 
 ## 1. Product Vision
 
-PoE SSF Companion answers one central question:
+PoE Companion answers one central question:
 
 > **What can my Path of Exile account do right now, and what can it become next?**
 
@@ -362,7 +362,7 @@ I found this Unique.
 
 ## 16. One-Sentence Definition
 
-> **PoE SSF Companion turns account ownership into understandable build optionality and target-farming context.**
+> **PoE Companion turns account ownership into understandable build optionality and target-farming context.**
 
 ---
 

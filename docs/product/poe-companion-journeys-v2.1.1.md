@@ -1,4 +1,4 @@
-# PoE SSF Companion — Core User Journeys V2.1.1
+# PoE Companion — Core User Journeys V2.1.1
 
 **Status:** Canonical behavioural specification
 **Purpose:** Describe observable end-to-end behaviour without prescribing database schema or frontend framework.

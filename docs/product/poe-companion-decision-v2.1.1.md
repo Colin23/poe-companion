@@ -1,4 +1,4 @@
-# PoE SSF Companion — Product Decisions V2.1.1
+# PoE Companion — Product Decisions V2.1.1
 
 **Status:** Canonical accepted decisions
 **Purpose:** Record current cross-cutting product/domain decisions. Detailed definitions belong to `Domain Model V2.1.1`; V0.1 inclusion belongs to `MVP Scope Freeze V2.1.1`.

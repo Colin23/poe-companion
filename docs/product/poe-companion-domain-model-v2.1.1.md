@@ -1,4 +1,4 @@
-# PoE SSF Companion — Domain Model V2.1.1
+# PoE Companion — Domain Model V2.1.1
 
 **Status:** Canonical domain definition
 **Purpose:** Define the core business concepts, relationships and invariants independently of framework, database schema and UI technology.

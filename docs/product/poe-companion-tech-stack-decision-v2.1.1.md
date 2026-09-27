@@ -1,4 +1,4 @@
-# PoE SSF Companion — Technology & Engineering Baseline V2.1.1
+# PoE Companion — Technology & Engineering Baseline V2.1.1
 
 **Status:** Canonical implementation technology baseline
 **Verified:** 2026-09-22

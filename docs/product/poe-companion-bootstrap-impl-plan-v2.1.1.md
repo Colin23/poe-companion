@@ -1,4 +1,4 @@
-# PoE SSF Companion — Repository Bootstrap & Vertical Slice Plan V2.1.1
+# PoE Companion — Repository Bootstrap & Vertical Slice Plan V2.1.1
 
 **Status:** Canonical initial implementation plan
 **Purpose:** Turn the V2.1.1 product/domain/architecture decisions into a concrete first repository and implementation sequence.
@@ -20,11 +20,11 @@ Do not initially create multiple Gradle modules, services, worker applications o
 ## 2. Initial Repository Shape
 
 ```text
-poe-ssf-companion/
+poecompanion/
 ├── src/
 │   ├── main/
 │   │   ├── kotlin/.../
-│   │   │   ├── PoESsfCompanionApplication.kt
+│   │   │   ├── PoECompanionApplication.kt
 │   │   │   ├── catalog/
 │   │   │   ├── league/
 │   │   │   ├── account/

@@ -1,4 +1,4 @@
-# PoE SSF Companion — MVP Scope Freeze V2.1.1
+# PoE Companion — MVP Scope Freeze V2.1.1
 
 **Target:** V0.1
 **Status:** Canonical scope freeze

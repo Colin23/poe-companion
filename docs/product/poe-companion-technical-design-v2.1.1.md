@@ -1,4 +1,4 @@
-# PoE SSF Companion — Technical Design V2.1.1
+# PoE Companion — Technical Design V2.1.1
 
 **Status:** Canonical technology-neutral architecture
 **Purpose:** Define system shape, module boundaries, data ownership, consistency rules and integration patterns without binding them to a concrete programming language/framework/database product.
