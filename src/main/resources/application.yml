@@ -2,6 +2,10 @@ spring:
   application:
     name: poe-companion
 
+  docker:
+    compose:
+      lifecycle-management: start-only
+
   datasource:
     url: jdbc:postgresql://${POE_COMPANION_DB_HOST}:${POE_COMPANION_DB_PORT}/${POE_COMPANION_DB_NAME}
     username: ${POE_COMPANION_DB_USER}
