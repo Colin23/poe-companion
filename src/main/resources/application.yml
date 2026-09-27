@@ -1,11 +1,50 @@
 spring:
   application:
     name: poe-companion
+
+  docker:
+    compose:
+      lifecycle-management: start-only
+
   datasource:
     url: jdbc:postgresql://${POE_COMPANION_DB_HOST}:${POE_COMPANION_DB_PORT}/${POE_COMPANION_DB_NAME}
     username: ${POE_COMPANION_DB_USER}
-    password: ${POE_COMPANION_DB_PW}
+    password: ${POE_COMPANION_DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
+
+  flyway:
+    enabled: true
+    create-schemas: true
+    default-schema: poe_companion
+    locations: classpath:db/migration
+    validate-migration-naming: true
+
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: poe_companion
+
+poe-companion:
+  security:
+    username: ${POE_COMPANION_APP_USERNAME}
+    password: ${POE_COMPANION_APP_PASSWORD}
+
+server:
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        same-site: lax
+        secure: ${POE_COMPANION_SECURE_COOKIES:true}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never

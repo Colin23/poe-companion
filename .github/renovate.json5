@@ -1,0 +1,89 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": [
+        "config:best-practices",
+        ":enableVulnerabilityAlerts"
+    ],
+    // Interpret schedules in your timezone.
+    "timezone": "Europe/Berlin",
+    // Normal updates: Monday morning.
+    // Security vulnerability PRs bypass the normal schedule.
+    "schedule": [
+        "* 4-8 * * 1"
+    ],
+    // Renovate's central control/status issue.
+    "dependencyDashboard": true,
+    "dependencyDashboardTitle": "Renovate Dependency Dashboard",
+    "labels": [
+        "dependencies"
+    ],
+    // Prevent a huge flood of routine PRs.
+    "prConcurrentLimit": 5,
+    // GitHub vulnerability alerts -> Renovate security PRs.
+    "vulnerabilityAlerts": {
+        "enabled": true,
+        "labels": [
+            "dependencies",
+            "security"
+        ],
+        "prCreation": "immediate",
+        "vulnerabilityFixStrategy": "lowest",
+        "prConcurrentLimit": 5
+    },
+    "packageRules": [
+        {
+            "description": "Group normal Gradle dependency updates",
+            "matchManagers": [
+                "gradle"
+            ],
+            "matchUpdateTypes": [
+                "minor",
+                "patch"
+            ],
+            "groupName": "Gradle non-major dependencies"
+        },
+        {
+            "description": "Label GitHub Actions updates",
+            "matchManagers": [
+                "github-actions"
+            ],
+            "addLabels": [
+                "ci"
+            ]
+        },
+        {
+            "description": "Group normal GitHub Actions updates",
+            "matchManagers": [
+                "github-actions"
+            ],
+            "matchUpdateTypes": [
+                "minor",
+                "patch",
+                "digest",
+                "pinDigest"
+            ],
+            "groupName": "GitHub Actions"
+        },
+        {
+            "description": "Group normal container updates",
+            "matchManagers": [
+                "docker-compose",
+                "dockerfile"
+            ],
+            "matchUpdateTypes": [
+                "minor",
+                "patch",
+                "digest",
+                "pinDigest"
+            ],
+            "groupName": "Container images"
+        },
+        {
+            "description": "Wait briefly before consuming brand-new Maven releases",
+            "matchDatasources": [
+                "maven"
+            ],
+            "minimumReleaseAge": "3 days"
+        }
+    ]
+}

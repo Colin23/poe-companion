@@ -1,28 +1,57 @@
 [versions]
+# library versions
+ktlint = "1.8.0"
+spring-modulith = "2.1.1"
+
+# plugin versions
+spotless = "8.10.2"
 forbiddenapis = "3.11"
-lombok = "9.7.0"
-dependencyManagement = "1.1.7"
+detekt = "2.0.0-alpha.3"
 cyclonedx-bom = "3.4.1"
+kotlin = "2.3.21"
 spring-boot = "4.1.1"
 
 [libraries]
-org-postgresql-postgresql = { group = "org.postgresql", name = "postgresql" }
-org-springframework-boot-springBootDevtools = { group = "org.springframework.boot", name = "spring-boot-devtools" }
-org-springframework-boot-springBootDockerCompose = { group = "org.springframework.boot", name = "spring-boot-docker-compose" }
+# implementation dependencies
+org-flywaydb-flywayDatabasePostgresql = { group = "org.flywaydb", name = "flyway-database-postgresql" }
+org-jetbrains-kotlin-kotlinReflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect" }
 org-springframework-boot-springBootStarterActuator = { group = "org.springframework.boot", name = "spring-boot-starter-actuator" }
 org-springframework-boot-springBootStarterDataJpa = { group = "org.springframework.boot", name = "spring-boot-starter-data-jpa" }
-org-springframework-boot-springBootStarterLiquibase = { group = "org.springframework.boot", name = "spring-boot-starter-liquibase" }
-org-springframework-boot-springBootStarterTest = { group = "org.springframework.boot", name = "spring-boot-starter-test" }
+org-springframework-boot-springBootStarterFlyway = { group = "org.springframework.boot", name = "spring-boot-starter-flyway" }
+org-springframework-boot-springBootStarterSecurity = { group = "org.springframework.boot", name = "spring-boot-starter-security" }
+org-springframework-boot-springBootStarterThymeleaf = { group = "org.springframework.boot", name = "spring-boot-starter-thymeleaf" }
 org-springframework-boot-springBootStarterValidation = { group = "org.springframework.boot", name = "spring-boot-starter-validation" }
-org-springframework-boot-springBootStarterWeb = { group = "org.springframework.boot", name = "spring-boot-starter-web" }
+org-springframework-boot-springBootStarterWebmvc = { group = "org.springframework.boot", name = "spring-boot-starter-webmvc" }
+org-springframework-modulith-springModulithBom = { group = "org.springframework.modulith", name = "spring-modulith-bom", version.ref = "spring-modulith" }
+org-springframework-modulith-springModulithStarterCore = { group = "org.springframework.modulith", name = "spring-modulith-starter-core" }
+org-thymeleaf-extras-thymeleafExtrasSpringSecurity6 = { group = "org.thymeleaf.extras", name = "thymeleaf-extras-springsecurity6" }
+tools-jackson-module-jacksonModuleKotlin = { group = "tools.jackson.module", name = "jackson-module-kotlin" }
+
+# developmentOnly dependencies
+org-springframework-boot-springBootDevtools = { group = "org.springframework.boot", name = "spring-boot-devtools" }
+org-springframework-boot-springBootDockerCompose = { group = "org.springframework.boot", name = "spring-boot-docker-compose" }
+
+# runtimeOnly dependencies
+org-postgresql-postgresql = { group = "org.postgresql", name = "postgresql" }
+
+# testImplementation dependencies
+org-springframework-boot-springBootStarterSecurityTest = { group = "org.springframework.boot", name = "spring-boot-starter-security-test" }
+org-springframework-boot-springBootStarterTest = { group = "org.springframework.boot", name = "spring-boot-starter-test" }
 org-springframework-boot-springBootStarterWebmvcTest = { group = "org.springframework.boot", name = "spring-boot-starter-webmvc-test" }
 org-springframework-boot-springBootTestcontainers = { group = "org.springframework.boot", name = "spring-boot-testcontainers" }
+org-springframework-modulith-springModulithStarterTest = { group = "org.springframework.modulith", name = "spring-modulith-starter-test" }
 org-testcontainers-junitJupiter = { group = "org.testcontainers", name = "testcontainers-junit-jupiter" }
 org-testcontainers-postgresql = { group = "org.testcontainers", name = "testcontainers-postgresql" }
 
+# testRuntimeOnly dependencies
+org-junit-platform-junitPlatformLauncher = { group = "org.junit.platform", name = "junit-platform-launcher" }
+
 [plugins]
+com-diffplug-spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 de-thetaphi-forbiddenapis = { id = "de.thetaphi.forbiddenapis", version.ref = "forbiddenapis" }
-io-freefair-lombok = { id = "io.freefair.lombok", version.ref = "lombok" }
-io-spring-dependencyManagement = { id = "io.spring.dependency-management", version.ref = "dependencyManagement" }
+dev-detekt = { id = "dev.detekt", version.ref = "detekt" }
 org-cyclonedx-bom = { id = "org.cyclonedx.bom", version.ref = "cyclonedx-bom" }
+org-jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+org-jetbrains-kotlin-plugin-jpa = { id = "org.jetbrains.kotlin.plugin.jpa", version.ref = "kotlin" }
+org-jetbrains-kotlin-plugin-spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
 org-springframework-boot-springBoot = { id = "org.springframework.boot", version.ref = "spring-boot" }
