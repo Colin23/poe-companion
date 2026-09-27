@@ -4,22 +4,40 @@
         "config:best-practices",
         ":enableVulnerabilityAlerts"
     ],
+
     // Interpret schedules in your timezone.
     "timezone": "Europe/Berlin",
-    // Normal updates: Monday morning.
-    // Security vulnerability PRs bypass the normal schedule.
+
+    // Routine dependency work happens Monday morning.
+    // Vulnerability-alert PRs bypass this schedule.
     "schedule": [
         "* 4-8 * * 1"
     ],
-    // Renovate's central control/status issue.
+
+    // Central visibility/control surface for pending updates.
     "dependencyDashboard": true,
     "dependencyDashboardTitle": "Renovate Dependency Dashboard",
+
+    // Keep routine update volume bounded. Vulnerability fixes have their own
+    // separate concurrency budget below and always skip the hourly limit.
+    "prConcurrentLimit": 5,
+    "prHourlyLimit": 2,
+
+    // Let GitHub perform the final merge only after repository rulesets pass.
+    "platformAutomerge": true,
+    "automergeType": "pr",
+    "automergeStrategy": "squash",
+    "rebaseWhen": "behind-base-branch",
+    "separateMinorPatch": true,
+    "ignoreTests": false,
+
     "labels": [
         "dependencies"
     ],
-    // Prevent a huge flood of routine PRs.
-    "prConcurrentLimit": 5,
-    // GitHub vulnerability alerts -> Renovate security PRs.
+
+    // GitHub vulnerability alerts -> immediate Renovate security PRs.
+    // Keep these manual for now even when CI passes: a security fix can involve
+    // a larger-than-patch upgrade and deserves an explicit review.
     "vulnerabilityAlerts": {
         "enabled": true,
         "labels": [
@@ -28,20 +46,11 @@
         ],
         "prCreation": "immediate",
         "vulnerabilityFixStrategy": "lowest",
-        "prConcurrentLimit": 5
+        "prConcurrentLimit": 5,
+        "automerge": false
     },
+
     "packageRules": [
-        {
-            "description": "Group normal Gradle dependency updates",
-            "matchManagers": [
-                "gradle"
-            ],
-            "matchUpdateTypes": [
-                "minor",
-                "patch"
-            ],
-            "groupName": "Gradle non-major dependencies"
-        },
         {
             "description": "Label GitHub Actions updates",
             "matchManagers": [
@@ -52,38 +61,40 @@
             ]
         },
         {
-            "description": "Group normal GitHub Actions updates",
-            "matchManagers": [
-                "github-actions"
-            ],
+            "description": "Automerge immutable SHA/digest pinning after CI",
             "matchUpdateTypes": [
-                "minor",
-                "patch",
-                "digest",
                 "pinDigest"
             ],
-            "groupName": "GitHub Actions"
+            "automerge": true
         },
         {
-            "description": "Group normal container updates",
-            "matchManagers": [
-                "docker-compose",
-                "dockerfile"
-            ],
+            "description": "Automerge stable patch updates after a 14-day supply-chain cooldown",
             "matchUpdateTypes": [
-                "minor",
-                "patch",
-                "digest",
-                "pinDigest"
+                "patch"
             ],
-            "groupName": "Container images"
+            "matchCurrentVersion": "!/^0/",
+            "minimumReleaseAge": "14 days",
+            "automerge": true
         },
         {
-            "description": "Wait briefly before consuming brand-new Maven releases",
-            "matchDatasources": [
-                "maven"
+            "description": "Never automerge pre-1.0 dependencies",
+            "matchCurrentVersion": "/^0\\./",
+            "automerge": false
+        },
+        {
+            "description": "Never automerge prerelease dependencies",
+            "matchCurrentVersion": "/-/",
+            "automerge": false
+        },
+        {
+            "description": "Require manual review when an existing immutable digest or SHA moves",
+            "matchUpdateTypes": [
+                "digest"
             ],
-            "minimumReleaseAge": "3 days"
+            "addLabels": [
+                "security"
+            ],
+            "automerge": false
         }
     ]
 }
