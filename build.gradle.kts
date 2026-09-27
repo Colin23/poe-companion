@@ -3,6 +3,7 @@ import org.cyclonedx.Version
 import org.cyclonedx.model.Component
 import org.gradle.api.file.RegularFile
 import org.springframework.boot.gradle.plugin.SpringBootPlugin
+import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 
 plugins {
     java
@@ -142,6 +143,13 @@ tasks.withType<Jar> {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+tasks.named<BootBuildImage>("bootBuildImage") {
+    environment.put(
+        "BP_JVM_VERSION",
+        java.toolchain.languageVersion.map { it.asInt().toString() },
+    )
 }
 
 tasks.named<CheckForbiddenApis>("forbiddenApisMain") {
