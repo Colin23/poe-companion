@@ -62,6 +62,7 @@ dependencies {
     testImplementation(libs.org.springframework.boot.springBootStarterSecurityTest)
     testImplementation(libs.org.springframework.boot.springBootStarterTest)
     testImplementation(libs.org.springframework.boot.springBootTestcontainers)
+    testImplementation(libs.org.springframework.boot.springBootStarterWebmvcTest)
     testImplementation(libs.org.springframework.modulith.springModulithStarterTest)
     testImplementation(libs.org.testcontainers.junitJupiter)
     testImplementation(libs.org.testcontainers.postgresql)

@@ -26,3 +26,25 @@ spring:
     properties:
       hibernate:
         default_schema: poe_companion
+
+poe-companion:
+  security:
+    username: ${POE_COMPANION_APP_USERNAME}
+    password: ${POE_COMPANION_APP_PASSWORD}
+
+server:
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        same-site: lax
+        secure: ${POE_COMPANION_SECURE_COOKIES:true}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never

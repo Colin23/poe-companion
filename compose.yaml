@@ -5,7 +5,7 @@ services:
       - "${POE_COMPANION_DB_PORT}:5432"
     environment:
       POSTGRES_USER: "${POE_COMPANION_DB_USER}"
-      POSTGRES_PASSWORD: "${POE_COMPANION_DB_PASSWORD}"
+      POSTGRES_PASSWORD: "${POE_COMPANION_DB_PASSWORD:?POE_COMPANION_DB_PASSWORD must be set}"
       POSTGRES_DB: "${POE_COMPANION_DB_NAME}"
     volumes:
       - poe-companion-db-data:/var/lib/postgresql

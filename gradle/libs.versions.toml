@@ -37,6 +37,7 @@ org-postgresql-postgresql = { group = "org.postgresql", name = "postgresql" }
 # testImplementation dependencies
 org-springframework-boot-springBootStarterSecurityTest = { group = "org.springframework.boot", name = "spring-boot-starter-security-test" }
 org-springframework-boot-springBootStarterTest = { group = "org.springframework.boot", name = "spring-boot-starter-test" }
+org-springframework-boot-springBootStarterWebmvcTest = { group = "org.springframework.boot", name = "spring-boot-starter-webmvc-test" }
 org-springframework-boot-springBootTestcontainers = { group = "org.springframework.boot", name = "spring-boot-testcontainers" }
 org-springframework-modulith-springModulithStarterTest = { group = "org.springframework.modulith", name = "spring-modulith-starter-test" }
 org-testcontainers-junitJupiter = { group = "org.testcontainers", name = "testcontainers-junit-jupiter" }
