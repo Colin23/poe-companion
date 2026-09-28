@@ -4,29 +4,23 @@
         "config:best-practices",
         ":enableVulnerabilityAlerts"
     ],
-
     // Interpret schedules in your timezone.
     "timezone": "Europe/Berlin",
-
     // Routine dependency work happens Monday morning.
     // Vulnerability-alert PRs bypass this schedule.
     "schedule": [
         "* 4-8 * * 1"
     ],
-
     // Central visibility/control surface for pending updates.
     "dependencyDashboard": true,
     "dependencyDashboardTitle": "Renovate Dependency Dashboard",
-
     // Keep routine update volume bounded. Vulnerability fixes have their own
     // separate concurrency budget below and always skip the hourly limit.
     "prConcurrentLimit": 5,
     "prHourlyLimit": 2,
-
     // Use GitHub's API for Renovate commits so GitHub can cryptographically
     // sign commits made by the Renovate GitHub App.
     "platformCommit": "enabled",
-
     // Let GitHub perform the final merge only after repository rulesets pass.
     "platformAutomerge": true,
     "automergeType": "pr",
@@ -34,11 +28,9 @@
     "rebaseWhen": "behind-base-branch",
     "separateMinorPatch": true,
     "ignoreTests": false,
-
     "labels": [
         "dependencies"
     ],
-
     // GitHub vulnerability alerts -> immediate Renovate security PRs.
     // Keep these manual for now even when CI passes: a security fix can involve
     // a larger-than-patch upgrade and deserves an explicit review.
@@ -53,7 +45,6 @@
         "prConcurrentLimit": 5,
         "automerge": false
     },
-
     "packageRules": [
         {
             "description": "Label GitHub Actions updates",
