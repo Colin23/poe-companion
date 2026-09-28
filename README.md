@@ -214,5 +214,5 @@ See [LICENSE](LICENSE) for details.
 
 This product isn't affiliated with or endorsed by Grinding Gear Games in any way.
 
-Path of Exile and related intellectual property belong to Grinding Gear Games.
+Path of Exile is developed by Grinding Gear Games.
 See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for additional third-party information.
