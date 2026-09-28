@@ -23,6 +23,10 @@
     "prConcurrentLimit": 5,
     "prHourlyLimit": 2,
 
+    // Use GitHub's API for Renovate commits so GitHub can cryptographically
+    // sign commits made by the Renovate GitHub App.
+    "platformCommit": "enabled",
+
     // Let GitHub perform the final merge only after repository rulesets pass.
     "platformAutomerge": true,
     "automergeType": "pr",
