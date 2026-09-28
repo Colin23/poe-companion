@@ -202,6 +202,9 @@ tasks.cyclonedxDirectBom {
     skipConfigs = listOf("(?i).*test.*")
     includeLicenseText = false
     includeBomSerialNumber = true
+    // Keep metadata enrichment disabled: it performs additional Maven POM resolution that can
+    // fall outside Renovate's dependency-verification metadata update path.
+    // See docs/development/dependency-management.md.
     includeMetadataResolution = false
     jsonOutput = layout.buildDirectory.file("reports/cyclonedx/bom.json")
     xmlOutput.convention(null as RegularFile?)
