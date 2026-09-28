@@ -206,3 +206,13 @@ The default branch also requires signed commits and is protected by required CI 
 
 Local/generated files such as `.env`, `.gradle/`, `.idea/`, `.kotlin/`, and `build/` are ignored. Keep credentials,
 local database state, and generated build output out of Git.
+
+## License and third-party notice
+
+PoE Companion is licensed under the GNU Affero General Public License version 3 only (`AGPL-3.0-only`).
+See [LICENSE](LICENSE) for details.
+
+This product isn't affiliated with or endorsed by Grinding Gear Games in any way.
+
+Path of Exile and related intellectual property belong to Grinding Gear Games.
+See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for additional third-party information.
