@@ -37,6 +37,10 @@ repositories {
     mavenCentral()
 }
 
+dependencyLocking {
+    lockAllConfigurations()
+}
+
 dependencies {
     implementation(platform(SpringBootPlugin.BOM_COORDINATES))
     implementation(platform(libs.org.springframework.modulith.springModulithBom))
