@@ -90,6 +90,18 @@
                 "security"
             ],
             "automerge": false
+        },
+        {
+            "description": "Group Kotlin Gradle plugins",
+            "matchManagers": [
+                "gradle"
+            ],
+            "matchPackageNames": [
+                "org.jetbrains.kotlin.jvm",
+                "org.jetbrains.kotlin.plugin.jpa",
+                "org.jetbrains.kotlin.plugin.spring"
+            ],
+            "groupName": "Kotlin Gradle plugins"
         }
     ]
 }
