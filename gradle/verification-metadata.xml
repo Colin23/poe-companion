@@ -3,6 +3,16 @@
    <configuration>
       <verify-metadata>true</verify-metadata>
       <verify-signatures>false</verify-signatures>
+      <trusted-artifacts>
+          <trust
+              file=".*-javadoc[.]jar"
+              regex="true"
+              reason="IDE-only Javadoc artifacts"/>
+          <trust
+              file=".*-sources[.]jar"
+              regex="true"
+              reason="IDE-only source artifacts"/>
+      </trusted-artifacts>
    </configuration>
    <components>
       <component group="aopalliance" name="aopalliance" version="1.0">

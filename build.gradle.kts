@@ -203,7 +203,7 @@ tasks.cyclonedxDirectBom {
     skipConfigs = listOf("(?i).*test.*")
     includeLicenseText = false
     includeBomSerialNumber = true
-    includeMetadataResolution = true
+    includeMetadataResolution = false
     jsonOutput = layout.buildDirectory.file("reports/cyclonedx/bom.json")
     xmlOutput.convention(null as RegularFile?)
 }
