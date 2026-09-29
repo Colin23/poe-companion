@@ -1,13 +1,16 @@
 package com.colinmoerbe.poecompanion.catalog
 
-import java.util.UUID
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
+/**
+ * Verifies generation and value semantics for [UniqueDefinitionId].
+ */
 class UniqueDefinitionIdTests {
 
     @Test
-    fun generatesDistinctIds() {
+    fun `two generated unique definition ids should not be equal`() {
         val first = UniqueDefinitionId.generate()
         val second = UniqueDefinitionId.generate()
 
@@ -15,9 +18,12 @@ class UniqueDefinitionIdTests {
     }
 
     @Test
-    fun usesWrappedUuidForValueEquality() {
-        val uuid = UUID.fromString("7cb15db6-15a3-4b5e-aea1-23abf28a41fb")
+    fun `reconstructed unique definition id should equal the original`() {
+        val original = UniqueDefinitionId.generate()
 
-        assertThat(UniqueDefinitionId(uuid)).isEqualTo(UniqueDefinitionId(uuid))
+        // Reconstruct a different object with the same UUID to verify value equality.
+        val reconstructed = UniqueDefinitionId(original.value)
+
+        assertThat(reconstructed).isEqualTo(original)
     }
 }
