@@ -26,16 +26,14 @@ internal class ExternalIdentityPersistenceAdapter(
         )
     }
 
-    fun findByProviderAndProviderKey(
-        provider: ExternalProvider,
-        providerKey: ExternalProviderKey,
-    ): ExternalIdentity? = springDataRepository
-        .findById(ExternalIdentityEntityId(provider, providerKey.value))
-        .map { entity ->
-            ExternalIdentity(
-                provider = entity.id.provider,
-                providerKey = ExternalProviderKey(entity.id.providerKey),
-                uniqueDefinitionId = UniqueDefinitionId(entity.uniqueDefinitionId),
-            )
-        }.orElse(null)
+    fun findByProviderAndProviderKey(provider: ExternalProvider, providerKey: ExternalProviderKey): ExternalIdentity? =
+        springDataRepository
+            .findById(ExternalIdentityEntityId(provider, providerKey.value))
+            .map { entity ->
+                ExternalIdentity(
+                    provider = entity.id.provider,
+                    providerKey = ExternalProviderKey(entity.id.providerKey),
+                    uniqueDefinitionId = UniqueDefinitionId(entity.uniqueDefinitionId),
+                )
+            }.orElse(null)
 }
