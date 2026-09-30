@@ -17,10 +17,10 @@ internal class ExternalIdentityPersistenceAdapter(
         springDataRepository.save(
             ExternalIdentityEntity(
                 id =
-                    ExternalIdentityEntityId(
-                        provider = externalIdentity.provider,
-                        providerKey = externalIdentity.providerKey.value,
-                    ),
+                ExternalIdentityEntityId(
+                    provider = externalIdentity.provider,
+                    providerKey = externalIdentity.providerKey.value,
+                ),
                 uniqueDefinitionId = externalIdentity.uniqueDefinitionId.value,
             ),
         )
