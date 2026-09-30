@@ -17,4 +17,8 @@ internal data class ExternalIdentityEntityId(
     var provider: ExternalProvider,
     @Column(name = "provider_key", nullable = false, updatable = false, length = 1024)
     var providerKey: String,
-) : Serializable
+) : Serializable {
+    private companion object {
+        const val serialVersionUID: Long = 1L
+    }
+}
