@@ -63,6 +63,41 @@ internal class ExternalIdentityPersistenceIntegrationTests(
     }
 
     @Test
+    fun `multiple provider identities may map to the same unique definition`() {
+        val uniqueDefinition = UniqueDefinition(UniqueDefinitionId.generate())
+        uniqueDefinitionPersistenceAdapter.save(uniqueDefinition)
+
+        val wikiIdentity =
+            ExternalIdentity(
+                provider = ExternalProvider.POE_WIKI,
+                providerKey = ExternalProviderKey("wiki-key"),
+                uniqueDefinitionId = uniqueDefinition.id,
+            )
+        val repoeIdentity =
+            ExternalIdentity(
+                provider = ExternalProvider.REPOE,
+                providerKey = ExternalProviderKey("repoe-key"),
+                uniqueDefinitionId = uniqueDefinition.id,
+            )
+
+        persistenceAdapter.save(wikiIdentity)
+        persistenceAdapter.save(repoeIdentity)
+
+        assertThat(
+            persistenceAdapter.findByProviderAndProviderKey(
+                wikiIdentity.provider,
+                wikiIdentity.providerKey,
+            ),
+        ).isEqualTo(wikiIdentity)
+        assertThat(
+            persistenceAdapter.findByProviderAndProviderKey(
+                repoeIdentity.provider,
+                repoeIdentity.providerKey,
+            ),
+        ).isEqualTo(repoeIdentity)
+    }
+
+    @Test
     fun `database should reject one provider key mapping to two unique definitions`() {
         val firstUniqueDefinition = UniqueDefinition(UniqueDefinitionId.generate())
         val secondUniqueDefinition = UniqueDefinition(UniqueDefinitionId.generate())
