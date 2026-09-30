@@ -1,9 +1,10 @@
 package com.colinmoerbe.poecompanion.catalog
 
 /**
- * External identity namespaces explicitly supported by the Companion.
+ * External identity namespaces recognized by the Companion.
  *
- * Adding a provider is an application capability change, not runtime configuration.
+ * This set is code-owned rather than runtime configuration. Recognizing an identity namespace does not imply that an
+ * ingestion adapter for that provider has already been implemented.
  */
 enum class ExternalProvider {
     POE_WIKI,
