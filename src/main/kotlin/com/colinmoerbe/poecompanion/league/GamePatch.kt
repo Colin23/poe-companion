@@ -5,11 +5,7 @@ package com.colinmoerbe.poecompanion.league
  *
  * The optional suffix preserves the official patch suffix without imposing provider-specific parsing rules.
  */
-data class GamePatch(
-    val compatibilityVersion: CompatibilityVersion,
-    val patch: Int,
-    val suffix: String? = null,
-) {
+data class GamePatch(val compatibilityVersion: CompatibilityVersion, val patch: Int, val suffix: String? = null) {
     init {
         require(patch >= 0) { "Patch version must not be negative" }
         require(suffix == null || suffix.isNotBlank()) { "Patch suffix must not be blank" }
