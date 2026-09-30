@@ -16,8 +16,11 @@ internal class ExternalIdentityPersistenceAdapter(
     fun save(externalIdentity: ExternalIdentity) {
         springDataRepository.save(
             ExternalIdentityEntity(
-                provider = externalIdentity.provider,
-                providerKey = externalIdentity.providerKey.value,
+                id =
+                    ExternalIdentityEntityId(
+                        provider = externalIdentity.provider,
+                        providerKey = externalIdentity.providerKey.value,
+                    ),
                 uniqueDefinitionId = externalIdentity.uniqueDefinitionId.value,
             ),
         )
@@ -30,8 +33,8 @@ internal class ExternalIdentityPersistenceAdapter(
         .findById(ExternalIdentityEntityId(provider, providerKey.value))
         .map { entity ->
             ExternalIdentity(
-                provider = entity.provider,
-                providerKey = ExternalProviderKey(entity.providerKey),
+                provider = entity.id.provider,
+                providerKey = ExternalProviderKey(entity.id.providerKey),
                 uniqueDefinitionId = UniqueDefinitionId(entity.uniqueDefinitionId),
             )
         }.orElse(null)
