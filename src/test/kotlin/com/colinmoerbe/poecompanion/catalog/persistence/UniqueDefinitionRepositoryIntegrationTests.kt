@@ -23,7 +23,7 @@ import org.springframework.jdbc.core.JdbcTemplate
         "poe-companion.security.password=test-password",
     ],
 )
-class UniqueDefinitionRepositoryIntegrationTests(
+internal class UniqueDefinitionRepositoryIntegrationTests(
     @Autowired private val repository: UniqueDefinitionRepository,
     @Autowired private val jdbcTemplate: JdbcTemplate,
 ) {
