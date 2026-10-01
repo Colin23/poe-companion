@@ -14,7 +14,7 @@ class LeagueDefinitionTests {
             LeagueDefinition(
                 id = LeagueDefinitionId.generate(),
                 name = " ",
-                category = LeagueCategory.CHALLENGE,
+                type = LeagueType.CHALLENGE,
                 participation = LeagueParticipation.SSF,
                 mortality = LeagueMortality.SOFTCORE,
                 realm = GameRealm.PC,
