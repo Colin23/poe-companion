@@ -9,9 +9,7 @@ import org.springframework.stereotype.Repository
  * Persists account-context identity/configuration without exposing JPA representations to the domain.
  */
 @Repository
-internal class AccountContextPersistenceAdapter(
-    private val springDataRepository: SpringDataAccountContextRepository,
-) {
+internal class AccountContextPersistenceAdapter(private val springDataRepository: SpringDataAccountContextRepository) {
     fun save(accountContext: AccountContext) {
         springDataRepository.save(
             AccountContextEntity(
