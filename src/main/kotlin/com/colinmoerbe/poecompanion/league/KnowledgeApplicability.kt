@@ -31,23 +31,35 @@ data class KnowledgeApplicability(
      * A known mismatch is definitive. Missing context precision for a constrained optional dimension yields UNKNOWN
      * rather than being treated as a match.
      */
+    @Suppress("ReturnCount")
     fun evaluateAgainst(context: EvaluationContext): ApplicabilityResult {
-        val knownMismatch =
-            (compatibilityVersion != null && compatibilityVersion != context.compatibilityVersion) ||
-                (ruleset != null && ruleset != context.ruleset) ||
-                (gamePatch != null && context.gamePatch != null && gamePatch != context.gamePatch) ||
-                (leagueDefinitionId != null &&
-                    context.leagueDefinitionId != null &&
-                    leagueDefinitionId != context.leagueDefinitionId)
-
-        val missingPrecision =
-            (gamePatch != null && context.gamePatch == null) ||
-                (leagueDefinitionId != null && context.leagueDefinitionId == null)
-
-        return when {
-            knownMismatch -> ApplicabilityResult.DOES_NOT_APPLY
-            missingPrecision -> ApplicabilityResult.UNKNOWN
-            else -> ApplicabilityResult.APPLIES
+        if (compatibilityVersion != null && compatibilityVersion != context.compatibilityVersion) {
+            return ApplicabilityResult.DOES_NOT_APPLY
         }
+
+        if (ruleset != null && ruleset != context.ruleset) {
+            return ApplicabilityResult.DOES_NOT_APPLY
+        }
+
+        if (gamePatch != null && context.gamePatch != null && gamePatch != context.gamePatch) {
+            return ApplicabilityResult.DOES_NOT_APPLY
+        }
+
+        if (leagueDefinitionId != null &&
+            context.leagueDefinitionId != null &&
+            leagueDefinitionId != context.leagueDefinitionId
+        ) {
+            return ApplicabilityResult.DOES_NOT_APPLY
+        }
+
+        if (gamePatch != null && context.gamePatch == null) {
+            return ApplicabilityResult.UNKNOWN
+        }
+
+        if (leagueDefinitionId != null && context.leagueDefinitionId == null) {
+            return ApplicabilityResult.UNKNOWN
+        }
+
+        return ApplicabilityResult.APPLIES
     }
 }
