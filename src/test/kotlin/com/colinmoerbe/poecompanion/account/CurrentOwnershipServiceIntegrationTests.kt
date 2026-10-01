@@ -137,15 +137,14 @@ internal class CurrentOwnershipServiceIntegrationTests(
     private fun createPersistedUniqueDefinition(): UniqueDefinition =
         UniqueDefinition(UniqueDefinitionId.generate()).also(uniqueDefinitionPersistenceAdapter::save)
 
-    private fun createPersistedLeagueDefinition(): LeagueDefinition =
-        LeagueDefinition(
-            id = LeagueDefinitionId.generate(),
-            name = "Allflame",
-            type = LeagueType.CHALLENGE,
-            participation = LeagueParticipation.SSF,
-            mortality = LeagueMortality.SOFTCORE,
-            realm = GameRealm.PC,
-        ).also(leagueDefinitionPersistenceAdapter::save)
+    private fun createPersistedLeagueDefinition(): LeagueDefinition = LeagueDefinition(
+        id = LeagueDefinitionId.generate(),
+        name = "Allflame",
+        type = LeagueType.CHALLENGE,
+        participation = LeagueParticipation.SSF,
+        mortality = LeagueMortality.SOFTCORE,
+        realm = GameRealm.PC,
+    ).also(leagueDefinitionPersistenceAdapter::save)
 
     private fun createPersistedAccountContext(): AccountContext {
         val leagueDefinition = createPersistedLeagueDefinition()
