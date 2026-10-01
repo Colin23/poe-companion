@@ -1,9 +1,9 @@
 package com.colinmoerbe.poecompanion.league.persistence
 
 import com.colinmoerbe.poecompanion.league.GameRealm
-import com.colinmoerbe.poecompanion.league.LeagueType
 import com.colinmoerbe.poecompanion.league.LeagueMortality
 import com.colinmoerbe.poecompanion.league.LeagueParticipation
+import com.colinmoerbe.poecompanion.league.LeagueType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
