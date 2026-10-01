@@ -21,6 +21,6 @@ internal open class AccountContextEntity(
     @Column(name = "league_definition_id", nullable = false, updatable = false)
     open var leagueDefinitionId: UUID,
     @Enumerated(EnumType.STRING)
-    @Column(name = "ruleset", nullable = false, length = 32)
+    @Column(name = "ruleset", nullable = false, updatable = false, length = 32)
     open var ruleset: Ruleset,
 )
