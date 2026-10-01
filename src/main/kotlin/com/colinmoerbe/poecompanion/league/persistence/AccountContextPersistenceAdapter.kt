@@ -4,6 +4,7 @@ import com.colinmoerbe.poecompanion.league.AccountContext
 import com.colinmoerbe.poecompanion.league.AccountContextId
 import com.colinmoerbe.poecompanion.league.LeagueDefinitionId
 import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
 
 /**
  * Persists account-context identity/configuration without exposing JPA representations to the domain.
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Repository
  */
 @Repository
 internal class AccountContextPersistenceAdapter(private val springDataRepository: SpringDataAccountContextRepository) {
+    @Transactional
     fun save(accountContext: AccountContext) {
         val existing = springDataRepository.findById(accountContext.id.value).orElse(null)
 
