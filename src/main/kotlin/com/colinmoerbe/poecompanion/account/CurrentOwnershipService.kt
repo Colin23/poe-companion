@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service
  * Derives current ownership for one account context from the active V0.1 manual authority.
  */
 @Service
-class CurrentOwnershipService(
+class CurrentOwnershipService internal constructor(
     private val manualOwnershipPersistenceAdapter: ManualOwnershipPersistenceAdapter,
 ) {
     fun getCurrentOwnership(accountContextId: AccountContextId): CurrentOwnership {
