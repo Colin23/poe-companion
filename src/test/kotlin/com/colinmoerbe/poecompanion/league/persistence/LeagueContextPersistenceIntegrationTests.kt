@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.dao.DataIntegrityViolationException
+import org.springframework.dao.InvalidDataAccessApiUsageException
 import org.springframework.jdbc.core.JdbcTemplate
 
 /**
@@ -149,7 +150,8 @@ internal class LeagueContextPersistenceIntegrationTests(
                     ruleset = Ruleset.RUTHLESS,
                 ),
             )
-        }.isInstanceOf(IllegalArgumentException::class.java)
+        }.isInstanceOf(InvalidDataAccessApiUsageException::class.java)
+            .hasCauseInstanceOf(IllegalArgumentException::class.java)
 
         assertThat(accountContextPersistenceAdapter.findById(id)?.ruleset).isEqualTo(Ruleset.NORMAL)
     }
