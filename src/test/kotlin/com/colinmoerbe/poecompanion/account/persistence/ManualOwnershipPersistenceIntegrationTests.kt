@@ -91,7 +91,7 @@ internal class ManualOwnershipPersistenceIntegrationTests(
         val persisted = persistenceAdapter.findBy(accountContext.id, uniqueDefinition.id)
 
         assertThat(persisted?.quantity).isEqualTo(2)
-        assertThat(springDataRepository.count()).isEqualTo(1)
+        assertThat(springDataRepository.count()).isEqualTo(1L)
     }
 
     @Test
