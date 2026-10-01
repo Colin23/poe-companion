@@ -32,29 +32,22 @@ data class KnowledgeApplicability(
      * rather than being treated as a match.
      */
     fun evaluateAgainst(context: EvaluationContext): ApplicabilityResult {
-        if (compatibilityVersion != null && compatibilityVersion != context.compatibilityVersion) {
-            return ApplicabilityResult.DOES_NOT_APPLY
-        }
-        if (ruleset != null && ruleset != context.ruleset) {
-            return ApplicabilityResult.DOES_NOT_APPLY
-        }
+        val knownMismatch =
+            (compatibilityVersion != null && compatibilityVersion != context.compatibilityVersion) ||
+                (ruleset != null && ruleset != context.ruleset) ||
+                (gamePatch != null && context.gamePatch != null && gamePatch != context.gamePatch) ||
+                (leagueDefinitionId != null &&
+                    context.leagueDefinitionId != null &&
+                    leagueDefinitionId != context.leagueDefinitionId)
 
-        var missingPrecision = false
+        val missingPrecision =
+            (gamePatch != null && context.gamePatch == null) ||
+                (leagueDefinitionId != null && context.leagueDefinitionId == null)
 
-        if (gamePatch != null) {
-            when {
-                context.gamePatch == null -> missingPrecision = true
-                gamePatch != context.gamePatch -> return ApplicabilityResult.DOES_NOT_APPLY
-            }
+        return when {
+            knownMismatch -> ApplicabilityResult.DOES_NOT_APPLY
+            missingPrecision -> ApplicabilityResult.UNKNOWN
+            else -> ApplicabilityResult.APPLIES
         }
-
-        if (leagueDefinitionId != null) {
-            when {
-                context.leagueDefinitionId == null -> missingPrecision = true
-                leagueDefinitionId != context.leagueDefinitionId -> return ApplicabilityResult.DOES_NOT_APPLY
-            }
-        }
-
-        return if (missingPrecision) ApplicabilityResult.UNKNOWN else ApplicabilityResult.APPLIES
     }
 }
