@@ -16,7 +16,7 @@ internal class LeagueDefinitionPersistenceAdapter(
             LeagueDefinitionEntity(
                 id = leagueDefinition.id.value,
                 name = leagueDefinition.name,
-                category = leagueDefinition.category,
+                type = leagueDefinition.type,
                 participation = leagueDefinition.participation,
                 mortality = leagueDefinition.mortality,
                 realm = leagueDefinition.realm,
@@ -30,7 +30,7 @@ internal class LeagueDefinitionPersistenceAdapter(
             LeagueDefinition(
                 id = LeagueDefinitionId(entity.id),
                 name = entity.name,
-                category = entity.category,
+                type = entity.type,
                 participation = entity.participation,
                 mortality = entity.mortality,
                 realm = entity.realm,
