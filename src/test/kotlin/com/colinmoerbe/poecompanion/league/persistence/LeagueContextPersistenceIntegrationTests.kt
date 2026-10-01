@@ -95,6 +95,41 @@ internal class LeagueContextPersistenceIntegrationTests(
     }
 
     @Test
+    fun `existing account context identity should reject ruleset redefinition`() {
+        val leagueDefinition =
+            LeagueDefinition(
+                id = LeagueDefinitionId.generate(),
+                name = "Allflame",
+                type = LeagueType.CHALLENGE,
+                participation = LeagueParticipation.SSF,
+                mortality = LeagueMortality.SOFTCORE,
+                realm = GameRealm.PC,
+            )
+        val id = AccountContextId.generate()
+
+        leagueDefinitionPersistenceAdapter.save(leagueDefinition)
+        accountContextPersistenceAdapter.save(
+            AccountContext(
+                id = id,
+                leagueDefinitionId = leagueDefinition.id,
+                ruleset = Ruleset.NORMAL,
+            ),
+        )
+
+        assertThatThrownBy {
+            accountContextPersistenceAdapter.save(
+                AccountContext(
+                    id = id,
+                    leagueDefinitionId = leagueDefinition.id,
+                    ruleset = Ruleset.RUTHLESS,
+                ),
+            )
+        }.isInstanceOf(IllegalArgumentException::class.java)
+
+        assertThat(accountContextPersistenceAdapter.findById(id)?.ruleset).isEqualTo(Ruleset.NORMAL)
+    }
+
+    @Test
     fun `database should reject account context referencing an unknown league`() {
         assertThatThrownBy {
             jdbcTemplate.update(
