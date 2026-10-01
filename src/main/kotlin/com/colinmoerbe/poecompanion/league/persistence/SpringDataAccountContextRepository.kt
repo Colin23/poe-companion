@@ -11,7 +11,7 @@ internal interface SpringDataAccountContextRepository : JpaRepository<AccountCon
     @Modifying
     @Query(
         value =
-            """
+        """
             INSERT INTO poe_companion.account_context (id, league_definition_id, ruleset)
             VALUES (:id, :leagueDefinitionId, :ruleset)
             ON CONFLICT (id) DO NOTHING
