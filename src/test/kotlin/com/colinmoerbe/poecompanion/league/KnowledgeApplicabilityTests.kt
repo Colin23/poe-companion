@@ -1,9 +1,9 @@
 package com.colinmoerbe.poecompanion.league
 
-import java.util.UUID
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 /**
  * Verifies strict, dimension-aware evaluation-context applicability.

@@ -1,6 +1,6 @@
 # PoE Companion — Implementation Decisions
 
-**Status:** Evolving implementation clarifications  
+**Status:** Evolving implementation clarifications
 **Purpose:** Record durable product/domain/architecture decisions discovered while implementing the frozen V2.1.1 specification.
 
 This document does not replace or silently modify the canonical V2.1.1 product specification. When implementation reveals an ambiguity, missing detail, or useful clarification, record the current implementation decision here. If a future implementation decision conflicts with the canonical specification, resolve that conflict explicitly rather than treating this document as an override.
