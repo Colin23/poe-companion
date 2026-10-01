@@ -8,10 +8,7 @@ import com.colinmoerbe.poecompanion.league.AccountContextId
  *
  * The view is sparse: only positive quantities are retained. Missing entries therefore mean an owned quantity of zero.
  */
-class CurrentOwnership(
-    val accountContextId: AccountContextId,
-    quantities: Map<UniqueDefinitionId, Int>,
-) {
+class CurrentOwnership(val accountContextId: AccountContextId, quantities: Map<UniqueDefinitionId, Int>) {
     val quantities: Map<UniqueDefinitionId, Int>
 
     init {

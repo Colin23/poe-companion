@@ -9,7 +9,5 @@ internal interface SpringDataManualOwnershipRepository :
     JpaRepository<ManualOwnershipEntity, ManualOwnershipEntityId> {
 
     @Query("SELECT entity FROM ManualOwnershipEntity entity WHERE entity.id.accountContextId = :accountContextId")
-    fun findAllByAccountContextId(
-        @Param("accountContextId") accountContextId: UUID,
-    ): List<ManualOwnershipEntity>
+    fun findAllByAccountContextId(@Param("accountContextId") accountContextId: UUID): List<ManualOwnershipEntity>
 }
