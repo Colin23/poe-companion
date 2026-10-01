@@ -4,7 +4,7 @@ import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.league.AccountContext
 import com.colinmoerbe.poecompanion.league.AccountContextId
 import com.colinmoerbe.poecompanion.league.GameRealm
-import com.colinmoerbe.poecompanion.league.LeagueCategory
+import com.colinmoerbe.poecompanion.league.LeagueType
 import com.colinmoerbe.poecompanion.league.LeagueDefinition
 import com.colinmoerbe.poecompanion.league.LeagueDefinitionId
 import com.colinmoerbe.poecompanion.league.LeagueMortality
@@ -50,7 +50,7 @@ internal class LeagueContextPersistenceIntegrationTests(
             LeagueDefinition(
                 id = LeagueDefinitionId.generate(),
                 name = "Allflame",
-                category = LeagueCategory.CHALLENGE,
+                type = LeagueType.CHALLENGE,
                 participation = LeagueParticipation.SSF,
                 mortality = LeagueMortality.SOFTCORE,
                 realm = GameRealm.PC,
@@ -61,7 +61,7 @@ internal class LeagueContextPersistenceIntegrationTests(
 
         assertThat(persisted?.id).isEqualTo(original.id)
         assertThat(persisted?.name).isEqualTo("Allflame")
-        assertThat(persisted?.category).isEqualTo(LeagueCategory.CHALLENGE)
+        assertThat(persisted?.type).isEqualTo(LeagueType.CHALLENGE)
         assertThat(persisted?.participation).isEqualTo(LeagueParticipation.SSF)
         assertThat(persisted?.mortality).isEqualTo(LeagueMortality.SOFTCORE)
         assertThat(persisted?.realm).isEqualTo(GameRealm.PC)
@@ -73,7 +73,7 @@ internal class LeagueContextPersistenceIntegrationTests(
             LeagueDefinition(
                 id = LeagueDefinitionId.generate(),
                 name = "Allflame",
-                category = LeagueCategory.CHALLENGE,
+                type = LeagueType.CHALLENGE,
                 participation = LeagueParticipation.SSF,
                 mortality = LeagueMortality.SOFTCORE,
                 realm = GameRealm.PC,
