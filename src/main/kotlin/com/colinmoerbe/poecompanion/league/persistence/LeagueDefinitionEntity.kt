@@ -1,7 +1,7 @@
 package com.colinmoerbe.poecompanion.league.persistence
 
 import com.colinmoerbe.poecompanion.league.GameRealm
-import com.colinmoerbe.poecompanion.league.LeagueCategory
+import com.colinmoerbe.poecompanion.league.LeagueType
 import com.colinmoerbe.poecompanion.league.LeagueMortality
 import com.colinmoerbe.poecompanion.league.LeagueParticipation
 import jakarta.persistence.Column
@@ -24,8 +24,8 @@ internal open class LeagueDefinitionEntity(
     @Column(name = "name", nullable = false, length = 255)
     open var name: String,
     @Enumerated(EnumType.STRING)
-    @Column(name = "league_category", nullable = false, length = 32)
-    open var category: LeagueCategory,
+    @Column(name = "league_type", nullable = false, length = 32)
+    open var type: LeagueType,
     @Enumerated(EnumType.STRING)
     @Column(name = "participation", nullable = false, length = 32)
     open var participation: LeagueParticipation,
