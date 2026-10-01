@@ -164,3 +164,39 @@ A league's human-readable name remains metadata. UI labels such as "SSF Standard
 If GGG API access becomes available, a provider adapter should translate GGG league data and rule IDs into the Companion's typed model. Provider DTOs and provider-specific rule names must not leak through the domain.
 
 The current representation is not treated as permanently complete. Real provider observations may justify additional dimensions or refinements later, but V0.1 does not wait for unavailable API access before establishing honest account-context isolation.
+
+
+---
+
+## 4. Account Context Identity Is Immutable; Evaluation Context Is Constructed Explicitly
+
+### Context
+
+The canonical model separates personalized state isolation from game-version evaluation:
+
+```text
+AccountContext
+= which isolated player environment owns the personalized state
+
+EvaluationContext
+= under which game/version/rules that state is evaluated
+```
+
+The bootstrap plan lists `EvaluationContext` among persistence integration concerns, but persisting arbitrary standalone evaluation-context rows would risk turning a transient evaluation value into unnecessary identity/state.
+
+### Decision
+
+An existing `AccountContextId` has immutable defining configuration:
+
+```text
+LeagueDefinitionId
+Ruleset
+```
+
+Changing either creates a different account context rather than redefining the existing identity. Personalized state can therefore safely remain attached to one stable meaning.
+
+`CompatibilityVersion` and `GamePatch` remain outside `AccountContext`.
+
+For V0.1, the application will persist/manual-select the relevant account context plus version/patch configuration and construct an explicit `EvaluationContext` for an evaluation. A standalone persistent `EvaluationContext` entity is not required merely because the value participates in persistence-backed workflows.
+
+Future historical records may store the exact evaluation context they were observed/evaluated under when that history becomes a concrete requirement.
