@@ -82,7 +82,6 @@ internal class CurrentOwnershipServiceIntegrationTests(
         assertThat(currentOwnership.quantityOf(zeroUnique.id)).isZero()
     }
 
-
     @Test
     fun `current ownership should remain isolated by account context`() {
         val leagueDefinition = createPersistedLeagueDefinition()
