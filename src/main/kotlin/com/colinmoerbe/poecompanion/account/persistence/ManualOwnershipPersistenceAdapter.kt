@@ -16,10 +16,10 @@ internal class ManualOwnershipPersistenceAdapter(
         springDataRepository.save(
             ManualOwnershipEntity(
                 id =
-                    ManualOwnershipEntityId(
-                        accountContextId = manualOwnership.accountContextId.value,
-                        uniqueDefinitionId = manualOwnership.uniqueDefinitionId.value,
-                    ),
+                ManualOwnershipEntityId(
+                    accountContextId = manualOwnership.accountContextId.value,
+                    uniqueDefinitionId = manualOwnership.uniqueDefinitionId.value,
+                ),
                 quantity = manualOwnership.quantity,
             ),
         )
