@@ -18,6 +18,7 @@ import com.colinmoerbe.poecompanion.league.persistence.AccountContextPersistence
 import com.colinmoerbe.poecompanion.league.persistence.LeagueDefinitionPersistenceAdapter
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -47,7 +48,12 @@ internal class ManualOwnershipPersistenceIntegrationTests(
 ) {
 
     @BeforeEach
-    fun clearManualOwnership() {
+    fun clearManualOwnershipBeforeTest() {
+        springDataRepository.deleteAllInBatch()
+    }
+
+    @AfterEach
+    fun clearManualOwnershipAfterTest() {
         springDataRepository.deleteAllInBatch()
     }
 
