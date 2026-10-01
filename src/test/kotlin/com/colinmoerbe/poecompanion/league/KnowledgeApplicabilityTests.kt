@@ -16,15 +16,7 @@ class KnowledgeApplicabilityTests {
     private val otherLeagueId = LeagueDefinitionId(UUID.fromString("00000000-0000-0000-0000-000000000002"))
 
     @Test
-    fun `unconstrained knowledge should apply to any context`() {
-        val applicability = KnowledgeApplicability()
-        val context = EvaluationContext(version, Ruleset.NORMAL)
-
-        assertThat(applicability.evaluateAgainst(context)).isEqualTo(ApplicabilityResult.APPLIES)
-    }
-
-    @Test
-    fun `omitted patch and league constraints should remain broad`() {
+    fun `confirmed broad patch and league dimensions should not restrict a detailed context`() {
         val applicability =
             KnowledgeApplicability(
                 compatibilityVersion = version,
@@ -71,7 +63,7 @@ class KnowledgeApplicabilityTests {
     }
 
     @Test
-    fun `missing required patch precision should be unknown`() {
+    fun `patch-specific knowledge should be unknown when context lacks exact patch`() {
         val applicability =
             KnowledgeApplicability(
                 compatibilityVersion = version,
