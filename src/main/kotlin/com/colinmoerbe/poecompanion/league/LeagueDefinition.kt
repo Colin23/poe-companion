@@ -8,7 +8,7 @@ package com.colinmoerbe.poecompanion.league
 class LeagueDefinition(
     val id: LeagueDefinitionId,
     val name: String,
-    val category: LeagueType,
+    val type: LeagueType,
     val participation: LeagueParticipation,
     val mortality: LeagueMortality,
     val realm: GameRealm,
