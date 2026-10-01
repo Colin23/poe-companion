@@ -7,10 +7,24 @@ import org.springframework.stereotype.Repository
 
 /**
  * Persists account-context identity/configuration without exposing JPA representations to the domain.
+ *
+ * Once an identity exists, its league and ruleset cannot be redefined.
  */
 @Repository
 internal class AccountContextPersistenceAdapter(private val springDataRepository: SpringDataAccountContextRepository) {
     fun save(accountContext: AccountContext) {
+        val existing = springDataRepository.findById(accountContext.id.value).orElse(null)
+
+        if (existing != null) {
+            require(
+                existing.leagueDefinitionId == accountContext.leagueDefinitionId.value &&
+                    existing.ruleset == accountContext.ruleset,
+            ) {
+                "Existing account context identity cannot be redefined"
+            }
+            return
+        }
+
         springDataRepository.save(
             AccountContextEntity(
                 id = accountContext.id.value,
