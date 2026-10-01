@@ -15,25 +15,28 @@ import org.springframework.transaction.annotation.Transactional
 internal class AccountContextPersistenceAdapter(private val springDataRepository: SpringDataAccountContextRepository) {
     @Transactional
     fun save(accountContext: AccountContext) {
-        val existing = springDataRepository.findById(accountContext.id.value).orElse(null)
+        val insertedRows =
+            springDataRepository.insertIfAbsent(
+                id = accountContext.id.value,
+                leagueDefinitionId = accountContext.leagueDefinitionId.value,
+                ruleset = accountContext.ruleset.name,
+            )
 
-        if (existing != null) {
-            require(
-                existing.leagueDefinitionId == accountContext.leagueDefinitionId.value &&
-                    existing.ruleset == accountContext.ruleset,
-            ) {
-                "Existing account context identity cannot be redefined"
-            }
+        if (insertedRows == 1) {
             return
         }
 
-        springDataRepository.save(
-            AccountContextEntity(
-                id = accountContext.id.value,
-                leagueDefinitionId = accountContext.leagueDefinitionId.value,
-                ruleset = accountContext.ruleset,
-            ),
-        )
+        val existing =
+            springDataRepository.findById(accountContext.id.value).orElseThrow {
+                IllegalStateException("Account context disappeared after an identity conflict")
+            }
+
+        require(
+            existing.leagueDefinitionId == accountContext.leagueDefinitionId.value &&
+                existing.ruleset == accountContext.ruleset,
+        ) {
+            "Existing account context identity cannot be redefined"
+        }
     }
 
     fun findById(id: AccountContextId): AccountContext? = springDataRepository
