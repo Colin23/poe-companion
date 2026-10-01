@@ -36,12 +36,12 @@ class AccountEvaluationService internal constructor(
         return AccountEvaluation(
             accountContextId = accountContext.id,
             evaluationContext =
-                EvaluationContext(
-                    compatibilityVersion = selection.compatibilityVersion,
-                    ruleset = accountContext.ruleset,
-                    gamePatch = selection.gamePatch,
-                    leagueDefinitionId = accountContext.leagueDefinitionId,
-                ),
+            EvaluationContext(
+                compatibilityVersion = selection.compatibilityVersion,
+                ruleset = accountContext.ruleset,
+                gamePatch = selection.gamePatch,
+                leagueDefinitionId = accountContext.leagueDefinitionId,
+            ),
         )
     }
 }

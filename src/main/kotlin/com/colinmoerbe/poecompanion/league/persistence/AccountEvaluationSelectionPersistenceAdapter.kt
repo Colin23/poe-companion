@@ -12,11 +12,7 @@ import org.springframework.stereotype.Repository
 internal class AccountEvaluationSelectionPersistenceAdapter(
     private val springDataRepository: SpringDataAccountEvaluationSelectionRepository,
 ) {
-    fun save(
-        accountContextId: AccountContextId,
-        compatibilityVersion: CompatibilityVersion,
-        gamePatch: GamePatch?,
-    ) {
+    fun save(accountContextId: AccountContextId, compatibilityVersion: CompatibilityVersion, gamePatch: GamePatch?) {
         springDataRepository.save(
             AccountEvaluationSelectionEntity(
                 singletonId = SINGLETON_ID,
@@ -29,28 +25,27 @@ internal class AccountEvaluationSelectionPersistenceAdapter(
         )
     }
 
-    fun find(): AccountEvaluationSettings? =
-        springDataRepository
-            .findById(SINGLETON_ID)
-            .map { entity ->
-                val compatibilityVersion =
-                    CompatibilityVersion(
-                        major = entity.compatibilityVersionMajor,
-                        minor = entity.compatibilityVersionMinor,
-                    )
-                AccountEvaluationSettings(
-                    accountContextId = AccountContextId(entity.accountContextId),
-                    compatibilityVersion = compatibilityVersion,
-                    gamePatch =
-                        entity.gamePatch?.let { patch ->
-                            GamePatch(
-                                compatibilityVersion = compatibilityVersion,
-                                patch = patch,
-                                suffix = entity.gamePatchSuffix,
-                            )
-                        },
+    fun find(): AccountEvaluationSettings? = springDataRepository
+        .findById(SINGLETON_ID)
+        .map { entity ->
+            val compatibilityVersion =
+                CompatibilityVersion(
+                    major = entity.compatibilityVersionMajor,
+                    minor = entity.compatibilityVersionMinor,
                 )
-            }.orElse(null)
+            AccountEvaluationSettings(
+                accountContextId = AccountContextId(entity.accountContextId),
+                compatibilityVersion = compatibilityVersion,
+                gamePatch =
+                entity.gamePatch?.let { patch ->
+                    GamePatch(
+                        compatibilityVersion = compatibilityVersion,
+                        patch = patch,
+                        suffix = entity.gamePatchSuffix,
+                    )
+                },
+            )
+        }.orElse(null)
 
     private companion object {
         const val SINGLETON_ID = 1
