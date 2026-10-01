@@ -111,3 +111,56 @@ Do not interpret the current nullable representation as the final uncertainty mo
 Ruleset-specific versioned knowledge should remain independently versionable. If the same fact is established for both Normal and Ruthless, represent separate ruleset-specific histories rather than one multi-ruleset record, so either ruleset can later change without partial-supersession complexity.
 
 Ruthless remains unsupported in V0.1; current Normal knowledge must not later be treated as proof that Ruthless is explicitly excluded.
+
+
+---
+
+## 3. League Definitions Are Manually Curated and Provider-Informed in V0.1
+
+### Context
+
+V0.1 needs durable league and account-context identity before personalized ownership can be isolated correctly.
+
+At the time of this decision (2026-10-01), the official Path of Exile developer documentation states that GGG is currently unable to process new application registrations. The product therefore cannot make live GGG OAuth/API access a prerequisite for its V0.1 league model.
+
+GGG's published League schema is still useful design evidence. It exposes separate league identity/name/realm data and league rules such as `Hardcore` and `NoParties` (SSF), but provider terminology and encoding do not become the Companion's domain model directly.
+
+Official references:
+
+- https://www.pathofexile.com/developer/docs
+- https://www.pathofexile.com/developer/docs/reference
+
+### Decision
+
+V0.1 manually curates application-owned `LeagueDefinition` records. Their identity is the opaque `LeagueDefinitionId`; display metadata does not define identity.
+
+The current internal model represents the league dimensions explicitly:
+
+```text
+LeagueType
+    STANDARD
+    CHALLENGE
+
+LeagueParticipation
+    SSF
+    TRADE
+
+LeagueMortality
+    SOFTCORE
+    HARDCORE
+
+GameRealm
+    PC
+    XBOX
+    SONY
+```
+
+These are Companion-owned concepts. In particular, `LeagueType` is intentionally not named `LeagueCategory`, because GGG already uses `category` for a different provider concept.
+
+A league's human-readable name remains metadata. UI labels such as "SSF Standard" or "Hardcore SSF <league>" should be derived from structured dimensions rather than stored as identity-bearing strings.
+
+### Future Provider Integration
+
+If GGG API access becomes available, a provider adapter should translate GGG league data and rule IDs into the Companion's typed model. Provider DTOs and provider-specific rule names must not leak through the domain.
+
+The current representation is not treated as permanently complete. Real provider observations may justify additional dimensions or refinements later, but V0.1 does not wait for unavailable API access before establishing honest account-context isolation.
