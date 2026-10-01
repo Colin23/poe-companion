@@ -95,6 +95,31 @@ internal class LeagueContextPersistenceIntegrationTests(
     }
 
     @Test
+    fun `saving the same account context identity and configuration should be idempotent`() {
+        val leagueDefinition =
+            LeagueDefinition(
+                id = LeagueDefinitionId.generate(),
+                name = "Allflame",
+                type = LeagueType.CHALLENGE,
+                participation = LeagueParticipation.SSF,
+                mortality = LeagueMortality.SOFTCORE,
+                realm = GameRealm.PC,
+            )
+        val accountContext =
+            AccountContext(
+                id = AccountContextId.generate(),
+                leagueDefinitionId = leagueDefinition.id,
+                ruleset = Ruleset.NORMAL,
+            )
+
+        leagueDefinitionPersistenceAdapter.save(leagueDefinition)
+        accountContextPersistenceAdapter.save(accountContext)
+        accountContextPersistenceAdapter.save(accountContext)
+
+        assertThat(accountContextPersistenceAdapter.findById(accountContext.id)?.ruleset).isEqualTo(Ruleset.NORMAL)
+    }
+
+    @Test
     fun `existing account context identity should reject ruleset redefinition`() {
         val leagueDefinition =
             LeagueDefinition(
