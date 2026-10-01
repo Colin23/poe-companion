@@ -39,4 +39,14 @@ internal class ManualOwnershipPersistenceAdapter(
                     quantity = entity.quantity,
                 )
             }.orElse(null)
+
+    fun findAllByAccountContextId(accountContextId: AccountContextId): List<ManualOwnership> = springDataRepository
+        .findAllByAccountContextId(accountContextId.value)
+        .map { entity ->
+            ManualOwnership(
+                accountContextId = AccountContextId(entity.id.accountContextId),
+                uniqueDefinitionId = UniqueDefinitionId(entity.id.uniqueDefinitionId),
+                quantity = entity.quantity,
+            )
+        }
 }
