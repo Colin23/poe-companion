@@ -82,19 +82,72 @@ internal class CurrentOwnershipServiceIntegrationTests(
         assertThat(currentOwnership.quantityOf(zeroUnique.id)).isZero()
     }
 
+    @Test
+    fun `current ownership should remain isolated by account context`() {
+        val leagueDefinition = createPersistedLeagueDefinition()
+        val contextA =
+            AccountContext(
+                id = AccountContextId.generate(),
+                leagueDefinitionId = leagueDefinition.id,
+                ruleset = Ruleset.NORMAL,
+            ).also(accountContextPersistenceAdapter::save)
+        val contextB =
+            AccountContext(
+                id = AccountContextId.generate(),
+                leagueDefinitionId = leagueDefinition.id,
+                ruleset = Ruleset.NORMAL,
+            ).also(accountContextPersistenceAdapter::save)
+        val sharedUnique = createPersistedUniqueDefinition()
+        val contextBOnlyUnique = createPersistedUniqueDefinition()
+
+        manualOwnershipPersistenceAdapter.save(
+            ManualOwnership(
+                accountContextId = contextA.id,
+                uniqueDefinitionId = sharedUnique.id,
+                quantity = 2,
+            ),
+        )
+        manualOwnershipPersistenceAdapter.save(
+            ManualOwnership(
+                accountContextId = contextB.id,
+                uniqueDefinitionId = sharedUnique.id,
+                quantity = 1,
+            ),
+        )
+        manualOwnershipPersistenceAdapter.save(
+            ManualOwnership(
+                accountContextId = contextB.id,
+                uniqueDefinitionId = contextBOnlyUnique.id,
+                quantity = 1,
+            ),
+        )
+
+        val ownershipA = currentOwnershipService.getCurrentOwnership(contextA.id)
+        val ownershipB = currentOwnershipService.getCurrentOwnership(contextB.id)
+
+        assertThat(ownershipA.accountContextId).isEqualTo(contextA.id)
+        assertThat(ownershipA.quantityOf(sharedUnique.id)).isEqualTo(2)
+        assertThat(ownershipA.quantityOf(contextBOnlyUnique.id)).isZero()
+
+        assertThat(ownershipB.accountContextId).isEqualTo(contextB.id)
+        assertThat(ownershipB.quantityOf(sharedUnique.id)).isEqualTo(1)
+        assertThat(ownershipB.quantityOf(contextBOnlyUnique.id)).isEqualTo(1)
+    }
+
     private fun createPersistedUniqueDefinition(): UniqueDefinition =
         UniqueDefinition(UniqueDefinitionId.generate()).also(uniqueDefinitionPersistenceAdapter::save)
 
+    private fun createPersistedLeagueDefinition(): LeagueDefinition = LeagueDefinition(
+        id = LeagueDefinitionId.generate(),
+        name = "Allflame",
+        type = LeagueType.CHALLENGE,
+        participation = LeagueParticipation.SSF,
+        mortality = LeagueMortality.SOFTCORE,
+        realm = GameRealm.PC,
+    ).also(leagueDefinitionPersistenceAdapter::save)
+
     private fun createPersistedAccountContext(): AccountContext {
-        val leagueDefinition =
-            LeagueDefinition(
-                id = LeagueDefinitionId.generate(),
-                name = "Allflame",
-                type = LeagueType.CHALLENGE,
-                participation = LeagueParticipation.SSF,
-                mortality = LeagueMortality.SOFTCORE,
-                realm = GameRealm.PC,
-            )
+        val leagueDefinition = createPersistedLeagueDefinition()
         val accountContext =
             AccountContext(
                 id = AccountContextId.generate(),
@@ -102,7 +155,6 @@ internal class CurrentOwnershipServiceIntegrationTests(
                 ruleset = Ruleset.NORMAL,
             )
 
-        leagueDefinitionPersistenceAdapter.save(leagueDefinition)
         accountContextPersistenceAdapter.save(accountContext)
 
         return accountContext
