@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.dao.DataIntegrityViolationException
+import org.springframework.dao.InvalidDataAccessApiUsageException
 import org.springframework.jdbc.core.JdbcTemplate
 
 /**
@@ -92,6 +93,67 @@ internal class LeagueContextPersistenceIntegrationTests(
         assertThat(persisted?.id).isEqualTo(original.id)
         assertThat(persisted?.leagueDefinitionId).isEqualTo(leagueDefinition.id)
         assertThat(persisted?.ruleset).isEqualTo(Ruleset.NORMAL)
+    }
+
+    @Test
+    fun `saving the same account context identity and configuration should be idempotent`() {
+        val leagueDefinition =
+            LeagueDefinition(
+                id = LeagueDefinitionId.generate(),
+                name = "Allflame",
+                type = LeagueType.CHALLENGE,
+                participation = LeagueParticipation.SSF,
+                mortality = LeagueMortality.SOFTCORE,
+                realm = GameRealm.PC,
+            )
+        val accountContext =
+            AccountContext(
+                id = AccountContextId.generate(),
+                leagueDefinitionId = leagueDefinition.id,
+                ruleset = Ruleset.NORMAL,
+            )
+
+        leagueDefinitionPersistenceAdapter.save(leagueDefinition)
+        accountContextPersistenceAdapter.save(accountContext)
+        accountContextPersistenceAdapter.save(accountContext)
+
+        assertThat(accountContextPersistenceAdapter.findById(accountContext.id)?.ruleset).isEqualTo(Ruleset.NORMAL)
+    }
+
+    @Test
+    fun `existing account context identity should reject ruleset redefinition`() {
+        val leagueDefinition =
+            LeagueDefinition(
+                id = LeagueDefinitionId.generate(),
+                name = "Allflame",
+                type = LeagueType.CHALLENGE,
+                participation = LeagueParticipation.SSF,
+                mortality = LeagueMortality.SOFTCORE,
+                realm = GameRealm.PC,
+            )
+        val id = AccountContextId.generate()
+
+        leagueDefinitionPersistenceAdapter.save(leagueDefinition)
+        accountContextPersistenceAdapter.save(
+            AccountContext(
+                id = id,
+                leagueDefinitionId = leagueDefinition.id,
+                ruleset = Ruleset.NORMAL,
+            ),
+        )
+
+        assertThatThrownBy {
+            accountContextPersistenceAdapter.save(
+                AccountContext(
+                    id = id,
+                    leagueDefinitionId = leagueDefinition.id,
+                    ruleset = Ruleset.RUTHLESS,
+                ),
+            )
+        }.isInstanceOf(InvalidDataAccessApiUsageException::class.java)
+            .hasCauseInstanceOf(IllegalArgumentException::class.java)
+
+        assertThat(accountContextPersistenceAdapter.findById(id)?.ruleset).isEqualTo(Ruleset.NORMAL)
     }
 
     @Test

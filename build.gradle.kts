@@ -37,6 +37,8 @@ repositories {
     mavenCentral()
 }
 
+val mockitoAgent = configurations.create("mockitoAgent")
+
 dependencyLocking {
     lockAllConfigurations()
 }
@@ -71,6 +73,11 @@ dependencies {
     testImplementation(libs.org.springframework.modulith.springModulithStarterTest)
     testImplementation(libs.org.testcontainers.junitJupiter)
     testImplementation(libs.org.testcontainers.postgresql)
+
+    mockitoAgent(platform(SpringBootPlugin.BOM_COORDINATES))
+    mockitoAgent(libs.org.mockito.mockitoCore) {
+        isTransitive = false
+    }
 
     testRuntimeOnly(libs.org.junit.platform.junitPlatformLauncher)
 }
@@ -146,6 +153,7 @@ tasks.withType<Jar> {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    jvmArgs("-javaagent:${mockitoAgent.asPath}")
 }
 
 tasks.named<BootBuildImage>("bootBuildImage") {

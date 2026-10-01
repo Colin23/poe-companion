@@ -4,20 +4,39 @@ import com.colinmoerbe.poecompanion.league.AccountContext
 import com.colinmoerbe.poecompanion.league.AccountContextId
 import com.colinmoerbe.poecompanion.league.LeagueDefinitionId
 import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
 
 /**
  * Persists account-context identity/configuration without exposing JPA representations to the domain.
+ *
+ * Once an identity exists, its league and ruleset cannot be redefined.
  */
 @Repository
 internal class AccountContextPersistenceAdapter(private val springDataRepository: SpringDataAccountContextRepository) {
+    @Transactional
     fun save(accountContext: AccountContext) {
-        springDataRepository.save(
-            AccountContextEntity(
+        val insertedRows =
+            springDataRepository.insertIfAbsent(
                 id = accountContext.id.value,
                 leagueDefinitionId = accountContext.leagueDefinitionId.value,
-                ruleset = accountContext.ruleset,
-            ),
-        )
+                ruleset = accountContext.ruleset.name,
+            )
+
+        if (insertedRows == 1) {
+            return
+        }
+
+        val existing =
+            springDataRepository.findById(accountContext.id.value).orElseThrow {
+                IllegalStateException("Account context disappeared after an identity conflict")
+            }
+
+        require(
+            existing.leagueDefinitionId == accountContext.leagueDefinitionId.value &&
+                existing.ruleset == accountContext.ruleset,
+        ) {
+            "Existing account context identity cannot be redefined"
+        }
     }
 
     fun findById(id: AccountContextId): AccountContext? = springDataRepository
