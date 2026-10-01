@@ -31,7 +31,7 @@ data class KnowledgeApplicability(
      * A known mismatch is definitive. Missing context precision for a constrained optional dimension yields UNKNOWN
      * rather than being treated as a match.
      */
-    @Suppress("ReturnCount")
+    @Suppress("ReturnCount", "CyclomaticComplexMethod")
     fun evaluateAgainst(context: EvaluationContext): ApplicabilityResult {
         if (compatibilityVersion != null && compatibilityVersion != context.compatibilityVersion) {
             return ApplicabilityResult.DOES_NOT_APPLY
