@@ -42,6 +42,7 @@ org-springframework-boot-springBootTestcontainers = { group = "org.springframewo
 org-springframework-modulith-springModulithStarterTest = { group = "org.springframework.modulith", name = "spring-modulith-starter-test" }
 org-testcontainers-junitJupiter = { group = "org.testcontainers", name = "testcontainers-junit-jupiter" }
 org-testcontainers-postgresql = { group = "org.testcontainers", name = "testcontainers-postgresql" }
+org-mockito-mockitoCore = { group = "org.mockito", name = "mockito-core" }
 
 # testRuntimeOnly dependencies
 org-junit-platform-junitPlatformLauncher = { group = "org.junit.platform", name = "junit-platform-launcher" }
