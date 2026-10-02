@@ -2,7 +2,6 @@ package com.colinmoerbe.poecompanion.account
 
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
 import com.colinmoerbe.poecompanion.league.AccountContextId
-import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 
@@ -12,19 +11,18 @@ import org.junit.jupiter.api.Test
 class ManualOwnershipTests {
 
     @Test
-    fun `zero owned quantity should be valid`() {
-        val ownership =
+    fun `zero manual ownership quantity should be rejected`() {
+        assertThatThrownBy {
             ManualOwnership(
                 accountContextId = AccountContextId.generate(),
                 uniqueDefinitionId = UniqueDefinitionId.generate(),
                 quantity = 0,
             )
-
-        assertThat(ownership.quantity).isZero()
+        }.isInstanceOf(IllegalArgumentException::class.java)
     }
 
     @Test
-    fun `negative owned quantity should be rejected`() {
+    fun `negative manual ownership quantity should be rejected`() {
         assertThatThrownBy {
             ManualOwnership(
                 accountContextId = AccountContextId.generate(),
