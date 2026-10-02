@@ -202,3 +202,32 @@ For V0.1, the application will persist/manual-select the relevant account contex
 The persisted V0.1 selection is the application's one **current** selection, not a history of context switches and not a per-`AccountContext` store of last-used version/patch preferences. Switching the current selection does not reset or overwrite personalized state belonging to either context: ownership, attempts, goals and future synchronized state remain attached to their own `AccountContextId`. If the later UI demonstrates value in restoring a separate last-used CompatibilityVersion/GamePatch for each AccountContext, that preference can be modeled then rather than being introduced speculatively.
 
 Future historical records may store the exact evaluation context they were observed/evaluated under when that history becomes a concrete requirement.
+
+
+---
+
+## 5. Persisted Manual Ownership Is Sparse
+
+### Context
+
+The initial manual-ownership persistence schema allowed quantity zero because V0.1 accepts non-negative manual quantity input and the write application service did not yet exist. Once the command boundary became concrete, keeping explicit zero rows no longer provided useful semantics and would make manual storage differ unnecessarily from future synchronized ownership aggregation.
+
+### Decision
+
+Manual ownership input still accepts zero as the meaningful instruction "this context owns none of this Unique." Persisted manual ownership is sparse:
+
+```text
+quantity > 0
+→ persist/update one ManualOwnership row
+
+quantity = 0
+→ delete the ManualOwnership row
+
+no row
+→ owned quantity 0
+```
+
+The database therefore permits only positive quantities for persisted `manual_ownership` rows. Existing explicit-zero rows are removed by the migration that tightens this constraint.
+
+`CurrentOwnership` continues to expose the same semantic result regardless of source representation: absence means quantity zero. Future synchronized ownership is expected to be naturally sparse as well.
+
