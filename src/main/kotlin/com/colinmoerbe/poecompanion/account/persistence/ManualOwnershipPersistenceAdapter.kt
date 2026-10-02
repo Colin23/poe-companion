@@ -1,6 +1,7 @@
 package com.colinmoerbe.poecompanion.account.persistence
 
 import com.colinmoerbe.poecompanion.account.ManualOwnership
+import com.colinmoerbe.poecompanion.account.ManualOwnershipRepository
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
 import com.colinmoerbe.poecompanion.league.AccountContextId
 import org.springframework.stereotype.Repository
@@ -11,8 +12,8 @@ import org.springframework.stereotype.Repository
 @Repository
 internal class ManualOwnershipPersistenceAdapter(
     private val springDataRepository: SpringDataManualOwnershipRepository,
-) {
-    fun save(manualOwnership: ManualOwnership) {
+) : ManualOwnershipRepository {
+    override fun save(manualOwnership: ManualOwnership) {
         springDataRepository.save(
             ManualOwnershipEntity(
                 id =
@@ -21,6 +22,18 @@ internal class ManualOwnershipPersistenceAdapter(
                     uniqueDefinitionId = manualOwnership.uniqueDefinitionId.value,
                 ),
                 quantity = manualOwnership.quantity,
+            ),
+        )
+    }
+
+    override fun deleteBy(
+        accountContextId: AccountContextId,
+        uniqueDefinitionId: UniqueDefinitionId,
+    ) {
+        springDataRepository.deleteById(
+            ManualOwnershipEntityId(
+                accountContextId = accountContextId.value,
+                uniqueDefinitionId = uniqueDefinitionId.value,
             ),
         )
     }
@@ -40,7 +53,7 @@ internal class ManualOwnershipPersistenceAdapter(
                 )
             }.orElse(null)
 
-    fun findAllByAccountContextId(accountContextId: AccountContextId): List<ManualOwnership> = springDataRepository
+    override fun findAllByAccountContextId(accountContextId: AccountContextId): List<ManualOwnership> = springDataRepository
         .findAllByAccountContextId(accountContextId.value)
         .map { entity ->
             ManualOwnership(
