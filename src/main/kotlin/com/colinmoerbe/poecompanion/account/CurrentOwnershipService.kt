@@ -1,6 +1,5 @@
 package com.colinmoerbe.poecompanion.account
 
-import com.colinmoerbe.poecompanion.account.persistence.ManualOwnershipPersistenceAdapter
 import com.colinmoerbe.poecompanion.league.AccountContextId
 import org.springframework.stereotype.Service
 
@@ -9,11 +8,11 @@ import org.springframework.stereotype.Service
  */
 @Service
 class CurrentOwnershipService internal constructor(
-    private val manualOwnershipPersistenceAdapter: ManualOwnershipPersistenceAdapter,
+    private val manualOwnershipRepository: ManualOwnershipRepository,
 ) {
     fun getCurrentOwnership(accountContextId: AccountContextId): CurrentOwnership {
         val quantities =
-            manualOwnershipPersistenceAdapter
+            manualOwnershipRepository
                 .findAllByAccountContextId(accountContextId)
                 .associate { it.uniqueDefinitionId to it.quantity }
 
