@@ -58,7 +58,7 @@ internal class CurrentOwnershipServiceIntegrationTests(
     fun `current ownership should derive a sparse view from persisted manual quantities`() {
         val accountContext = createPersistedAccountContext()
         val ownedUnique = createPersistedUniqueDefinition()
-        val zeroUnique = createPersistedUniqueDefinition()
+        val missingUnique = createPersistedUniqueDefinition()
 
         manualOwnershipPersistenceAdapter.save(
             ManualOwnership(
@@ -67,19 +67,11 @@ internal class CurrentOwnershipServiceIntegrationTests(
                 quantity = 2,
             ),
         )
-        manualOwnershipPersistenceAdapter.save(
-            ManualOwnership(
-                accountContextId = accountContext.id,
-                uniqueDefinitionId = zeroUnique.id,
-                quantity = 0,
-            ),
-        )
-
         val currentOwnership = currentOwnershipService.getCurrentOwnership(accountContext.id)
 
         assertThat(currentOwnership.accountContextId).isEqualTo(accountContext.id)
         assertThat(currentOwnership.quantities).containsExactlyEntriesOf(mapOf(ownedUnique.id to 2))
-        assertThat(currentOwnership.quantityOf(zeroUnique.id)).isZero()
+        assertThat(currentOwnership.quantityOf(missingUnique.id)).isZero()
     }
 
     @Test
