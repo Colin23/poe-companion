@@ -9,15 +9,9 @@ import org.springframework.transaction.annotation.Transactional
  * Applies user-driven changes to manually maintained ownership.
  */
 @Service
-class ManualOwnershipService internal constructor(
-    private val manualOwnershipRepository: ManualOwnershipRepository,
-) {
+class ManualOwnershipService internal constructor(private val manualOwnershipRepository: ManualOwnershipRepository) {
     @Transactional
-    fun setOwnedQuantity(
-        accountContextId: AccountContextId,
-        uniqueDefinitionId: UniqueDefinitionId,
-        quantity: Int,
-    ) {
+    fun setOwnedQuantity(accountContextId: AccountContextId, uniqueDefinitionId: UniqueDefinitionId, quantity: Int) {
         require(quantity >= 0) { "Owned quantity must not be negative" }
 
         if (quantity == 0) {

@@ -26,10 +26,7 @@ internal class ManualOwnershipPersistenceAdapter(
         )
     }
 
-    override fun deleteBy(
-        accountContextId: AccountContextId,
-        uniqueDefinitionId: UniqueDefinitionId,
-    ) {
+    override fun deleteBy(accountContextId: AccountContextId, uniqueDefinitionId: UniqueDefinitionId) {
         springDataRepository.deleteById(
             ManualOwnershipEntityId(
                 accountContextId = accountContextId.value,
@@ -53,13 +50,14 @@ internal class ManualOwnershipPersistenceAdapter(
                 )
             }.orElse(null)
 
-    override fun findAllByAccountContextId(accountContextId: AccountContextId): List<ManualOwnership> = springDataRepository
-        .findAllByAccountContextId(accountContextId.value)
-        .map { entity ->
-            ManualOwnership(
-                accountContextId = AccountContextId(entity.id.accountContextId),
-                uniqueDefinitionId = UniqueDefinitionId(entity.id.uniqueDefinitionId),
-                quantity = entity.quantity,
-            )
-        }
+    override fun findAllByAccountContextId(accountContextId: AccountContextId): List<ManualOwnership> =
+        springDataRepository
+            .findAllByAccountContextId(accountContextId.value)
+            .map { entity ->
+                ManualOwnership(
+                    accountContextId = AccountContextId(entity.id.accountContextId),
+                    uniqueDefinitionId = UniqueDefinitionId(entity.id.uniqueDefinitionId),
+                    quantity = entity.quantity,
+                )
+            }
 }

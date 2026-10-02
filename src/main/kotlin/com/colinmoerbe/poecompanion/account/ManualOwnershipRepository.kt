@@ -9,10 +9,7 @@ import com.colinmoerbe.poecompanion.league.AccountContextId
 internal interface ManualOwnershipRepository {
     fun save(manualOwnership: ManualOwnership)
 
-    fun deleteBy(
-        accountContextId: AccountContextId,
-        uniqueDefinitionId: UniqueDefinitionId,
-    )
+    fun deleteBy(accountContextId: AccountContextId, uniqueDefinitionId: UniqueDefinitionId)
 
     fun findAllByAccountContextId(accountContextId: AccountContextId): List<ManualOwnership>
 }
