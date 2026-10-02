@@ -78,14 +78,21 @@ internal class ManualOwnershipServiceIntegrationTests(
     }
 
     @Test
-    fun `zero quantity should remove existing manual ownership`() {
+    fun `zero quantity should remove only the targeted manual ownership`() {
         val accountContext = createPersistedAccountContext()
+        val otherAccountContext = createPersistedAccountContext()
         val uniqueDefinition = createPersistedUniqueDefinition()
+        val otherUniqueDefinition = createPersistedUniqueDefinition()
 
         manualOwnershipService.setOwnedQuantity(accountContext.id, uniqueDefinition.id, 2)
+        manualOwnershipService.setOwnedQuantity(accountContext.id, otherUniqueDefinition.id, 3)
+        manualOwnershipService.setOwnedQuantity(otherAccountContext.id, uniqueDefinition.id, 4)
+
         manualOwnershipService.setOwnedQuantity(accountContext.id, uniqueDefinition.id, 0)
 
         assertThat(persistenceAdapter.findBy(accountContext.id, uniqueDefinition.id)).isNull()
+        assertThat(persistenceAdapter.findBy(accountContext.id, otherUniqueDefinition.id)?.quantity).isEqualTo(3)
+        assertThat(persistenceAdapter.findBy(otherAccountContext.id, uniqueDefinition.id)?.quantity).isEqualTo(4)
     }
 
     @Test
