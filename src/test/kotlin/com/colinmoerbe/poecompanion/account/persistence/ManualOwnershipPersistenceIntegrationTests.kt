@@ -58,20 +58,21 @@ internal class ManualOwnershipPersistenceIntegrationTests(
     }
 
     @Test
-    fun `zero manual ownership quantity should persist`() {
+    fun `database should reject zero manual ownership quantities`() {
         val accountContext = createPersistedAccountContext()
         val uniqueDefinition = createPersistedUniqueDefinition()
-        val original =
-            ManualOwnership(
-                accountContextId = accountContext.id,
-                uniqueDefinitionId = uniqueDefinition.id,
-                quantity = 0,
+
+        assertThatThrownBy {
+            jdbcTemplate.update(
+                """
+                INSERT INTO poe_companion.manual_ownership (account_context_id, unique_definition_id, quantity)
+                VALUES (?, ?, ?)
+                """.trimIndent(),
+                accountContext.id.value,
+                uniqueDefinition.id.value,
+                0,
             )
-
-        persistenceAdapter.save(original)
-        val persisted = persistenceAdapter.findBy(accountContext.id, uniqueDefinition.id)
-
-        assertThat(persisted).isEqualTo(original)
+        }.isInstanceOf(DataIntegrityViolationException::class.java)
     }
 
     @Test
