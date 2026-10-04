@@ -83,7 +83,7 @@ class BuildVariantRevisionTests {
     }
 
     @Test
-    fun `draft revision should activate`() {
+    fun `revision with no requirement groups should activate`() {
         val revision = createRevision()
 
         revision.activate()
