@@ -52,6 +52,23 @@ class BuildVariantRevisionTests {
     }
 
     @Test
+    fun `active revision should not allow mutation through exposed requirement groups`() {
+        val revision = createRevision()
+        val first = createRequirementGroup()
+        val second = createRequirementGroup()
+        revision.updateRequirementGroups(listOf(first, second))
+        revision.activate()
+
+        @Suppress("UNCHECKED_CAST")
+        val exposed = revision.requirementGroups as MutableList<RequirementGroup>
+
+        assertThatThrownBy {
+            exposed.removeAt(0)
+        }.isInstanceOf(UnsupportedOperationException::class.java)
+        assertThat(revision.requirementGroups).containsExactly(first, second)
+    }
+
+    @Test
     fun `draft revision should allow no requirement groups`() {
         val revision = createRevision()
         revision.updateRequirementGroups(listOf(createRequirementGroup()))
