@@ -46,7 +46,7 @@ class BuildVariantRevisionTests {
     fun `draft revision should not supersede`() {
         val revision = createRevision()
 
-        assertThatThrownBy(revision::supersede).isInstanceOf(IllegalArgumentException::class.java)
+        assertThatThrownBy(revision::supersede).isInstanceOf(IllegalStateException::class.java)
     }
 
     @Test
@@ -54,7 +54,7 @@ class BuildVariantRevisionTests {
         val revision = createRevision()
         revision.activate()
 
-        assertThatThrownBy(revision::activate).isInstanceOf(IllegalArgumentException::class.java)
+        assertThatThrownBy(revision::activate).isInstanceOf(IllegalStateException::class.java)
     }
 
     @Test
@@ -63,8 +63,8 @@ class BuildVariantRevisionTests {
         revision.activate()
         revision.supersede()
 
-        assertThatThrownBy(revision::activate).isInstanceOf(IllegalArgumentException::class.java)
-        assertThatThrownBy(revision::supersede).isInstanceOf(IllegalArgumentException::class.java)
+        assertThatThrownBy(revision::activate).isInstanceOf(IllegalStateException::class.java)
+        assertThatThrownBy(revision::supersede).isInstanceOf(IllegalStateException::class.java)
     }
 
     private fun createRevision(): BuildVariantRevision =
