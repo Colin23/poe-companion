@@ -1,5 +1,7 @@
 package com.colinmoerbe.poecompanion.build
 
+import java.util.Collections
+
 /**
  * One logical group of Unique requirements within a build revision.
  */
@@ -12,6 +14,6 @@ class RequirementGroup(requirements: List<Requirement>) {
             "Requirement group must not contain the same Unique more than once"
         }
 
-        this.requirements = requirements.toList()
+        this.requirements = Collections.unmodifiableList(ArrayList(requirements))
     }
 }
