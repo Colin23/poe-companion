@@ -39,6 +39,19 @@ class BuildVariantRevisionTests {
     }
 
     @Test
+    fun `revision groups should not change when input list is mutated later`() {
+        val revision = createRevision()
+        val first = createRequirementGroup()
+        val input = mutableListOf(first)
+
+        revision.updateRequirementGroups(input)
+        revision.activate()
+        input += createRequirementGroup()
+
+        assertThat(revision.requirementGroups).containsExactly(first)
+    }
+
+    @Test
     fun `draft revision should allow no requirement groups`() {
         val revision = createRevision()
         revision.updateRequirementGroups(listOf(createRequirementGroup()))
