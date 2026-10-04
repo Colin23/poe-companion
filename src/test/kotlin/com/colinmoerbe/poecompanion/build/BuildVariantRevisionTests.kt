@@ -67,10 +67,9 @@ class BuildVariantRevisionTests {
         assertThatThrownBy(revision::supersede).isInstanceOf(IllegalStateException::class.java)
     }
 
-    private fun createRevision(): BuildVariantRevision =
-        BuildVariantRevision(
-            id = BuildVariantRevisionId.generate(),
-            buildVariantId = BuildVariantId.generate(),
-            compatibilityVersion = CompatibilityVersion(3, 30),
-        )
+    private fun createRevision(): BuildVariantRevision = BuildVariantRevision(
+        id = BuildVariantRevisionId.generate(),
+        buildVariantId = BuildVariantId.generate(),
+        compatibilityVersion = CompatibilityVersion(3, 30),
+    )
 }
