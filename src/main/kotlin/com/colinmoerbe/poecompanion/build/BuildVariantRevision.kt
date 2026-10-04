@@ -15,6 +15,16 @@ class BuildVariantRevision(
     var status: BuildVariantRevisionStatus = BuildVariantRevisionStatus.DRAFT
         private set
 
+    var requirementGroups: List<RequirementGroup> = emptyList()
+        private set
+
+    fun updateRequirementGroups(requirementGroups: List<RequirementGroup>) {
+        check(status == BuildVariantRevisionStatus.DRAFT) {
+            "Only draft build revisions can change requirement groups"
+        }
+        this.requirementGroups = requirementGroups.toList()
+    }
+
     fun activate() {
         check(status == BuildVariantRevisionStatus.DRAFT) { "Only draft build revisions can be activated" }
         status = BuildVariantRevisionStatus.ACTIVE
