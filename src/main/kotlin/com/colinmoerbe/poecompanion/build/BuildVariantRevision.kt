@@ -16,12 +16,12 @@ class BuildVariantRevision(
         private set
 
     fun activate() {
-        require(status == BuildVariantRevisionStatus.DRAFT) { "Only draft build revisions can be activated" }
+        check(status == BuildVariantRevisionStatus.DRAFT) { "Only draft build revisions can be activated" }
         status = BuildVariantRevisionStatus.ACTIVE
     }
 
     fun supersede() {
-        require(status == BuildVariantRevisionStatus.ACTIVE) { "Only active build revisions can be superseded" }
+        check(status == BuildVariantRevisionStatus.ACTIVE) { "Only active build revisions can be superseded" }
         status = BuildVariantRevisionStatus.SUPERSEDED
     }
 }
