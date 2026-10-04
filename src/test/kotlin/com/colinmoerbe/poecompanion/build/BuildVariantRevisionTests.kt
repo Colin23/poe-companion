@@ -1,5 +1,6 @@
 package com.colinmoerbe.poecompanion.build
 
+import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
 import com.colinmoerbe.poecompanion.league.CompatibilityVersion
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -21,10 +22,85 @@ class BuildVariantRevisionTests {
         assertThat(revision.buildVariantId).isEqualTo(buildVariantId)
         assertThat(revision.compatibilityVersion).isEqualTo(compatibilityVersion)
         assertThat(revision.status).isEqualTo(BuildVariantRevisionStatus.DRAFT)
+        assertThat(revision.requirementGroups).isEmpty()
     }
 
     @Test
-    fun `draft revision should activate`() {
+    fun `draft revision should update and replace requirement groups`() {
+        val revision = createRevision()
+        val first = createRequirementGroup()
+        val second = createRequirementGroup()
+
+        revision.updateRequirementGroups(listOf(first))
+        assertThat(revision.requirementGroups).containsExactly(first)
+
+        revision.updateRequirementGroups(listOf(second))
+        assertThat(revision.requirementGroups).containsExactly(second)
+    }
+
+    @Test
+    fun `revision groups should not change when input list is mutated later`() {
+        val revision = createRevision()
+        val first = createRequirementGroup()
+        val input = mutableListOf(first)
+
+        revision.updateRequirementGroups(input)
+        revision.activate()
+        input += createRequirementGroup()
+
+        assertThat(revision.requirementGroups).containsExactly(first)
+    }
+
+    @Test
+    fun `active revision should not allow mutation through exposed requirement groups`() {
+        val revision = createRevision()
+        val first = createRequirementGroup()
+        val second = createRequirementGroup()
+        revision.updateRequirementGroups(listOf(first, second))
+        revision.activate()
+
+        @Suppress("UNCHECKED_CAST")
+        val exposed = revision.requirementGroups as MutableList<RequirementGroup>
+
+        assertThatThrownBy {
+            exposed.removeAt(0)
+        }.isInstanceOf(UnsupportedOperationException::class.java)
+        assertThat(revision.requirementGroups).containsExactly(first, second)
+    }
+
+    @Test
+    fun `draft revision should allow no requirement groups`() {
+        val revision = createRevision()
+        revision.updateRequirementGroups(listOf(createRequirementGroup()))
+
+        revision.updateRequirementGroups(emptyList())
+
+        assertThat(revision.requirementGroups).isEmpty()
+    }
+
+    @Test
+    fun `active revision should reject requirement group changes`() {
+        val revision = createRevision()
+        revision.activate()
+
+        assertThatThrownBy {
+            revision.updateRequirementGroups(listOf(createRequirementGroup()))
+        }.isInstanceOf(IllegalStateException::class.java)
+    }
+
+    @Test
+    fun `superseded revision should reject requirement group changes`() {
+        val revision = createRevision()
+        revision.activate()
+        revision.supersede()
+
+        assertThatThrownBy {
+            revision.updateRequirementGroups(listOf(createRequirementGroup()))
+        }.isInstanceOf(IllegalStateException::class.java)
+    }
+
+    @Test
+    fun `revision with no requirement groups should activate`() {
         val revision = createRevision()
 
         revision.activate()
@@ -71,5 +147,9 @@ class BuildVariantRevisionTests {
         id = BuildVariantRevisionId.generate(),
         buildVariantId = BuildVariantId.generate(),
         compatibilityVersion = CompatibilityVersion(3, 30),
+    )
+
+    private fun createRequirementGroup(): RequirementGroup = RequirementGroup(
+        listOf(Requirement(UniqueDefinitionId.generate(), 1)),
     )
 }

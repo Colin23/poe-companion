@@ -1,6 +1,7 @@
 package com.colinmoerbe.poecompanion.build
 
 import com.colinmoerbe.poecompanion.league.CompatibilityVersion
+import java.util.Collections
 
 /**
  * Version-specific semantic definition of a build variant.
@@ -14,6 +15,16 @@ class BuildVariantRevision(
 ) {
     var status: BuildVariantRevisionStatus = BuildVariantRevisionStatus.DRAFT
         private set
+
+    var requirementGroups: List<RequirementGroup> = emptyList()
+        private set
+
+    fun updateRequirementGroups(requirementGroups: List<RequirementGroup>) {
+        check(status == BuildVariantRevisionStatus.DRAFT) {
+            "Only draft build revisions can change requirement groups"
+        }
+        this.requirementGroups = Collections.unmodifiableList(ArrayList(requirementGroups))
+    }
 
     fun activate() {
         check(status == BuildVariantRevisionStatus.DRAFT) { "Only draft build revisions can be activated" }
