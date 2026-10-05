@@ -54,7 +54,7 @@ class RequirementGroupTests {
         val uniqueDefinitionId = UniqueDefinitionId.generate()
         val first = Requirement(uniqueDefinitionId, 1)
         val second = Requirement(UniqueDefinitionId.generate(), 2)
-        val group = RequirementGroup(listOf(first, second))
+        val group = RequirementGroup(RequirementLogic.ALL, listOf(first, second))
 
         @Suppress("UNCHECKED_CAST")
         val exposed = group.requirements as MutableList<Requirement>
