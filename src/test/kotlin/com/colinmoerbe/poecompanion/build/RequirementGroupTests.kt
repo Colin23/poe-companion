@@ -12,8 +12,9 @@ class RequirementGroupTests {
         val first = Requirement(UniqueDefinitionId.generate(), 1)
         val second = Requirement(UniqueDefinitionId.generate(), 2)
 
-        val group = RequirementGroup(RequirementLogic.ALL, listOf(first, second))
+        val group = RequirementGroup(RequirementImportance.CORE, RequirementLogic.ALL, listOf(first, second))
 
+        assertThat(group.importance).isEqualTo(RequirementImportance.CORE)
         assertThat(group.logic).isEqualTo(RequirementLogic.ALL)
         assertThat(group.requirements).containsExactly(first, second)
     }
@@ -22,15 +23,29 @@ class RequirementGroupTests {
     fun `group should retain any logic explicitly`() {
         val requirement = Requirement(UniqueDefinitionId.generate(), 1)
 
-        val group = RequirementGroup(RequirementLogic.ANY, listOf(requirement))
+        val group = RequirementGroup(RequirementImportance.ENABLING, RequirementLogic.ANY, listOf(requirement))
 
+        assertThat(group.importance).isEqualTo(RequirementImportance.ENABLING)
         assertThat(group.logic).isEqualTo(RequirementLogic.ANY)
+    }
+
+    @Test
+    fun `group should retain upgrade importance explicitly`() {
+        val requirement = Requirement(UniqueDefinitionId.generate(), 1)
+
+        val group = RequirementGroup(
+            RequirementImportance.UPGRADE,
+            RequirementLogic.ALL,
+            listOf(requirement),
+        )
+
+        assertThat(group.importance).isEqualTo(RequirementImportance.UPGRADE)
     }
 
     @Test
     fun `empty group should be rejected`() {
         assertThatThrownBy {
-            RequirementGroup(RequirementLogic.ALL, emptyList())
+            RequirementGroup(RequirementImportance.CORE, RequirementLogic.ALL, emptyList())
         }.isInstanceOf(IllegalArgumentException::class.java)
     }
 
@@ -40,6 +55,7 @@ class RequirementGroupTests {
 
         assertThatThrownBy {
             RequirementGroup(
+                RequirementImportance.CORE,
                 RequirementLogic.ALL,
                 listOf(
                     Requirement(uniqueDefinitionId, 1),
@@ -54,7 +70,7 @@ class RequirementGroupTests {
         val uniqueDefinitionId = UniqueDefinitionId.generate()
         val first = Requirement(uniqueDefinitionId, 1)
         val second = Requirement(UniqueDefinitionId.generate(), 2)
-        val group = RequirementGroup(RequirementLogic.ALL, listOf(first, second))
+        val group = RequirementGroup(RequirementImportance.CORE, RequirementLogic.ALL, listOf(first, second))
 
         @Suppress("UNCHECKED_CAST")
         val exposed = group.requirements as MutableList<Requirement>
@@ -72,7 +88,7 @@ class RequirementGroupTests {
     fun `group should not change when input list is mutated later`() {
         val first = Requirement(UniqueDefinitionId.generate(), 1)
         val input = mutableListOf(first)
-        val group = RequirementGroup(RequirementLogic.ALL, input)
+        val group = RequirementGroup(RequirementImportance.UPGRADE, RequirementLogic.ALL, input)
 
         input += Requirement(UniqueDefinitionId.generate(), 1)
 
