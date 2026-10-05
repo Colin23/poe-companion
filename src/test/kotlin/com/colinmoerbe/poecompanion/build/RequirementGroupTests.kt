@@ -12,15 +12,25 @@ class RequirementGroupTests {
         val first = Requirement(UniqueDefinitionId.generate(), 1)
         val second = Requirement(UniqueDefinitionId.generate(), 2)
 
-        val group = RequirementGroup(listOf(first, second))
+        val group = RequirementGroup(RequirementLogic.ALL, listOf(first, second))
 
+        assertThat(group.logic).isEqualTo(RequirementLogic.ALL)
         assertThat(group.requirements).containsExactly(first, second)
+    }
+
+    @Test
+    fun `group should retain any logic explicitly`() {
+        val requirement = Requirement(UniqueDefinitionId.generate(), 1)
+
+        val group = RequirementGroup(RequirementLogic.ANY, listOf(requirement))
+
+        assertThat(group.logic).isEqualTo(RequirementLogic.ANY)
     }
 
     @Test
     fun `empty group should be rejected`() {
         assertThatThrownBy {
-            RequirementGroup(emptyList())
+            RequirementGroup(RequirementLogic.ALL, emptyList())
         }.isInstanceOf(IllegalArgumentException::class.java)
     }
 
@@ -30,6 +40,7 @@ class RequirementGroupTests {
 
         assertThatThrownBy {
             RequirementGroup(
+                RequirementLogic.ALL,
                 listOf(
                     Requirement(uniqueDefinitionId, 1),
                     Requirement(uniqueDefinitionId, 2),
@@ -43,7 +54,7 @@ class RequirementGroupTests {
         val uniqueDefinitionId = UniqueDefinitionId.generate()
         val first = Requirement(uniqueDefinitionId, 1)
         val second = Requirement(UniqueDefinitionId.generate(), 2)
-        val group = RequirementGroup(listOf(first, second))
+        val group = RequirementGroup(RequirementLogic.ALL, listOf(first, second))
 
         @Suppress("UNCHECKED_CAST")
         val exposed = group.requirements as MutableList<Requirement>
@@ -61,7 +72,7 @@ class RequirementGroupTests {
     fun `group should not change when input list is mutated later`() {
         val first = Requirement(UniqueDefinitionId.generate(), 1)
         val input = mutableListOf(first)
-        val group = RequirementGroup(input)
+        val group = RequirementGroup(RequirementLogic.ALL, input)
 
         input += Requirement(UniqueDefinitionId.generate(), 1)
 
