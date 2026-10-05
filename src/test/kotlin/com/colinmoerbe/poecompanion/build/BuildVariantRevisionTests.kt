@@ -150,6 +150,7 @@ class BuildVariantRevisionTests {
     )
 
     private fun createRequirementGroup(): RequirementGroup = RequirementGroup(
+        RequirementImportance.CORE,
         RequirementLogic.ALL,
         listOf(Requirement(UniqueDefinitionId.generate(), 1)),
     )
