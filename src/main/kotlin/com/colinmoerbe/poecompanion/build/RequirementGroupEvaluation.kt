@@ -13,7 +13,7 @@ class RequirementGroupEvaluation internal constructor(
 
     val satisfied: Boolean =
         when (group.logic) {
-            RequirementLogic.ALL -> requirements.all { it.satisfied }
-            RequirementLogic.ANY -> requirements.any { it.satisfied }
+            RequirementLogic.ALL -> this.requirements.all { it.satisfied }
+            RequirementLogic.ANY -> this.requirements.any { it.satisfied }
         }
 }
