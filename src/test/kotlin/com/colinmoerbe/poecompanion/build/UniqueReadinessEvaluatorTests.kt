@@ -269,12 +269,14 @@ class UniqueReadinessEvaluatorTests {
             .isInstanceOf(UnsupportedOperationException::class.java)
     }
 
-    private fun activeRevision(vararg groups: RequirementGroup): BuildVariantRevision = revision().also {
+    private fun activeRevision(vararg groups: RequirementGroup): BuildVariantRevision =
+        revision().also {
             it.updateRequirementGroups(groups.toList())
             it.activate()
         }
 
-    private fun revision(): BuildVariantRevision = BuildVariantRevision(
+    private fun revision(): BuildVariantRevision =
+        BuildVariantRevision(
             id = BuildVariantRevisionId.generate(),
             buildVariantId = BuildVariantId.generate(),
             compatibilityVersion = CompatibilityVersion(3, 30),
