@@ -5,7 +5,11 @@ import java.util.Collections
 /**
  * One logical group of Unique requirements within a build revision.
  */
-class RequirementGroup(val logic: RequirementLogic, requirements: List<Requirement>) {
+class RequirementGroup(
+    val importance: RequirementImportance,
+    val logic: RequirementLogic,
+    requirements: List<Requirement>,
+) {
     val requirements: List<Requirement>
 
     init {
