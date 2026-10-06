@@ -7,10 +7,7 @@ import com.colinmoerbe.poecompanion.account.CurrentOwnership
  */
 class UniqueReadinessEvaluator {
 
-    fun evaluate(
-        revision: BuildVariantRevision,
-        ownership: CurrentOwnership,
-    ): UniqueReadinessResult {
+    fun evaluate(revision: BuildVariantRevision, ownership: CurrentOwnership): UniqueReadinessResult {
         check(revision.status == BuildVariantRevisionStatus.ACTIVE) {
             "Only active build revisions can be evaluated for Unique readiness"
         }
@@ -26,10 +23,7 @@ class UniqueReadinessEvaluator {
         return UniqueReadinessResult(readiness, groups)
     }
 
-    private fun evaluateGroup(
-        group: RequirementGroup,
-        ownership: CurrentOwnership,
-    ): RequirementGroupEvaluation {
+    private fun evaluateGroup(group: RequirementGroup, ownership: CurrentOwnership): RequirementGroupEvaluation {
         val requirements =
             group.requirements.map { requirement ->
                 RequirementEvaluation(
