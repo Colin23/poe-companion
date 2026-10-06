@@ -258,6 +258,7 @@ class UniqueReadinessEvaluatorTests {
 
         @Suppress("UNCHECKED_CAST")
         val exposedGroups = result.groups as MutableList<RequirementGroupEvaluation>
+
         @Suppress("UNCHECKED_CAST")
         val exposedRequirements =
             result.groups.single().requirements as MutableList<RequirementEvaluation>
@@ -268,14 +269,12 @@ class UniqueReadinessEvaluatorTests {
             .isInstanceOf(UnsupportedOperationException::class.java)
     }
 
-    private fun activeRevision(vararg groups: RequirementGroup): BuildVariantRevision =
-        revision().also {
+    private fun activeRevision(vararg groups: RequirementGroup): BuildVariantRevision = revision().also {
             it.updateRequirementGroups(groups.toList())
             it.activate()
         }
 
-    private fun revision(): BuildVariantRevision =
-        BuildVariantRevision(
+    private fun revision(): BuildVariantRevision = BuildVariantRevision(
             id = BuildVariantRevisionId.generate(),
             buildVariantId = BuildVariantId.generate(),
             compatibilityVersion = CompatibilityVersion(3, 30),
@@ -292,9 +291,7 @@ class UniqueReadinessEvaluatorTests {
             requirements = requirements.toList(),
         )
 
-    private fun ownership(
-        vararg quantities: Pair<UniqueDefinitionId, Int>,
-    ): CurrentOwnership =
+    private fun ownership(vararg quantities: Pair<UniqueDefinitionId, Int>): CurrentOwnership =
         CurrentOwnership(
             accountContextId = AccountContextId.generate(),
             quantities = quantities.toMap(),
