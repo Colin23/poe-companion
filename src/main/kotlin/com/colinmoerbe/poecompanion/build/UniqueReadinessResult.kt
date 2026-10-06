@@ -12,5 +12,5 @@ class UniqueReadinessResult internal constructor(
     val groups: List<RequirementGroupEvaluation> = Collections.unmodifiableList(ArrayList(groups))
 
     val hasRequiredUniqueGroups: Boolean =
-        groups.any { it.group.importance != RequirementImportance.UPGRADE }
+        this.groups.any { it.group.importance != RequirementImportance.UPGRADE }
 }
