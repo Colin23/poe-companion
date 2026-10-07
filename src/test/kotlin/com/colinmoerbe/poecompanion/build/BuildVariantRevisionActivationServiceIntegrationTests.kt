@@ -247,13 +247,13 @@ internal class BuildVariantRevisionActivationServiceIntegrationTests(
         version: CompatibilityVersion,
         groups: List<RequirementGroup> = emptyList(),
     ): BuildVariantRevision = BuildVariantRevision(
-            id = BuildVariantRevisionId.generate(),
-            buildVariantId = variantId,
-            compatibilityVersion = version,
-        ).also { revision ->
-            revision.updateRequirementGroups(groups)
-            revisionPersistenceAdapter.saveDraftSnapshot(revision)
-        }
+        id = BuildVariantRevisionId.generate(),
+        buildVariantId = variantId,
+        compatibilityVersion = version,
+    ).also { revision ->
+        revision.updateRequirementGroups(groups)
+        revisionPersistenceAdapter.saveDraftSnapshot(revision)
+    }
 
     private fun clearBuildPersistence() {
         requirementRepository.deleteAllInBatch()
