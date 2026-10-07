@@ -95,14 +95,13 @@ internal class BuildVariantRevisionPersistenceAdapter(
     override fun findActiveBy(
         buildVariantId: BuildVariantId,
         compatibilityVersion: CompatibilityVersion,
-    ): BuildVariantRevision? =
-        revisionRepository
-            .findByScopeAndStatus(
-                buildVariantId = buildVariantId.value,
-                compatibilityVersionMajor = compatibilityVersion.major,
-                compatibilityVersionMinor = compatibilityVersion.minor,
-                status = BuildVariantRevisionStatus.ACTIVE,
-            )?.let(::toDomain)
+    ): BuildVariantRevision? = revisionRepository
+        .findByScopeAndStatus(
+            buildVariantId = buildVariantId.value,
+            compatibilityVersionMajor = compatibilityVersion.major,
+            compatibilityVersionMinor = compatibilityVersion.minor,
+            status = BuildVariantRevisionStatus.ACTIVE,
+        )?.let(::toDomain)
 
     @Transactional
     override fun transitionStatus(
