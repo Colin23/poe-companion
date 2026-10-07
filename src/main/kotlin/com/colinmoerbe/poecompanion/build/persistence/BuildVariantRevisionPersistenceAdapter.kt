@@ -98,16 +98,17 @@ internal class BuildVariantRevisionPersistenceAdapter(
         }
     }
 
-    private fun toRequirement(entity: RequirementEntity): Requirement =
-        Requirement(
-            uniqueDefinitionId = UniqueDefinitionId(entity.uniqueDefinitionId),
-            requiredQuantity = entity.requiredQuantity,
-        )
+    private fun toRequirement(entity: RequirementEntity): Requirement = Requirement(
+        uniqueDefinitionId = UniqueDefinitionId(entity.uniqueDefinitionId),
+        requiredQuantity = entity.requiredQuantity,
+    )
 
     private fun restoreStatus(revision: BuildVariantRevision, status: BuildVariantRevisionStatus) {
         when (status) {
             BuildVariantRevisionStatus.DRAFT -> Unit
+
             BuildVariantRevisionStatus.ACTIVE -> revision.activate()
+
             BuildVariantRevisionStatus.SUPERSEDED -> {
                 revision.activate()
                 revision.supersede()
