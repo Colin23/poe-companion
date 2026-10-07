@@ -16,6 +16,7 @@ import com.colinmoerbe.poecompanion.catalog.UniqueDefinition
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
 import com.colinmoerbe.poecompanion.catalog.persistence.UniqueDefinitionPersistenceAdapter
 import com.colinmoerbe.poecompanion.league.CompatibilityVersion
+import jakarta.persistence.EntityManager
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
@@ -26,6 +27,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.transaction.annotation.Transactional
 
 /**
  * Verifies Build domain ↔ JPA ↔ PostgreSQL round-tripping and Build-specific schema invariants.
@@ -48,6 +50,7 @@ internal class BuildPersistenceIntegrationTests(
     @Autowired private val requirementRepository: SpringDataRequirementRepository,
     @Autowired private val uniqueDefinitionPersistenceAdapter: UniqueDefinitionPersistenceAdapter,
     @Autowired private val jdbcTemplate: JdbcTemplate,
+    @Autowired private val entityManager: EntityManager,
 ) {
 
     @BeforeEach
@@ -193,6 +196,48 @@ internal class BuildPersistenceIntegrationTests(
             )
         assertThat(requirementRepository.findAllByRevisionId(revision.id.value).map { it.uniqueDefinitionId })
             .doesNotContain(removedUnique.id.value)
+    }
+
+    @Test
+    @Transactional
+    fun `loaded draft should replace its snapshot inside one outer transaction`() {
+        val persisted = createPersistedVariant()
+        val oldUnique = createPersistedUniqueDefinition()
+        val replacementUnique = createPersistedUniqueDefinition()
+        val revision =
+            BuildVariantRevision(
+                id = BuildVariantRevisionId.generate(),
+                buildVariantId = persisted.variant.id,
+                compatibilityVersion = CompatibilityVersion(3, 30),
+            )
+        revision.updateRequirementGroups(
+            listOf(
+                RequirementGroup(
+                    RequirementImportance.CORE,
+                    RequirementLogic.ALL,
+                    listOf(Requirement(oldUnique.id, 1)),
+                ),
+            ),
+        )
+        revisionPersistenceAdapter.save(revision)
+
+        val loaded = requireNotNull(revisionPersistenceAdapter.findById(revision.id))
+        loaded.updateRequirementGroups(
+            listOf(
+                RequirementGroup(
+                    RequirementImportance.CORE,
+                    RequirementLogic.ALL,
+                    listOf(Requirement(replacementUnique.id, 2)),
+                ),
+            ),
+        )
+        revisionPersistenceAdapter.save(loaded)
+        entityManager.flush()
+
+        val persistedRequirements = requirementRepository.findAllByRevisionId(revision.id.value)
+        assertThat(persistedRequirements.map { it.uniqueDefinitionId })
+            .containsExactly(replacementUnique.id.value)
+        assertThat(persistedRequirements.map { it.requiredQuantity }).containsExactly(2)
     }
 
     @Test

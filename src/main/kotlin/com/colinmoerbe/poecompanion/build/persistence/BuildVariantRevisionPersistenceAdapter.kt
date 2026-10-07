@@ -8,6 +8,8 @@ import com.colinmoerbe.poecompanion.build.Requirement
 import com.colinmoerbe.poecompanion.build.RequirementGroup
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
 import com.colinmoerbe.poecompanion.league.CompatibilityVersion
+import jakarta.persistence.EntityManager
+import jakarta.persistence.PersistenceContext
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 
@@ -20,6 +22,9 @@ internal class BuildVariantRevisionPersistenceAdapter(
     private val groupRepository: SpringDataRequirementGroupRepository,
     private val requirementRepository: SpringDataRequirementRepository,
 ) {
+    @field:PersistenceContext
+    private lateinit var entityManager: EntityManager
+
     @Transactional
     fun save(revision: BuildVariantRevision) {
         revisionRepository.save(
@@ -32,6 +37,7 @@ internal class BuildVariantRevisionPersistenceAdapter(
             ),
         )
 
+        detachExistingSnapshot(revision.id)
         requirementRepository.deleteAllByRevisionId(revision.id.value)
         groupRepository.deleteAllByRevisionId(revision.id.value)
 
@@ -96,6 +102,12 @@ internal class BuildVariantRevisionPersistenceAdapter(
             revision.updateRequirementGroups(groups)
             restoreStatus(revision, entity.status)
         }
+    }
+
+    private fun detachExistingSnapshot(revisionId: BuildVariantRevisionId) {
+        entityManager.flush()
+        requirementRepository.findAllByRevisionId(revisionId.value).forEach(entityManager::detach)
+        groupRepository.findAllByRevisionId(revisionId.value).forEach(entityManager::detach)
     }
 
     private fun toRequirement(entity: RequirementEntity): Requirement = Requirement(
