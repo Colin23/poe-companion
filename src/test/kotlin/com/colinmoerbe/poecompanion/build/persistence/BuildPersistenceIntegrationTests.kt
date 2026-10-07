@@ -109,7 +109,7 @@ internal class BuildPersistenceIntegrationTests(
             ),
         )
 
-        revisionPersistenceAdapter.save(revision)
+        revisionPersistenceAdapter.saveDraftSnapshot(revision)
         val restored = requireNotNull(revisionPersistenceAdapter.findById(revision.id))
 
         assertThat(restored.id).isEqualTo(revision.id)
@@ -139,7 +139,7 @@ internal class BuildPersistenceIntegrationTests(
                 compatibilityVersion = CompatibilityVersion(3, 30),
             )
 
-        revisionPersistenceAdapter.save(revision)
+        revisionPersistenceAdapter.saveDraftSnapshot(revision)
         val restored = requireNotNull(revisionPersistenceAdapter.findById(revision.id))
 
         assertThat(restored.requirementGroups).isEmpty()
@@ -173,7 +173,7 @@ internal class BuildPersistenceIntegrationTests(
                 ),
             ),
         )
-        revisionPersistenceAdapter.save(revision)
+        revisionPersistenceAdapter.saveDraftSnapshot(revision)
 
         revision.updateRequirementGroups(
             listOf(
@@ -184,7 +184,7 @@ internal class BuildPersistenceIntegrationTests(
                 ),
             ),
         )
-        revisionPersistenceAdapter.save(revision)
+        revisionPersistenceAdapter.saveDraftSnapshot(revision)
 
         val restored = requireNotNull(revisionPersistenceAdapter.findById(revision.id))
         assertThat(restored.requirementGroups).hasSize(1)
@@ -219,7 +219,7 @@ internal class BuildPersistenceIntegrationTests(
                 ),
             ),
         )
-        revisionPersistenceAdapter.save(revision)
+        revisionPersistenceAdapter.saveDraftSnapshot(revision)
 
         val loaded = requireNotNull(revisionPersistenceAdapter.findById(revision.id))
         loaded.updateRequirementGroups(
@@ -231,7 +231,7 @@ internal class BuildPersistenceIntegrationTests(
                 ),
             ),
         )
-        revisionPersistenceAdapter.save(loaded)
+        revisionPersistenceAdapter.saveDraftSnapshot(loaded)
         entityManager.flush()
 
         val persistedRequirements = requirementRepository.findAllByRevisionId(revision.id.value)
@@ -259,8 +259,12 @@ internal class BuildPersistenceIntegrationTests(
                 ),
             ),
         )
-        revision.activate()
-        revisionPersistenceAdapter.save(revision)
+        revisionPersistenceAdapter.saveDraftSnapshot(revision)
+        revisionPersistenceAdapter.transitionStatus(
+            revision.id,
+            BuildVariantRevisionStatus.DRAFT,
+            BuildVariantRevisionStatus.ACTIVE,
+        )
 
         val restored = requireNotNull(revisionPersistenceAdapter.findById(revision.id))
 
@@ -278,9 +282,17 @@ internal class BuildPersistenceIntegrationTests(
                 buildVariantId = persisted.variant.id,
                 compatibilityVersion = CompatibilityVersion(3, 30),
             )
-        revision.activate()
-        revision.supersede()
-        revisionPersistenceAdapter.save(revision)
+        revisionPersistenceAdapter.saveDraftSnapshot(revision)
+        revisionPersistenceAdapter.transitionStatus(
+            revision.id,
+            BuildVariantRevisionStatus.DRAFT,
+            BuildVariantRevisionStatus.ACTIVE,
+        )
+        revisionPersistenceAdapter.transitionStatus(
+            revision.id,
+            BuildVariantRevisionStatus.ACTIVE,
+            BuildVariantRevisionStatus.SUPERSEDED,
+        )
 
         assertThat(revisionPersistenceAdapter.findById(revision.id)?.status)
             .isEqualTo(BuildVariantRevisionStatus.SUPERSEDED)
