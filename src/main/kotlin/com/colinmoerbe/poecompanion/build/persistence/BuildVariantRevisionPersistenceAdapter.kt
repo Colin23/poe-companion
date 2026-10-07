@@ -194,15 +194,14 @@ internal class BuildVariantRevisionPersistenceAdapter(
     private fun translateIntegrityViolation(
         id: BuildVariantRevisionId,
         exception: DataIntegrityViolationException,
-    ): RuntimeException =
-        if (exception.hasConstraintName(ACTIVE_REVISION_UNIQUE_CONSTRAINT)) {
-            BuildRevisionActivationConflictException(
-                message = "Build revision activation conflicted with concurrent lifecycle state: $id",
-                cause = exception,
-            )
-        } else {
-            exception
-        }
+    ): RuntimeException = if (exception.hasConstraintName(ACTIVE_REVISION_UNIQUE_CONSTRAINT)) {
+        BuildRevisionActivationConflictException(
+            message = "Build revision activation conflicted with concurrent lifecycle state: $id",
+            cause = exception,
+        )
+    } else {
+        exception
+    }
 
     private fun Throwable.hasConstraintName(constraintName: String): Boolean {
         var current: Throwable? = this
