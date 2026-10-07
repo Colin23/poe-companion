@@ -6,8 +6,7 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import java.util.UUID
 
-internal interface SpringDataRequirementRepository :
-    JpaRepository<RequirementEntity, RequirementEntityId> {
+internal interface SpringDataRequirementRepository : JpaRepository<RequirementEntity, RequirementEntityId> {
 
     @Query(
         """
