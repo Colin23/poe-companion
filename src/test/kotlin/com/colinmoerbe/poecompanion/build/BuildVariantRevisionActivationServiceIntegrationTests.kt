@@ -68,13 +68,13 @@ internal class BuildVariantRevisionActivationServiceIntegrationTests(
                 variantId = variant.id,
                 version = CompatibilityVersion(3, 30),
                 groups =
-                    listOf(
-                        RequirementGroup(
-                            RequirementImportance.CORE,
-                            RequirementLogic.ALL,
-                            listOf(Requirement(unique.id, 2)),
-                        ),
+                listOf(
+                    RequirementGroup(
+                        RequirementImportance.CORE,
+                        RequirementLogic.ALL,
+                        listOf(Requirement(unique.id, 2)),
                     ),
+                ),
             )
 
         activationService.activate(revision.id)
@@ -246,8 +246,7 @@ internal class BuildVariantRevisionActivationServiceIntegrationTests(
         variantId: BuildVariantId,
         version: CompatibilityVersion,
         groups: List<RequirementGroup> = emptyList(),
-    ): BuildVariantRevision =
-        BuildVariantRevision(
+    ): BuildVariantRevision = BuildVariantRevision(
             id = BuildVariantRevisionId.generate(),
             buildVariantId = variantId,
             compatibilityVersion = version,
