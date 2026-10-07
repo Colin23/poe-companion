@@ -8,10 +8,7 @@ import com.colinmoerbe.poecompanion.league.CompatibilityVersion
 internal interface BuildVariantRevisionPersistencePort {
     fun findById(id: BuildVariantRevisionId): BuildVariantRevision?
 
-    fun findActiveBy(
-        buildVariantId: BuildVariantId,
-        compatibilityVersion: CompatibilityVersion,
-    ): BuildVariantRevision?
+    fun findActiveBy(buildVariantId: BuildVariantId, compatibilityVersion: CompatibilityVersion): BuildVariantRevision?
 
     /**
      * Persists one lifecycle transition only if the durable status still matches [expectedStatus].
