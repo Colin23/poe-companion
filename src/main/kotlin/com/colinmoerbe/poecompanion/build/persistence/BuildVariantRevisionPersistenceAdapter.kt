@@ -133,8 +133,10 @@ internal class BuildVariantRevisionPersistenceAdapter(
                 expectedStatus = BuildVariantRevisionStatus.DRAFT,
                 newStatus = BuildVariantRevisionStatus.DRAFT,
             )
-        check(claimedRows == 1) {
-            "Only persisted draft build revisions can replace requirement snapshots"
+        if (claimedRows != 1) {
+            throw BuildRevisionActivationConflictException(
+                "Build revision snapshot conflicted with concurrent lifecycle state: $id",
+            )
         }
     }
 
