@@ -269,33 +269,29 @@ class UniqueReadinessEvaluatorTests {
             .isInstanceOf(UnsupportedOperationException::class.java)
     }
 
-    private fun activeRevision(vararg groups: RequirementGroup): BuildVariantRevision =
-        revision().also {
-            it.updateRequirementGroups(groups.toList())
-            it.activate()
-        }
+    private fun activeRevision(vararg groups: RequirementGroup): BuildVariantRevision = revision().also {
+        it.updateRequirementGroups(groups.toList())
+        it.activate()
+    }
 
-    private fun revision(): BuildVariantRevision =
-        BuildVariantRevision(
-            id = BuildVariantRevisionId.generate(),
-            buildVariantId = BuildVariantId.generate(),
-            compatibilityVersion = CompatibilityVersion(3, 30),
-        )
+    private fun revision(): BuildVariantRevision = BuildVariantRevision(
+        id = BuildVariantRevisionId.generate(),
+        buildVariantId = BuildVariantId.generate(),
+        compatibilityVersion = CompatibilityVersion(3, 30),
+    )
 
     private fun group(
         importance: RequirementImportance,
         logic: RequirementLogic,
         vararg requirements: Requirement,
-    ): RequirementGroup =
-        RequirementGroup(
-            importance = importance,
-            logic = logic,
-            requirements = requirements.toList(),
-        )
+    ): RequirementGroup = RequirementGroup(
+        importance = importance,
+        logic = logic,
+        requirements = requirements.toList(),
+    )
 
-    private fun ownership(vararg quantities: Pair<UniqueDefinitionId, Int>): CurrentOwnership =
-        CurrentOwnership(
-            accountContextId = AccountContextId.generate(),
-            quantities = quantities.toMap(),
-        )
+    private fun ownership(vararg quantities: Pair<UniqueDefinitionId, Int>): CurrentOwnership = CurrentOwnership(
+        accountContextId = AccountContextId.generate(),
+        quantities = quantities.toMap(),
+    )
 }
