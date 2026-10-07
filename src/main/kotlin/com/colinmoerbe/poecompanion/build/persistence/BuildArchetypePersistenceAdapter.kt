@@ -8,9 +8,7 @@ import org.springframework.stereotype.Repository
  * Persists build archetypes without exposing JPA representations to the domain.
  */
 @Repository
-internal class BuildArchetypePersistenceAdapter(
-    private val springDataRepository: SpringDataBuildArchetypeRepository,
-) {
+internal class BuildArchetypePersistenceAdapter(private val springDataRepository: SpringDataBuildArchetypeRepository) {
     fun save(buildArchetype: BuildArchetype) {
         springDataRepository.save(
             BuildArchetypeEntity(
