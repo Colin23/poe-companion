@@ -162,7 +162,7 @@ internal class BuildVariantRevisionActivationServiceIntegrationTests(
         activationService.activate(revision.id)
 
         assertThatThrownBy { revisionPersistenceAdapter.saveDraftSnapshot(staleDraft) }
-            .isInstanceOf(IllegalStateException::class.java)
+            .isInstanceOf(BuildRevisionActivationConflictException::class.java)
 
         val restored = requireNotNull(revisionPersistenceAdapter.findById(revision.id))
         assertThat(restored.status).isEqualTo(BuildVariantRevisionStatus.ACTIVE)
