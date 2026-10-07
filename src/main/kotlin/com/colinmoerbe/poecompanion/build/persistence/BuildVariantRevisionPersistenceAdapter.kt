@@ -1,8 +1,10 @@
 package com.colinmoerbe.poecompanion.build.persistence
 
+import com.colinmoerbe.poecompanion.build.BuildRevisionActivationConflictException
 import com.colinmoerbe.poecompanion.build.BuildVariantId
 import com.colinmoerbe.poecompanion.build.BuildVariantRevision
 import com.colinmoerbe.poecompanion.build.BuildVariantRevisionId
+import com.colinmoerbe.poecompanion.build.BuildVariantRevisionPersistencePort
 import com.colinmoerbe.poecompanion.build.BuildVariantRevisionStatus
 import com.colinmoerbe.poecompanion.build.Requirement
 import com.colinmoerbe.poecompanion.build.RequirementGroup
@@ -10,6 +12,8 @@ import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
 import com.colinmoerbe.poecompanion.league.CompatibilityVersion
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
+import org.hibernate.exception.ConstraintViolationException
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 
@@ -21,21 +25,21 @@ internal class BuildVariantRevisionPersistenceAdapter(
     private val revisionRepository: SpringDataBuildVariantRevisionRepository,
     private val groupRepository: SpringDataRequirementGroupRepository,
     private val requirementRepository: SpringDataRequirementRepository,
-) {
+) : BuildVariantRevisionPersistencePort {
     @field:PersistenceContext
     private lateinit var entityManager: EntityManager
 
     @Transactional
-    fun save(revision: BuildVariantRevision) {
-        revisionRepository.save(
-            BuildVariantRevisionEntity(
-                id = revision.id.value,
-                buildVariantId = revision.buildVariantId.value,
-                compatibilityVersionMajor = revision.compatibilityVersion.major,
-                compatibilityVersionMinor = revision.compatibilityVersion.minor,
-                status = revision.status,
-            ),
-        )
+    fun saveDraftSnapshot(revision: BuildVariantRevision) {
+        check(revision.status == BuildVariantRevisionStatus.DRAFT) {
+            "Only draft build revisions can persist editable requirement snapshots"
+        }
+
+        if (revisionRepository.existsById(revision.id.value)) {
+            claimPersistedDraft(revision.id)
+        } else {
+            revisionRepository.save(toEntity(revision))
+        }
 
         detachExistingSnapshot(revision.id)
         requirementRepository.deleteAllByRevisionId(revision.id.value)
@@ -74,12 +78,74 @@ internal class BuildVariantRevisionPersistenceAdapter(
     }
 
     @Transactional(readOnly = true)
-    fun findById(id: BuildVariantRevisionId): BuildVariantRevision? {
+    override fun findById(id: BuildVariantRevisionId): BuildVariantRevision? {
         val entity = revisionRepository.findById(id.value).orElse(null) ?: return null
-        val requirementEntities = requirementRepository.findAllByRevisionId(id.value)
+        return toDomain(entity)
+    }
+
+    @Transactional(readOnly = true)
+    override fun findActiveBy(
+        buildVariantId: BuildVariantId,
+        compatibilityVersion: CompatibilityVersion,
+    ): BuildVariantRevision? =
+        revisionRepository
+            .findByScopeAndStatus(
+                buildVariantId = buildVariantId.value,
+                compatibilityVersionMajor = compatibilityVersion.major,
+                compatibilityVersionMinor = compatibilityVersion.minor,
+                status = BuildVariantRevisionStatus.ACTIVE,
+            )?.let(::toDomain)
+
+    @Transactional
+    override fun transitionStatus(
+        id: BuildVariantRevisionId,
+        expectedStatus: BuildVariantRevisionStatus,
+        newStatus: BuildVariantRevisionStatus,
+    ) {
+        try {
+            val updatedRows =
+                revisionRepository.updateStatusIfCurrent(
+                    id = id.value,
+                    expectedStatus = expectedStatus,
+                    newStatus = newStatus,
+                )
+            if (updatedRows != 1) {
+                throw activationConflict(id)
+            }
+        } catch (exception: DataIntegrityViolationException) {
+            if (exception.hasConstraintName(ACTIVE_REVISION_UNIQUE_CONSTRAINT)) {
+                throw activationConflict(id, exception)
+            }
+            throw exception
+        }
+    }
+
+    private fun claimPersistedDraft(id: BuildVariantRevisionId) {
+        val claimedRows =
+            revisionRepository.updateStatusIfCurrent(
+                id = id.value,
+                expectedStatus = BuildVariantRevisionStatus.DRAFT,
+                newStatus = BuildVariantRevisionStatus.DRAFT,
+            )
+        check(claimedRows == 1) {
+            "Only persisted draft build revisions can replace requirement snapshots"
+        }
+    }
+
+    private fun toEntity(revision: BuildVariantRevision): BuildVariantRevisionEntity =
+        BuildVariantRevisionEntity(
+            id = revision.id.value,
+            buildVariantId = revision.buildVariantId.value,
+            compatibilityVersionMajor = revision.compatibilityVersion.major,
+            compatibilityVersionMinor = revision.compatibilityVersion.minor,
+            status = revision.status,
+        )
+
+    private fun toDomain(entity: BuildVariantRevisionEntity): BuildVariantRevision {
+        val requirementEntities = requirementRepository.findAllByRevisionId(entity.id)
         val requirementsByGroupPosition = requirementEntities.groupBy { it.id.groupPosition }
         val groups =
-            groupRepository.findAllByRevisionId(id.value).map { groupEntity ->
+            groupRepository.findAllByRevisionId(entity.id).map { groupEntity ->
                 RequirementGroup(
                     importance = groupEntity.importance,
                     logic = groupEntity.logic,
@@ -126,5 +192,29 @@ internal class BuildVariantRevisionPersistenceAdapter(
                 revision.supersede()
             }
         }
+    }
+
+    private fun activationConflict(
+        id: BuildVariantRevisionId,
+        cause: Throwable? = null,
+    ): BuildRevisionActivationConflictException =
+        BuildRevisionActivationConflictException(
+            message = "Build revision activation conflicted with concurrent lifecycle state: $id",
+            cause = cause,
+        )
+
+    private fun Throwable.hasConstraintName(constraintName: String): Boolean {
+        var current: Throwable? = this
+        while (current != null) {
+            if (current is ConstraintViolationException && current.constraintName == constraintName) {
+                return true
+            }
+            current = current.cause
+        }
+        return false
+    }
+
+    private companion object {
+        const val ACTIVE_REVISION_UNIQUE_CONSTRAINT = "uq_build_variant_revision_active_version"
     }
 }
