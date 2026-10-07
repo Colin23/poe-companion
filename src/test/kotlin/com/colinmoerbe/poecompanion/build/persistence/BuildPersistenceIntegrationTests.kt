@@ -391,8 +391,5 @@ internal class BuildPersistenceIntegrationTests(
         archetypeRepository.deleteAllInBatch()
     }
 
-    private data class PersistedVariant(
-        val archetype: BuildArchetype,
-        val variant: BuildVariant,
-    )
+    private data class PersistedVariant(val archetype: BuildArchetype, val variant: BuildVariant)
 }
