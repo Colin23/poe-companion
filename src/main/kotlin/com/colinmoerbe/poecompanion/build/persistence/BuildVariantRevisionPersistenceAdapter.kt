@@ -38,7 +38,15 @@ internal class BuildVariantRevisionPersistenceAdapter(
         if (revisionRepository.existsById(revision.id.value)) {
             claimPersistedDraft(revision.id)
         } else {
-            revisionRepository.save(toEntity(revision))
+            revisionRepository.save(
+                BuildVariantRevisionEntity(
+                    id = revision.id.value,
+                    buildVariantId = revision.buildVariantId.value,
+                    compatibilityVersionMajor = revision.compatibilityVersion.major,
+                    compatibilityVersionMinor = revision.compatibilityVersion.minor,
+                    status = revision.status,
+                ),
+            )
         }
 
         detachExistingSnapshot(revision.id)
@@ -113,10 +121,7 @@ internal class BuildVariantRevisionPersistenceAdapter(
                 throw activationConflict(id)
             }
         } catch (exception: DataIntegrityViolationException) {
-            if (exception.hasConstraintName(ACTIVE_REVISION_UNIQUE_CONSTRAINT)) {
-                throw activationConflict(id, exception)
-            }
-            throw exception
+            throw translateIntegrityViolation(id, exception)
         }
     }
 
@@ -131,15 +136,6 @@ internal class BuildVariantRevisionPersistenceAdapter(
             "Only persisted draft build revisions can replace requirement snapshots"
         }
     }
-
-    private fun toEntity(revision: BuildVariantRevision): BuildVariantRevisionEntity =
-        BuildVariantRevisionEntity(
-            id = revision.id.value,
-            buildVariantId = revision.buildVariantId.value,
-            compatibilityVersionMajor = revision.compatibilityVersion.major,
-            compatibilityVersionMinor = revision.compatibilityVersion.minor,
-            status = revision.status,
-        )
 
     private fun toDomain(entity: BuildVariantRevisionEntity): BuildVariantRevision {
         val requirementEntities = requirementRepository.findAllByRevisionId(entity.id)
@@ -193,6 +189,16 @@ internal class BuildVariantRevisionPersistenceAdapter(
             }
         }
     }
+
+    private fun translateIntegrityViolation(
+        id: BuildVariantRevisionId,
+        exception: DataIntegrityViolationException,
+    ): RuntimeException =
+        if (exception.hasConstraintName(ACTIVE_REVISION_UNIQUE_CONSTRAINT)) {
+            activationConflict(id, exception)
+        } else {
+            exception
+        }
 
     private fun activationConflict(
         id: BuildVariantRevisionId,
