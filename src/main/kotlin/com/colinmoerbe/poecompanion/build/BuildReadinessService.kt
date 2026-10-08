@@ -18,11 +18,10 @@ class BuildReadinessService internal constructor(
     private val readinessEvaluator = UniqueReadinessEvaluator()
 
     @Transactional(readOnly = true)
-    fun evaluate(buildVariantId: BuildVariantId): BuildReadinessQueryResult =
-        accountEvaluationService
-            .getSelected()
-            ?.let { accountEvaluation -> evaluateSelected(buildVariantId, accountEvaluation) }
-            ?: BuildReadinessQueryResult.NoAccountEvaluationSelected
+    fun evaluate(buildVariantId: BuildVariantId): BuildReadinessQueryResult = accountEvaluationService
+        .getSelected()
+        ?.let { accountEvaluation -> evaluateSelected(buildVariantId, accountEvaluation) }
+        ?: BuildReadinessQueryResult.NoAccountEvaluationSelected
 
     private fun evaluateSelected(
         buildVariantId: BuildVariantId,
