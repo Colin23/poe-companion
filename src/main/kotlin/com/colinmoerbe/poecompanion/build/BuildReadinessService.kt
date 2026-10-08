@@ -1,7 +1,6 @@
 package com.colinmoerbe.poecompanion.build
 
 import com.colinmoerbe.poecompanion.account.CurrentOwnershipService
-import com.colinmoerbe.poecompanion.league.AccountEvaluation
 import com.colinmoerbe.poecompanion.league.AccountEvaluationService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -17,16 +16,13 @@ class BuildReadinessService internal constructor(
 ) {
     private val readinessEvaluator = UniqueReadinessEvaluator()
 
+    @Suppress("ReturnCount")
     @Transactional(readOnly = true)
-    fun evaluate(buildVariantId: BuildVariantId): BuildReadinessQueryResult = accountEvaluationService
-        .getSelected()
-        ?.let { accountEvaluation -> evaluateSelected(buildVariantId, accountEvaluation) }
-        ?: BuildReadinessQueryResult.NoAccountEvaluationSelected
+    fun evaluate(buildVariantId: BuildVariantId): BuildReadinessQueryResult {
+        val accountEvaluation =
+            accountEvaluationService.getSelected()
+                ?: return BuildReadinessQueryResult.NoAccountEvaluationSelected
 
-    private fun evaluateSelected(
-        buildVariantId: BuildVariantId,
-        accountEvaluation: AccountEvaluation,
-    ): BuildReadinessQueryResult {
         val revision =
             revisionPersistencePort.findActiveBy(
                 buildVariantId = buildVariantId,
