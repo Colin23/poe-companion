@@ -210,16 +210,15 @@ internal class BuildReadinessServiceIntegrationTests(
         buildVariantId: BuildVariantId,
         version: CompatibilityVersion,
         requirementGroups: List<RequirementGroup> = emptyList(),
-    ): BuildVariantRevision =
-        BuildVariantRevision(
-            id = BuildVariantRevisionId.generate(),
-            buildVariantId = buildVariantId,
-            compatibilityVersion = version,
-        ).also { revision ->
-            revision.updateRequirementGroups(requirementGroups)
-            revisionPersistenceAdapter.saveDraftSnapshot(revision)
-            activationService.activate(revision.id)
-        }
+    ): BuildVariantRevision = BuildVariantRevision(
+        id = BuildVariantRevisionId.generate(),
+        buildVariantId = buildVariantId,
+        compatibilityVersion = version,
+    ).also { revision ->
+        revision.updateRequirementGroups(requirementGroups)
+        revisionPersistenceAdapter.saveDraftSnapshot(revision)
+        activationService.activate(revision.id)
+    }
 
     private fun createPersistedUniqueDefinition(): UniqueDefinition =
         UniqueDefinition(UniqueDefinitionId.generate()).also(uniqueDefinitionPersistenceAdapter::save)
