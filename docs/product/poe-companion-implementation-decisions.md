@@ -230,3 +230,63 @@ no row
 The database therefore permits only positive quantities for persisted `manual_ownership` rows. Existing explicit-zero rows are removed by the migration that tightens this constraint.
 
 `CurrentOwnership` continues to expose the same semantic result regardless of source representation: absence means quantity zero. Future synchronized ownership is expected to be naturally sparse as well.
+
+
+---
+
+## 6. Build Revision Identity, Lifecycle, and Persistence Synchronization
+
+### Context
+
+Build revision persistence combines immutable revision scope, editable draft snapshots, and lifecycle transitions that must remain safe under concurrent curator actions.
+
+A `BuildVariantRevisionId` identifies one revision whose defining scope is:
+
+```text
+BuildVariantId
+CompatibilityVersion
+```
+
+Requirement groups and requirements are editable while the durable revision remains `DRAFT`. Once activated, readiness-relevant semantic contents are immutable.
+
+Lifecycle transitions use conditional bulk updates so competing commands can detect that durable state changed instead of silently overwriting one another. JPQL bulk updates execute directly against the database and can therefore leave a previously managed JPA entity stale inside the same persistence context unless the affected entity is synchronized explicitly.
+
+### Decision
+
+An existing `BuildVariantRevisionId` permanently remains attached to the same:
+
+```text
+BuildVariantId
+CompatibilityVersion
+```
+
+Saving an existing draft snapshot must reject a reconstructed revision whose variant or compatibility version differs from the durable revision. JPA mapping flags such as `updatable = false` are not treated as sufficient application-level protection against redefining identity.
+
+Build-revision activation keeps the optimistic concurrency contract established for V0.1:
+
+```text
+conditional lifecycle transitions
++
+PostgreSQL partial unique ACTIVE index
+```
+
+For competing activation commands in one `(BuildVariantId, CompatibilityVersion)` scope:
+
+```text
+one command may succeed
+a losing command rolls back
+the loser receives an explicit BuildRevisionActivationConflictException
+no automatic retry
+```
+
+Automatic retry is intentionally avoided because retrying a genuinely competing activation could turn an explicit conflict into silent last-writer-wins supersession.
+
+The database enforces at most one `ACTIVE` revision per `(BuildVariantId, CompatibilityVersion)`. `OUTDATED` remains derived from compatibility with the current evaluation context and is not persisted as a revision lifecycle state.
+
+After a successful JPQL bulk lifecycle transition, persistence must synchronize the affected managed revision entity with the database. This synchronization is targeted to that revision; the persistence context must not be globally cleared merely to repair one stale managed entity.
+
+### Deliberately Deferred Enforcement
+
+A `BuildVariantId` conceptually remains attached to one `BuildArchetypeId`.
+
+The current persistence adapter does not yet expose a concrete BuildVariant authoring/update application workflow, so explicit persisted re-parenting protection is deferred rather than added speculatively. Revisit this when the first BuildVariant authoring command/service is introduced. That workflow must reject changing the archetype of an existing `BuildVariantId` instead of relying only on JPA's `updatable = false` mapping.

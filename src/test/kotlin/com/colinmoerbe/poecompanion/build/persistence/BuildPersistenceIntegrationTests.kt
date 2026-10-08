@@ -3,6 +3,7 @@ package com.colinmoerbe.poecompanion.build.persistence
 import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.build.BuildArchetype
 import com.colinmoerbe.poecompanion.build.BuildArchetypeId
+import com.colinmoerbe.poecompanion.build.BuildRevisionIdentityMismatchException
 import com.colinmoerbe.poecompanion.build.BuildVariant
 import com.colinmoerbe.poecompanion.build.BuildVariantId
 import com.colinmoerbe.poecompanion.build.BuildVariantRevision
@@ -196,6 +197,53 @@ internal class BuildPersistenceIntegrationTests(
             )
         assertThat(requirementRepository.findAllByRevisionId(revision.id.value).map { it.uniqueDefinitionId })
             .doesNotContain(removedUnique.id.value)
+    }
+
+    @Test
+    fun `existing revision id should reject reconstructed immutable scope changes`() {
+        val original = createPersistedVariant()
+        val other = createPersistedVariant()
+        val unique = createPersistedUniqueDefinition()
+        val revision =
+            BuildVariantRevision(
+                id = BuildVariantRevisionId.generate(),
+                buildVariantId = original.variant.id,
+                compatibilityVersion = CompatibilityVersion(3, 30),
+            )
+        revision.updateRequirementGroups(
+            listOf(
+                RequirementGroup(
+                    RequirementImportance.CORE,
+                    RequirementLogic.ALL,
+                    listOf(Requirement(unique.id, 1)),
+                ),
+            ),
+        )
+        revisionPersistenceAdapter.saveDraftSnapshot(revision)
+
+        val reparented =
+            BuildVariantRevision(
+                id = revision.id,
+                buildVariantId = other.variant.id,
+                compatibilityVersion = revision.compatibilityVersion,
+            )
+        assertThatThrownBy { revisionPersistenceAdapter.saveDraftSnapshot(reparented) }
+            .isInstanceOf(BuildRevisionIdentityMismatchException::class.java)
+
+        val reversioned =
+            BuildVariantRevision(
+                id = revision.id,
+                buildVariantId = revision.buildVariantId,
+                compatibilityVersion = CompatibilityVersion(3, 31),
+            )
+        assertThatThrownBy { revisionPersistenceAdapter.saveDraftSnapshot(reversioned) }
+            .isInstanceOf(BuildRevisionIdentityMismatchException::class.java)
+
+        val restored = requireNotNull(revisionPersistenceAdapter.findById(revision.id))
+        assertThat(restored.buildVariantId).isEqualTo(original.variant.id)
+        assertThat(restored.compatibilityVersion).isEqualTo(CompatibilityVersion(3, 30))
+        assertThat(restored.requirementGroups.single().requirements)
+            .containsExactly(Requirement(unique.id, 1))
     }
 
     @Test

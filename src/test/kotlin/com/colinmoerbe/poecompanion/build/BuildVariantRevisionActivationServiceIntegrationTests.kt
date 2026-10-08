@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.support.TransactionTemplate
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
@@ -84,6 +85,18 @@ internal class BuildVariantRevisionActivationServiceIntegrationTests(
         assertThat(restored.requirementGroups).hasSize(1)
         assertThat(restored.requirementGroups.single().requirements)
             .containsExactly(Requirement(unique.id, 2))
+    }
+
+    @Test
+    @Transactional
+    fun `activated revision should reread as active inside the same outer transaction`() {
+        val variant = createPersistedVariant()
+        val revision = createDraft(variant.id, CompatibilityVersion(3, 30))
+
+        activationService.activate(revision.id)
+
+        assertThat(revisionPersistenceAdapter.findById(revision.id)?.status)
+            .isEqualTo(BuildVariantRevisionStatus.ACTIVE)
     }
 
     @Test

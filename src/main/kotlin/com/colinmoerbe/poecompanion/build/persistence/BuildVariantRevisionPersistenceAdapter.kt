@@ -1,6 +1,7 @@
 package com.colinmoerbe.poecompanion.build.persistence
 
 import com.colinmoerbe.poecompanion.build.BuildRevisionActivationConflictException
+import com.colinmoerbe.poecompanion.build.BuildRevisionIdentityMismatchException
 import com.colinmoerbe.poecompanion.build.BuildVariantId
 import com.colinmoerbe.poecompanion.build.BuildVariantRevision
 import com.colinmoerbe.poecompanion.build.BuildVariantRevisionId
@@ -35,9 +36,8 @@ internal class BuildVariantRevisionPersistenceAdapter(
             "Only draft build revisions can persist editable requirement snapshots"
         }
 
-        if (revisionRepository.existsById(revision.id.value)) {
-            claimPersistedDraft(revision.id)
-        } else {
+        val persistedRevision = revisionRepository.findById(revision.id.value).orElse(null)
+        if (persistedRevision == null) {
             revisionRepository.save(
                 BuildVariantRevisionEntity(
                     id = revision.id.value,
@@ -47,6 +47,17 @@ internal class BuildVariantRevisionPersistenceAdapter(
                     status = revision.status,
                 ),
             )
+        } else {
+            if (
+                persistedRevision.buildVariantId != revision.buildVariantId.value ||
+                persistedRevision.compatibilityVersionMajor != revision.compatibilityVersion.major ||
+                persistedRevision.compatibilityVersionMinor != revision.compatibilityVersion.minor
+            ) {
+                throw BuildRevisionIdentityMismatchException(
+                    "Build revision identity cannot change variant or compatibility version: ${revision.id}",
+                )
+            }
+            claimPersistedDraft(revision.id)
         }
 
         detachExistingSnapshot(revision.id)
@@ -121,6 +132,7 @@ internal class BuildVariantRevisionPersistenceAdapter(
                     "Build revision activation conflicted with concurrent lifecycle state: $id",
                 )
             }
+            entityManager.refresh(entityManager.getReference(BuildVariantRevisionEntity::class.java, id.value))
         } catch (exception: DataIntegrityViolationException) {
             throw translateIntegrityViolation(id, exception)
         }
