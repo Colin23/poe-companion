@@ -1,7 +1,7 @@
 # PoE Companion — Specification Index V2.1.2
 
-**Status:** Canonical — Acquisition-domain micro-release  
-**Date:** 2026-10-09  
+**Status:** Canonical — Acquisition-domain micro-release
+**Date:** 2026-10-09
 **Purpose:** Define the authoritative V2.1.2 specification set and the narrow Acquisition-domain refinement discovered during Milestone 4 implementation.
 
 V2.1.2 is a deliberately small canonical micro-release. It does **not** reopen broad product architecture or V0.1 scope.
