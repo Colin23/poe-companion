@@ -1,7 +1,7 @@
 # PoE Companion — Acquisition Domain Amendment V2.1.2
 
-**Status:** Canonical normative amendment  
-**Date:** 2026-10-09  
+**Status:** Canonical normative amendment
+**Date:** 2026-10-09
 **Purpose:** Refine the V2.1.1 Acquisition domain before Milestone 4 implementation, based on real Path of Exile encounter structures.
 
 This document is authoritative for the Acquisition concepts it explicitly refines.
