@@ -193,7 +193,9 @@ The eventual implementation may use revisions, change-point facts, or another ex
 
 ## 6. Source Availability
 
-Whether an encounter currently exists as an acquisition opportunity is a source-level fact.
+A curated `AcquisitionSource` has stable source identity independently of whether that source is currently available in a particular game context.
+
+Whether that already-known source is available as an acquisition opportunity in a given `EvaluationContext` is a source-level fact.
 
 It is **not** inferred from the presence or absence of DropRelationships.
 
@@ -216,7 +218,7 @@ Meaning:
 
 ```text
 applicable AVAILABLE knowledge
-    -> the source is known to exist/be available in this EvaluationContext
+    -> the already-known source is available as an acquisition opportunity in this EvaluationContext
 
 applicable UNAVAILABLE knowledge
     -> the source is positively known not to be available in this EvaluationContext
