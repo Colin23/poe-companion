@@ -1,7 +1,7 @@
 # PoE Companion — Implementation Decisions
 
 **Status:** Evolving implementation clarifications
-**Purpose:** Record durable product/domain/architecture decisions discovered while implementing the frozen V2.1.1 specification.
+**Purpose:** Record durable product/domain/architecture decisions discovered while implementing the current canonical specification.
 
 This document does not replace or silently modify the current canonical product specification. When implementation reveals an ambiguity, missing detail, or useful clarification, record the current implementation decision here. If a future implementation decision conflicts with the canonical specification, resolve that conflict explicitly rather than treating this document as an override.
 
@@ -57,13 +57,35 @@ Missing required context precision remains `UNKNOWN`; it must never be treated a
 
 Exact `GamePatch` matching is intentionally limited. It is a safe foundation for strict applicability, not the final representation of temporal knowledge.
 
-### Deferred Design Work
+### First Concrete Change-Point Use
 
-Do not introduce generic patch ordering merely to implement `>=` comparisons.
+V2.1.2 source availability/encounter knowledge is the first concrete feature that requires effective-patch resolution, before `DropRelationship`.
 
-Before effective-from semantics are implemented, define the ordering rules required for real GGG patch identifiers, including suffix-bearing patches such as `3.29.3b`. Hotfixes and maintenance events must not be folded into `GamePatch` ordering without an explicit domain decision.
+`GamePatch` therefore supports a deliberately narrow ordering operation only within one `CompatibilityVersion`:
 
-The first concrete versioned-knowledge use case should drive the implementation. Current expectation is that acquisition `DropRelationship` applicability will be the first Slice 1 feature that requires this behavior.
+```text
+numeric patch first
+same numeric patch: unsuffixed release first
+suffix-bearing releases: lexical suffix order
+```
+
+For example:
+
+```text
+3.30.0 < 3.30.0b < 3.30.0c < 3.30.1
+```
+
+Comparing patches from different compatibility versions is rejected rather than pretending that `GamePatch` defines a universal ordering.
+
+GGG hotfix events are not folded into `GamePatch` ordering. The official patch-note history exposes entries such as lettered `3.27.0b` through `3.27.0h` separately from `3.27.0g Hotfix 2` and similar hotfix events. Hotfix chronology remains outside this value type unless a future canonical feature explicitly requires it.
+
+Official evidence:
+- https://www.pathofexile.com/forum/view-forum/1122
+- https://www.pathofexile.com/forum/view-forum/patch-notes/page/2
+
+Source encounter knowledge uses complete snapshots at change points, not field-level deltas. A baseline snapshot has no effective patch; later snapshots become current at their effective patch and remain current until superseded by another snapshot.
+
+When a timeline contains patch-specific change points but the `EvaluationContext` lacks exact patch precision, resolution remains `UNKNOWN`. A patchless context can resolve a baseline-only timeline because no known patch change can alter the answer.
 
 
 ---
