@@ -30,6 +30,8 @@ data class GamePatch(val compatibilityVersion: CompatibilityVersion, val patch: 
             return patchComparison
         }
 
+        // Comparator contract: negative = this patch comes before the other, zero = same ordering position,
+        // positive = this patch comes after the other.
         return when {
             suffix == other.suffix -> 0
             suffix == null -> -1
