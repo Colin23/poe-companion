@@ -57,6 +57,7 @@ class BossEncounterKnowledgeTimeline(
         }
     }
 
+    @Suppress("ReturnCount")
     private fun resolvePatch(context: EvaluationContext): BossEncounterKnowledgeResolution {
         val contextPatch = context.gamePatch
 
