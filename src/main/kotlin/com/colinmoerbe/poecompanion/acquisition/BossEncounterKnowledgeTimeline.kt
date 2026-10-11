@@ -32,18 +32,29 @@ class BossEncounterKnowledgeTimeline(
 
         this.snapshots =
             Collections.unmodifiableList(
-                snapshots.sortedWith(
-                    compareBy<BossEncounterKnowledgeSnapshot> { it.effectiveFromPatch != null }
-                        .thenComparator { first, second ->
-                            val firstPatch = first.effectiveFromPatch
-                            val secondPatch = second.effectiveFromPatch
-                            when {
-                                firstPatch == null || secondPatch == null -> 0
-                                else -> firstPatch.compareWithinCompatibilityVersion(secondPatch)
-                            }
-                        },
-                ),
+                snapshots.sortedWith(Comparator(::compareSnapshotsByEffectivePatch)),
             )
+    }
+
+    /**
+     * Orders the compatibility-version baseline first, then patch-specific snapshots chronologically.
+     *
+     * Comparator convention: negative means the first snapshot comes earlier, zero means the same ordering position,
+     * and positive means the first snapshot comes later.
+     */
+    private fun compareSnapshotsByEffectivePatch(
+        first: BossEncounterKnowledgeSnapshot,
+        second: BossEncounterKnowledgeSnapshot,
+    ): Int {
+        val firstPatch = first.effectiveFromPatch
+        val secondPatch = second.effectiveFromPatch
+
+        return when {
+            firstPatch == null && secondPatch == null -> 0
+            firstPatch == null -> -1
+            secondPatch == null -> 1
+            else -> firstPatch.compareWithinCompatibilityVersion(secondPatch)
+        }
     }
 
     /**
