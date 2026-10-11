@@ -74,7 +74,7 @@ class BossEncounterKnowledgeTimeline(
                 effectivePatch == null || effectivePatch.compareWithinCompatibilityVersion(contextPatch) <= 0
             }
 
-        return applicableSnapshot?.let(BossEncounterKnowledgeResolution::Resolved)
+        return applicableSnapshot?.let { BossEncounterKnowledgeResolution.Resolved(it) }
             ?: BossEncounterKnowledgeResolution.Unknown
     }
 }
