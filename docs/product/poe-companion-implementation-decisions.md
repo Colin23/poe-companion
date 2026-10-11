@@ -449,3 +449,25 @@ targetProbability = 1 and probabilityPerAttempt < 1
 Attempt counts use `Int` in V0.1. A mathematically required threshold beyond `Int.MAX_VALUE` is rejected rather than overflowing or returning a misleading value.
 
 `AvailableAttempts` remains separate personalized AccountContext state and does not belong inside the probability model.
+
+---
+
+## 10. Persist AcquisitionSource Identity Independently of Encounter Knowledge
+
+### Context
+
+Manually entered AvailableAttempts must reference a stable canonical AcquisitionSource. The initial Acquisition domain
+models source identities and versioned encounter knowledge without persistence, so a database foreign key for personal
+attempt state requires a persistent source identity first.
+
+### Decision
+
+Persist each canonical `AcquisitionSource` as one row keyed solely by its application-owned `AcquisitionSourceId`.
+
+Existence of that row means that the canonical acquisition opportunity is known to the Companion. It does **not**
+establish source availability, encounter participation, applicability to an EvaluationContext, or drop knowledge.
+
+Keep the domain identity independent from the JPA representation. Versioned encounter knowledge, boss participation,
+DropRelationships, and curator authoring/persistence workflows remain separate work.
+
+This identity table is a prerequisite for the `AvailableAttempts` foreign key; no attempt count is stored in this step.
