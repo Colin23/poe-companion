@@ -57,25 +57,13 @@ data class FixedBernoulliModel(val probabilityPerAttempt: Double) {
         val rawRequiredAttempts =
             Math.log1p(-targetProbability) /
                 Math.log1p(-probabilityPerAttempt)
-        val roundedRequiredAttempts = ceil(rawRequiredAttempts)
+        // Cumulative Double results can round to the target before the mathematical threshold is reached.
+        val requiredAttempts = ceil(rawRequiredAttempts)
 
-        require(roundedRequiredAttempts <= Int.MAX_VALUE.toDouble()) {
+        require(requiredAttempts <= Int.MAX_VALUE.toDouble()) {
             "Required attempt count exceeds the supported integer range"
         }
 
-        var attempts = roundedRequiredAttempts.toInt().coerceAtLeast(1)
-
-        // Floating-point rounding can land immediately beside the true integer boundary.
-        while (attempts > 1 && probabilityOfAtLeastOneSuccessWithin(attempts - 1) >= targetProbability) {
-            attempts--
-        }
-        while (probabilityOfAtLeastOneSuccessWithin(attempts) < targetProbability) {
-            require(attempts < Int.MAX_VALUE) {
-                "Required attempt count exceeds the supported integer range"
-            }
-            attempts++
-        }
-
-        return attempts
+        return requiredAttempts.toInt()
     }
 }
