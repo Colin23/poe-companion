@@ -22,15 +22,12 @@ data class FixedBernoulliModel(
     fun probabilityOfAtLeastOneSuccessWithin(attempts: Int): Double {
         require(attempts >= 0) { "Attempts must not be negative" }
 
-        if (attempts == 0) {
-            return 0.0
+        return when {
+            attempts == 0 -> 0.0
+            probabilityPerAttempt == 1.0 -> 1.0
+            // Numerically stable equivalent of 1 - (1 - p)^n.
+            else -> -Math.expm1(attempts * Math.log1p(-probabilityPerAttempt))
         }
-        if (probabilityPerAttempt == 1.0) {
-            return 1.0
-        }
-
-        // Numerically stable equivalent of 1 - (1 - p)^n.
-        return -Math.expm1(attempts * Math.log1p(-probabilityPerAttempt))
     }
 
     /**
