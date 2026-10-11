@@ -449,4 +449,3 @@ targetProbability = 1 and probabilityPerAttempt < 1
 Attempt counts use `Int` in V0.1. A mathematically required threshold beyond `Int.MAX_VALUE` is rejected rather than overflowing or returning a misleading value.
 
 `AvailableAttempts` remains separate personalized AccountContext state and does not belong inside the probability model.
-
