@@ -49,12 +49,10 @@ class BossEncounterKnowledgeTimeline(
     /**
      * Resolves the current trustworthy snapshot for the supplied evaluation context.
      */
-    fun resolve(context: EvaluationContext): BossEncounterKnowledgeResolution {
-        return when (scope.evaluateAgainst(context)) {
-            ApplicabilityResult.DOES_NOT_APPLY -> BossEncounterKnowledgeResolution.DoesNotApply
-            ApplicabilityResult.UNKNOWN -> BossEncounterKnowledgeResolution.Unknown
-            ApplicabilityResult.APPLIES -> resolvePatch(context)
-        }
+    fun resolve(context: EvaluationContext): BossEncounterKnowledgeResolution = when (scope.evaluateAgainst(context)) {
+        ApplicabilityResult.DOES_NOT_APPLY -> BossEncounterKnowledgeResolution.DoesNotApply
+        ApplicabilityResult.UNKNOWN -> BossEncounterKnowledgeResolution.Unknown
+        ApplicabilityResult.APPLIES -> resolvePatch(context)
     }
 
     @Suppress("ReturnCount")
