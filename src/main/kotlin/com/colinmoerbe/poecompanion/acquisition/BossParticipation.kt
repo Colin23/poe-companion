@@ -18,6 +18,11 @@ sealed interface BossParticipation {
             require(bossDefinitionIds.isNotEmpty()) { "Fixed boss participation must contain at least one boss" }
             this.bossDefinitionIds = Collections.unmodifiableSet(LinkedHashSet(bossDefinitionIds))
         }
+
+        override fun equals(other: Any?): Boolean =
+            this === other || (other is Fixed && bossDefinitionIds == other.bossDefinitionIds)
+
+        override fun hashCode(): Int = bossDefinitionIds.hashCode()
     }
 
     /**
