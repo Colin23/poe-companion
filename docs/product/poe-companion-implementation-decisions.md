@@ -471,3 +471,31 @@ Keep the domain identity independent from the JPA representation. Versioned enco
 DropRelationships, and curator authoring/persistence workflows remain separate work.
 
 This identity table is a prerequisite for the `AvailableAttempts` foreign key; no attempt count is stored in this step.
+
+---
+
+## 11. Manually Recorded AvailableAttempts Preserve Explicit Zero
+
+### Context
+
+V0.1 lets the player manually record currently available attempt counts for a canonical AcquisitionSource within an
+AccountContext. A never-entered count is not evidence of zero attempts, unlike sparse manual ownership where absence
+is deliberately defined as zero.
+
+### Decision
+
+`AvailableAttempts` is one non-negative integer fact per `(AccountContextId, AcquisitionSourceId)`. Its lifecycle is:
+
+```text
+no row             -> no attempt count has been entered
+row with count = 0 -> explicitly recorded zero available attempts
+row with count > 0 -> explicitly recorded positive available attempts
+clear command      -> delete only the targeted fact, restoring the unrecorded state
+```
+
+The composite primary key permits at most one current fact per account/source pair. Database foreign keys require
+the account context and canonical source identities to exist; a non-negative check permits explicit zero.
+
+This is manually maintained personalized Acquisition state, independent of the selected EvaluationContext, canonical
+source availability, encounter access knowledge, DropEstimate, and the pure probability model. No resource-derived
+attempt counting or attempt history is introduced.
