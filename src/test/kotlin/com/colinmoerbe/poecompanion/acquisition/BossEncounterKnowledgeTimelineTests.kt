@@ -143,23 +143,21 @@ class BossEncounterKnowledgeTimelineTests {
     private fun timeline(
         vararg snapshots: BossEncounterKnowledgeSnapshot,
         leagueDefinitionId: LeagueDefinitionId? = null,
-    ): BossEncounterKnowledgeTimeline =
-        BossEncounterKnowledgeTimeline(
-            acquisitionSourceId = sourceId,
-            scope = AcquisitionKnowledgeScope(version, Ruleset.NORMAL, leagueDefinitionId),
-            snapshots = snapshots.toList(),
-        )
+    ): BossEncounterKnowledgeTimeline = BossEncounterKnowledgeTimeline(
+        acquisitionSourceId = sourceId,
+        scope = AcquisitionKnowledgeScope(version, Ruleset.NORMAL, leagueDefinitionId),
+        snapshots = snapshots.toList(),
+    )
 
     private fun snapshot(
         effectiveFromPatch: GamePatch? = null,
         displayLabel: String = "Uber Elder",
         availability: AcquisitionSourceAvailability = AcquisitionSourceAvailability.AVAILABLE,
         bossParticipation: BossParticipation = BossParticipation.Fixed(setOf(bossId)),
-    ): BossEncounterKnowledgeSnapshot =
-        BossEncounterKnowledgeSnapshot(
-            effectiveFromPatch = effectiveFromPatch,
-            displayLabel = displayLabel,
-            availability = availability,
-            bossParticipation = bossParticipation,
-        )
+    ): BossEncounterKnowledgeSnapshot = BossEncounterKnowledgeSnapshot(
+        effectiveFromPatch = effectiveFromPatch,
+        displayLabel = displayLabel,
+        availability = availability,
+        bossParticipation = bossParticipation,
+    )
 }
