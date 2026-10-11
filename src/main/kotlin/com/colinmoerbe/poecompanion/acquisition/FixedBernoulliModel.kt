@@ -7,9 +7,7 @@ import kotlin.math.ceil
  *
  * Each attempt has the same success probability and attempts are independent from one another.
  */
-data class FixedBernoulliModel(
-    val probabilityPerAttempt: Double,
-) {
+data class FixedBernoulliModel(val probabilityPerAttempt: Double) {
     init {
         require(probabilityPerAttempt.isFinite() && probabilityPerAttempt > 0.0 && probabilityPerAttempt <= 1.0) {
             "Probability per attempt must be finite, greater than 0, and at most 1"
@@ -24,7 +22,9 @@ data class FixedBernoulliModel(
 
         return when {
             attempts == 0 -> 0.0
+
             probabilityPerAttempt == 1.0 -> 1.0
+
             // Numerically stable equivalent of 1 - (1 - p)^n.
             else -> -Math.expm1(attempts * Math.log1p(-probabilityPerAttempt))
         }
