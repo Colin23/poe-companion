@@ -351,3 +351,57 @@ whether a legitimate same-display-name/different-entity case exists
 ```
 
 The normal path should reject or otherwise strongly block accidental duplicates. A database `UNIQUE(display_name)` constraint must not be introduced before those semantics are decided, because display text remains metadata rather than canonical identity.
+
+---
+
+## 8. Drop Relationship Identity Survives Applicability Changes
+
+### Context
+
+Canonical acquisition knowledge must distinguish three different claims:
+
+```text
+no known source-to-Unique relationship
+explicitly known CAN_DROP
+explicitly known CANNOT_DROP
+```
+
+Treating the absence of a `DropRelationship` as `CANNOT_DROP` would convert missing canonical knowledge into false negative knowledge. Deleting/recreating relationships whenever drop applicability changes would also make later `DropEstimate`, personal override, and historical references attach to unstable identities.
+
+### Decision
+
+`DropRelationship` is the stable application-owned canonical association between one:
+
+```text
+AcquisitionSourceId
+UniqueDefinitionId
+```
+
+Its `DropRelationshipId` survives applicability changes such as:
+
+```text
+CAN_DROP
+→ CANNOT_DROP
+→ CAN_DROP
+```
+
+Versioned `DropRelationshipSnapshot` values carry the explicit current state for one `AcquisitionKnowledgeScope`. Missing applicable knowledge resolves to `UNKNOWN`; it is never promoted to `CANNOT_DROP`.
+
+Therefore:
+
+```text
+no DropRelationship / no applicable relationship knowledge
+    != CANNOT_DROP
+
+CANNOT_DROP
+    = explicit canonical negative knowledge
+```
+
+Source availability remains a separate fact. A source may be AVAILABLE while a relationship is CANNOT_DROP, and historical drop knowledge may remain CAN_DROP while source availability is UNAVAILABLE.
+
+### Deferred Enforcement
+
+Normal canonical authoring should maintain one stable `DropRelationship` for one `(AcquisitionSourceId, UniqueDefinitionId)` pair.
+
+The initial domain object cannot enforce that cross-record invariant because it has no repository or curator-collection context. Revisit and enforce pair uniqueness when DropRelationship persistence/curator authoring is introduced rather than inventing an in-memory global registry.
+
