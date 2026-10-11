@@ -90,6 +90,13 @@ class FixedBernoulliModelTests {
     }
 
     @Test
+    fun `positive target should require at least one attempt even when the threshold quotient underflows`() {
+        val model = FixedBernoulliModel(0.99)
+
+        assertThat(model.attemptsToReachProbability(Double.MIN_VALUE)).isEqualTo(1)
+    }
+
+    @Test
     fun `certain success should reach every positive target in one attempt`() {
         val model = FixedBernoulliModel(1.0)
 
