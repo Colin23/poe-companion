@@ -8,9 +8,7 @@ import org.springframework.transaction.annotation.Transactional
  * Manages the current manually entered count of available attempts for a source in an account context.
  */
 @Service
-class AvailableAttemptsService internal constructor(
-    private val persistencePort: AvailableAttemptsPersistencePort,
-) {
+class AvailableAttemptsService internal constructor(private val persistencePort: AvailableAttemptsPersistencePort) {
     @Transactional
     fun setAvailableAttempts(
         accountContextId: AccountContextId,
