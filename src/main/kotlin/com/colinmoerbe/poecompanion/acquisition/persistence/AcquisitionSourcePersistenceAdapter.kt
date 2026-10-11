@@ -15,9 +15,8 @@ internal class AcquisitionSourcePersistenceAdapter(
         springDataRepository.save(AcquisitionSourceEntity(acquisitionSource.id.value))
     }
 
-    fun findById(id: AcquisitionSourceId): AcquisitionSource? =
-        springDataRepository
-            .findById(id.value)
-            .map { entity -> AcquisitionSource(AcquisitionSourceId(entity.id)) }
-            .orElse(null)
+    fun findById(id: AcquisitionSourceId): AcquisitionSource? = springDataRepository
+        .findById(id.value)
+        .map { entity -> AcquisitionSource(AcquisitionSourceId(entity.id)) }
+        .orElse(null)
 }
