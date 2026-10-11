@@ -134,6 +134,33 @@ class BossEncounterKnowledgeTimelineTests {
     }
 
     @Test
+    fun `fixed participation should have roster value equality`() {
+        val otherBossId = BossDefinitionId.generate()
+
+        val first = BossParticipation.Fixed(setOf(bossId, otherBossId))
+        val reconstructed = BossParticipation.Fixed(setOf(otherBossId, bossId))
+
+        assertThat(reconstructed).isEqualTo(first)
+        assertThat(reconstructed.hashCode()).isEqualTo(first.hashCode())
+    }
+
+    @Test
+    fun `equivalent independently constructed snapshots should compare equally`() {
+        val first =
+            snapshot(
+                bossParticipation = BossParticipation.Fixed(setOf(bossId)),
+            )
+        val reconstructed =
+            snapshot(
+                bossParticipation = BossParticipation.Fixed(setOf(bossId)),
+            )
+
+        assertThat(reconstructed).isEqualTo(first)
+        assertThat(BossEncounterKnowledgeResolution.Resolved(reconstructed))
+            .isEqualTo(BossEncounterKnowledgeResolution.Resolved(first))
+    }
+
+    @Test
     fun `configuration-dependent participation should not require a fake fixed roster`() {
         val snapshot = snapshot(bossParticipation = BossParticipation.ConfigurationDependent)
 
