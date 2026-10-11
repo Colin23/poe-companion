@@ -7,7 +7,4 @@ import com.colinmoerbe.poecompanion.league.GamePatch
  *
  * A null effective patch is the baseline for the timeline's compatibility version.
  */
-data class DropRelationshipSnapshot(
-    val effectiveFromPatch: GamePatch?,
-    val state: DropRelationshipState,
-)
+data class DropRelationshipSnapshot(val effectiveFromPatch: GamePatch?, val state: DropRelationshipState)
