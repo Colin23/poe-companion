@@ -3,7 +3,7 @@
 **Status:** Evolving implementation clarifications
 **Purpose:** Record durable product/domain/architecture decisions discovered while implementing the frozen V2.1.1 specification.
 
-This document does not replace or silently modify the canonical V2.1.1 product specification. When implementation reveals an ambiguity, missing detail, or useful clarification, record the current implementation decision here. If a future implementation decision conflicts with the canonical specification, resolve that conflict explicitly rather than treating this document as an override.
+This document does not replace or silently modify the current canonical product specification. When implementation reveals an ambiguity, missing detail, or useful clarification, record the current implementation decision here. If a future implementation decision conflicts with the canonical specification, resolve that conflict explicitly rather than treating this document as an override.
 
 ---
 
@@ -290,3 +290,42 @@ After a successful JPQL bulk lifecycle transition, persistence must synchronize 
 A `BuildVariantId` conceptually remains attached to one `BuildArchetypeId`.
 
 The current persistence adapter does not yet expose a concrete BuildVariant authoring/update application workflow, so explicit persisted re-parenting protection is deferred rather than added speculatively. Revisit this when the first BuildVariant authoring command/service is introduced. That workflow must reject changing the archetype of an existing `BuildVariantId` instead of relying only on JPA's `updatable = false` mapping.
+
+
+---
+
+## 7. Boss Display Names Are Metadata; Duplicate Protection Belongs at the Curator Boundary
+
+### Context
+
+V2.1.2 establishes that `BossDefinitionId` is stable application-owned identity and that boss display names are metadata rather than identity.
+
+The first `BossDefinition` domain object can validate one boss in isolation, but it has no collection or persistence context from which to determine whether another canonical boss already represents the same game entity.
+
+Treating the display name itself as database identity would also be too strong. Future real data may expose rename, alias, normalization, localization, or rare same-name cases that should not silently redefine application-owned identity.
+
+### Current Decision
+
+The initial `BossDefinition` requires only a non-blank display name.
+
+This is **not** a product decision that duplicate boss definitions are desirable or normally supported.
+
+Normal curator workflows should prevent or strongly guard against accidentally creating two `BossDefinition` records that appear to represent the same boss. The initial identity-domain PR deliberately does not encode cross-record name uniqueness because that rule belongs at a boundary that can see existing canonical records.
+
+Do not add a domain test asserting that two same-named bosses are a supported semantic case merely because different `BossDefinitionId` values technically allow construction in isolation.
+
+### Deferred Enforcement
+
+Revisit duplicate protection when the first real BossDefinition persistence/curator authoring workflow is implemented.
+
+That workflow must decide what counts as an effective duplicate, including at least:
+
+```text
+leading/trailing whitespace
+case differences
+Unicode normalization
+boss renames or aliases
+whether a legitimate same-display-name/different-entity case exists
+```
+
+The normal path should reject or otherwise strongly block accidental duplicates. A database `UNIQUE(display_name)` constraint must not be introduced before those semantics are decided, because display text remains metadata rather than canonical identity.
