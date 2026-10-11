@@ -58,7 +58,7 @@ data class FixedBernoulliModel(val probabilityPerAttempt: Double) {
             Math.log1p(-targetProbability) /
                 Math.log1p(-probabilityPerAttempt)
         // Cumulative Double results can round to the target before the mathematical threshold is reached.
-        val requiredAttempts = ceil(rawRequiredAttempts)
+        val requiredAttempts = maxOf(1.0, ceil(rawRequiredAttempts))
 
         require(requiredAttempts <= Int.MAX_VALUE.toDouble()) {
             "Required attempt count exceeds the supported integer range"
