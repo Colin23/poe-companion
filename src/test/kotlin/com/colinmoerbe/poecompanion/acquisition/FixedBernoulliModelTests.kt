@@ -82,6 +82,14 @@ class FixedBernoulliModelTests {
     }
 
     @Test
+    fun `near certain target should not round cumulative probability into an earlier success threshold`() {
+        val model = FixedBernoulliModel(1e-7)
+        val target = 0.9999999999999999
+
+        assertThat(model.attemptsToReachProbability(target)).isEqualTo(367_367_988)
+    }
+
+    @Test
     fun `certain success should reach every positive target in one attempt`() {
         val model = FixedBernoulliModel(1.0)
 
