@@ -404,4 +404,3 @@ Source availability remains a separate fact. A source may be AVAILABLE while a r
 Normal canonical authoring should maintain one stable `DropRelationship` for one `(AcquisitionSourceId, UniqueDefinitionId)` pair.
 
 The initial domain object cannot enforce that cross-record invariant because it has no repository or curator-collection context. Revisit and enforce pair uniqueness when DropRelationship persistence/curator authoring is introduced rather than inventing an in-memory global registry.
-
