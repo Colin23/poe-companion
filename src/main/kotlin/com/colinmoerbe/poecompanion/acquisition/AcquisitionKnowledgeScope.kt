@@ -20,6 +20,7 @@ data class AcquisitionKnowledgeScope(
     /**
      * Evaluates this scope against a concrete game context before patch change points are considered.
      */
+    @Suppress("ReturnCount")
     fun evaluateAgainst(context: EvaluationContext): ApplicabilityResult {
         if (compatibilityVersion != context.compatibilityVersion || ruleset != context.ruleset) {
             return ApplicabilityResult.DOES_NOT_APPLY
