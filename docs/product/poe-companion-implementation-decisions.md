@@ -404,3 +404,49 @@ Source availability remains a separate fact. A source may be AVAILABLE while a r
 Normal canonical authoring should maintain one stable `DropRelationship` for one `(AcquisitionSourceId, UniqueDefinitionId)` pair.
 
 The initial domain object cannot enforce that cross-record invariant because it has no repository or curator-collection context. Revisit and enforce pair uniqueness when DropRelationship persistence/curator authoring is introduced rather than inventing an in-memory global registry.
+
+---
+
+## 9. Fixed Bernoulli Probability Is a Pure Known-Probability Model
+
+### Context
+
+V0.1 supports fixed independent Bernoulli probability calculations, while canonical acquisition knowledge may also have no known probability at all.
+
+Conflating unknown probability with a numeric sentinel such as `0` would contradict the established "unknown stays unknown" rule. Threshold calculations also have a finite-reachability edge case: when per-attempt probability is less than 1, cumulative success probability approaches 100% but never reaches exactly 100% in a finite number of attempts.
+
+### Decision
+
+`FixedBernoulliModel` exists only when a concrete fixed probability is known:
+
+```text
+0 < probabilityPerAttempt <= 1
+```
+
+Unknown probability is represented by the absence of an applicable probability model/estimate, never by `p = 0`.
+
+The pure model owns:
+
+```text
+cumulative probability within n attempts
+expected attempts until first success
+smallest finite attempt count reaching a target probability
+```
+
+For threshold calculation:
+
+```text
+0 < targetProbability < 1
+    -> return the smallest finite attempt count that reaches the target
+
+targetProbability = 1 and probabilityPerAttempt = 1
+    -> 1 attempt
+
+targetProbability = 1 and probabilityPerAttempt < 1
+    -> reject because no finite attempt count reaches 100%
+```
+
+Attempt counts use `Int` in V0.1. A mathematically required threshold beyond `Int.MAX_VALUE` is rejected rather than overflowing or returning a misleading value.
+
+`AvailableAttempts` remains separate personalized AccountContext state and does not belong inside the probability model.
+
