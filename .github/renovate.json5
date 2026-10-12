@@ -82,6 +82,17 @@
             "automerge": false
         },
         {
+            // Automatically updating the verification-metadata.xml for Gradle plugins doesn't work with Renovate.
+            "description": "Require manual review for Gradle plugin updates",
+            "matchManagers": [
+                "gradle"
+            ],
+            "matchDepTypes": [
+                "plugin"
+            ],
+            "automerge": false
+        },
+        {
             "description": "Require manual review when an existing immutable digest or SHA moves",
             "matchUpdateTypes": [
                 "digest"
