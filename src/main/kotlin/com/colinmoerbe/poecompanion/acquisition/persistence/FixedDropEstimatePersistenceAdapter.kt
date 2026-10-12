@@ -77,13 +77,7 @@ internal class FixedDropEstimatePersistenceAdapter(
                 reviewedAt = snapshot.reviewedAt,
             )
         } catch (exception: DataIntegrityViolationException) {
-            if (exception.hasConstraintName(ACTIVE_ESTIMATE_UNIQUE_CONSTRAINT)) {
-                throw FixedDropEstimatePublicationConflictException(
-                    "Another active fixed drop estimate already occupies this exact probability key",
-                    exception,
-                )
-            }
-            throw exception
+            throw translateIntegrityViolation(exception)
         }
     }
 
@@ -130,6 +124,16 @@ internal class FixedDropEstimatePersistenceAdapter(
             snapshots = snapshots,
         )
     }
+
+    private fun translateIntegrityViolation(exception: DataIntegrityViolationException): RuntimeException =
+        if (exception.hasConstraintName(ACTIVE_ESTIMATE_UNIQUE_CONSTRAINT)) {
+            FixedDropEstimatePublicationConflictException(
+                "Another active fixed drop estimate already occupies this exact probability key",
+                exception,
+            )
+        } else {
+            exception
+        }
 
     private fun Throwable.hasConstraintName(constraintName: String): Boolean {
         var current: Throwable? = this

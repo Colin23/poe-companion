@@ -149,11 +149,17 @@ internal class FixedDropEstimateServiceIntegrationTests(
         service.publish(relationship.id, ruthlessScope, snapshot(probability = 0.05), null)
         service.publish(relationship.id, nextVersionScope, snapshot(probability = 0.09), null)
 
-        assertThat(service.findAcceptedTimeline(relationship.id, normalScope)?.snapshots?.single()?.model?.probabilityPerAttempt)
+        assertThat(
+            service.findAcceptedTimeline(relationship.id, normalScope)?.snapshots?.single()?.model?.probabilityPerAttempt,
+        )
             .isEqualTo(0.10)
-        assertThat(service.findAcceptedTimeline(relationship.id, ruthlessScope)?.snapshots?.single()?.model?.probabilityPerAttempt)
+        assertThat(
+            service.findAcceptedTimeline(relationship.id, ruthlessScope)?.snapshots?.single()?.model?.probabilityPerAttempt,
+        )
             .isEqualTo(0.05)
-        assertThat(service.findAcceptedTimeline(relationship.id, nextVersionScope)?.snapshots?.single()?.model?.probabilityPerAttempt)
+        assertThat(
+            service.findAcceptedTimeline(relationship.id, nextVersionScope)?.snapshots?.single()?.model?.probabilityPerAttempt,
+        )
             .isEqualTo(0.09)
     }
 
@@ -164,9 +170,13 @@ internal class FixedDropEstimateServiceIntegrationTests(
         service.publish(relationship.id, normalScope, snapshot(probability = 0.10), null)
         service.publish(relationship.id, leagueScope, snapshot(probability = 0.12), null)
 
-        assertThat(service.findAcceptedTimeline(relationship.id, normalScope)?.snapshots?.single()?.model?.probabilityPerAttempt)
+        assertThat(
+            service.findAcceptedTimeline(relationship.id, normalScope)?.snapshots?.single()?.model?.probabilityPerAttempt,
+        )
             .isEqualTo(0.10)
-        assertThat(service.findAcceptedTimeline(relationship.id, leagueScope)?.snapshots?.single()?.model?.probabilityPerAttempt)
+        assertThat(
+            service.findAcceptedTimeline(relationship.id, leagueScope)?.snapshots?.single()?.model?.probabilityPerAttempt,
+        )
             .isEqualTo(0.12)
     }
 
