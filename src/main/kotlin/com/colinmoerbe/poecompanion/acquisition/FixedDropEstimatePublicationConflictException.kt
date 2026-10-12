@@ -5,7 +5,5 @@ package com.colinmoerbe.poecompanion.acquisition
  *
  * The application does not retry automatically because doing so could silently replace the other publication.
  */
-class FixedDropEstimatePublicationConflictException internal constructor(
-    message: String,
-    cause: Throwable? = null,
-) : RuntimeException(message, cause)
+class FixedDropEstimatePublicationConflictException internal constructor(message: String, cause: Throwable? = null) :
+    RuntimeException(message, cause)

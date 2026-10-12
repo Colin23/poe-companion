@@ -354,15 +354,14 @@ internal class FixedDropEstimateServiceIntegrationTests(
         return relationship
     }
 
-    private fun league(): LeagueDefinition =
-        LeagueDefinition(
-            id = LeagueDefinitionId.generate(),
-            name = "Test league",
-            type = LeagueType.CHALLENGE,
-            participation = LeagueParticipation.SSF,
-            mortality = LeagueMortality.SOFTCORE,
-            realm = GameRealm.PC,
-        ).also(leagueAdapter::save)
+    private fun league(): LeagueDefinition = LeagueDefinition(
+        id = LeagueDefinitionId.generate(),
+        name = "Test league",
+        type = LeagueType.CHALLENGE,
+        participation = LeagueParticipation.SSF,
+        mortality = LeagueMortality.SOFTCORE,
+        realm = GameRealm.PC,
+    ).also(leagueAdapter::save)
 
     private fun snapshot(
         id: DropEstimateId = DropEstimateId.generate(),
@@ -407,10 +406,7 @@ internal class FixedDropEstimateServiceIntegrationTests(
         )
     }
 
-    private fun racePublications(
-        first: () -> Unit,
-        second: () -> Unit,
-    ): List<Result<Unit>> {
+    private fun racePublications(first: () -> Unit, second: () -> Unit): List<Result<Unit>> {
         val executor = Executors.newFixedThreadPool(2)
         val ready = CountDownLatch(2)
         val start = CountDownLatch(1)
