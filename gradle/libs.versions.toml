@@ -4,7 +4,7 @@ ktlint = "1.8.0"
 spring-modulith = "2.1.1"
 
 # plugin versions
-spotless = "8.10.2"
+spotless = "8.10.3"
 forbiddenapis = "3.11"
 detekt = "2.0.0-alpha.6"
 cyclonedx-bom = "3.4.1"
