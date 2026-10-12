@@ -399,11 +399,11 @@ CANNOT_DROP
 
 Source availability remains a separate fact. A source may be AVAILABLE while a relationship is CANNOT_DROP, and historical drop knowledge may remain CAN_DROP while source availability is UNAVAILABLE.
 
-### Deferred Enforcement
+### Enforcement
 
-Normal canonical authoring should maintain one stable `DropRelationship` for one `(AcquisitionSourceId, UniqueDefinitionId)` pair.
-
-The initial domain object cannot enforce that cross-record invariant because it has no repository or curator-collection context. Revisit and enforce pair uniqueness when DropRelationship persistence/curator authoring is introduced rather than inventing an in-memory global registry.
+One stable `DropRelationship` for each `(AcquisitionSourceId, UniqueDefinitionId)` pair is enforced by the
+PostgreSQL identity table introduced in section 12. An existing `DropRelationshipId` cannot be rebound to a different
+source or Unique through the persistence adapter. This does not persist versioned CAN_DROP/CANNOT_DROP knowledge.
 
 ---
 
@@ -499,3 +499,32 @@ the account context and canonical source identities to exist; a non-negative che
 This is manually maintained personalized Acquisition state, independent of the selected EvaluationContext, canonical
 source availability, encounter access knowledge, DropEstimate, and the pure probability model. No resource-derived
 attempt counting or attempt history is introduced.
+
+---
+
+## 12. DropRelationship Identity Is Durable and Pair-Unique
+
+### Context
+
+Canonical DropEstimate persistence needs a foreign key to a real DropRelationship identity. A relationship identity must
+survive changes in which game contexts allow the drop, and multiple IDs for the same source-to-Unique pair would make
+probability knowledge ambiguous.
+
+### Decision
+
+Persist a `DropRelationship` with its stable application-owned UUID and immutable defining pair:
+
+```text
+AcquisitionSourceId
+UniqueDefinitionId
+```
+
+PostgreSQL enforces the unique pair as well as both foreign keys. The persistence adapter follows the AccountContext
+identity pattern: inserting an absent ID is allowed; saving an existing ID with the same pair is idempotent; attempting
+to bind an existing ID to another pair is rejected rather than updating it. Another ID for an existing pair is likewise
+rejected by the database uniqueness constraint.
+
+The presence of a relationship identity is not itself a claim that the source currently drops the Unique. Current
+CAN_DROP/CANNOT_DROP state remains separately resolved by `DropRelationshipTimeline`; its own persistence is deferred
+until a concrete versioned-knowledge authoring/read workflow requires it. No DropEstimate or attempt probability is
+stored here.
