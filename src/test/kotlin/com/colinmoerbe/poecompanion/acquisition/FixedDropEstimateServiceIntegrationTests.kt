@@ -149,18 +149,9 @@ internal class FixedDropEstimateServiceIntegrationTests(
         service.publish(relationship.id, ruthlessScope, snapshot(probability = 0.05), null)
         service.publish(relationship.id, nextVersionScope, snapshot(probability = 0.09), null)
 
-        assertThat(
-            service.findAcceptedTimeline(relationship.id, normalScope)?.snapshots?.single()?.model?.probabilityPerAttempt,
-        )
-            .isEqualTo(0.10)
-        assertThat(
-            service.findAcceptedTimeline(relationship.id, ruthlessScope)?.snapshots?.single()?.model?.probabilityPerAttempt,
-        )
-            .isEqualTo(0.05)
-        assertThat(
-            service.findAcceptedTimeline(relationship.id, nextVersionScope)?.snapshots?.single()?.model?.probabilityPerAttempt,
-        )
-            .isEqualTo(0.09)
+        assertThat(acceptedProbability(relationship.id, normalScope)).isEqualTo(0.10)
+        assertThat(acceptedProbability(relationship.id, ruthlessScope)).isEqualTo(0.05)
+        assertThat(acceptedProbability(relationship.id, nextVersionScope)).isEqualTo(0.09)
     }
 
     @Test
@@ -170,14 +161,8 @@ internal class FixedDropEstimateServiceIntegrationTests(
         service.publish(relationship.id, normalScope, snapshot(probability = 0.10), null)
         service.publish(relationship.id, leagueScope, snapshot(probability = 0.12), null)
 
-        assertThat(
-            service.findAcceptedTimeline(relationship.id, normalScope)?.snapshots?.single()?.model?.probabilityPerAttempt,
-        )
-            .isEqualTo(0.10)
-        assertThat(
-            service.findAcceptedTimeline(relationship.id, leagueScope)?.snapshots?.single()?.model?.probabilityPerAttempt,
-        )
-            .isEqualTo(0.12)
+        assertThat(acceptedProbability(relationship.id, normalScope)).isEqualTo(0.10)
+        assertThat(acceptedProbability(relationship.id, leagueScope)).isEqualTo(0.12)
     }
 
     @Test
@@ -349,6 +334,15 @@ internal class FixedDropEstimateServiceIntegrationTests(
         assertThat(service.findAcceptedTimeline(relationship.id, normalScope)?.snapshots).hasSize(1)
         assertThat(estimateRepository.findById(initial.id.value).orElseThrow().status.name).isEqualTo("SUPERSEDED")
     }
+
+    private fun acceptedProbability(
+        dropRelationshipId: DropRelationshipId,
+        scope: AcquisitionKnowledgeScope,
+    ): Double? = service.findAcceptedTimeline(dropRelationshipId, scope)
+        ?.snapshots
+        ?.single()
+        ?.model
+        ?.probabilityPerAttempt
 
     private fun relationship(): DropRelationship {
         val source = AcquisitionSource(AcquisitionSourceId.generate())
