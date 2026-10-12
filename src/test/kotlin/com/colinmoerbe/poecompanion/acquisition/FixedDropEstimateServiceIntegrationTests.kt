@@ -29,6 +29,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.dao.DuplicateKeyException
+import org.springframework.dao.InvalidDataAccessApiUsageException
 import org.springframework.jdbc.core.JdbcTemplate
 import java.sql.Timestamp
 import java.time.Instant
@@ -207,7 +208,8 @@ internal class FixedDropEstimateServiceIntegrationTests(
 
         assertThatThrownBy {
             service.publish(relationship.id, normalScope, snapshot(id = first.id, probability = 0.15), second.id)
-        }.isInstanceOf(IllegalArgumentException::class.java)
+        }.isInstanceOf(InvalidDataAccessApiUsageException::class.java)
+            .hasCauseInstanceOf(IllegalArgumentException::class.java)
 
         assertThat(service.findAcceptedTimeline(relationship.id, normalScope)?.snapshots).containsExactly(second)
     }
