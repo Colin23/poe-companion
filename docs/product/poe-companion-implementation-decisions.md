@@ -528,3 +528,51 @@ The presence of a relationship identity is not itself a claim that the source cu
 CAN_DROP/CANNOT_DROP state remains separately resolved by `DropRelationshipTimeline`; its own persistence is deferred
 until a concrete versioned-knowledge authoring/read workflow requires it. No DropEstimate or attempt probability is
 stored here.
+
+---
+
+## 13. Accepted Fixed DropEstimate Knowledge Is a Pure Scoped Timeline
+
+### Context
+
+The V0.1 probability calculator supports only fixed independent Bernoulli attempts. A bare probability has no reliable
+meaning without the source/attempt semantics, applicability scope, provenance, and evidence. Game-patch changes to
+probability must not be confused with later curator corrections to an estimate for the same game context.
+
+### Decision
+
+A `FixedDropEstimateTimeline` represents **currently accepted canonical** fixed-probability knowledge for one stable
+`DropRelationship` and one `AcquisitionKnowledgeScope`. It is a pure domain structure, not a database revision.
+Its `FixedDropEstimateSnapshot` records include application-owned `DropEstimateId`, a validated `FixedBernoulliModel`,
+optional effective-from `GamePatch`, canonical `DropEstimateProvenance` (`OFFICIAL`, `MEASURED`,
+`COMMUNITY_ESTIMATE`), nonblank evidence reference, and curator review time.
+
+Snapshots describe accepted **game-patch change points**. Only one accepted snapshot is allowed at each change
+point; each snapshot identity is unique inside its timeline. Patchless resolution becomes `UNKNOWN` if the timeline
+contains any patch change points; an earlier patch without a baseline or preceding snapshot also resolves `UNKNOWN`.
+Scope applicability uses the established strict Normal/Ruthless, CompatibilityVersion, and optional league semantics.
+
+V0.1's only supported counted attempt is `CompletedBossEncounterAttempt(AcquisitionSourceId)`, meaning **one successfully
+completed encounter at that source**, including multi-boss encounters. The timeline checks that this source matches
+the referenced DropRelationship. No one-value attempt enum, free-text attempt-definition field, or generic attempt
+type hierarchy is introduced. The UI can obtain human-readable encounter labels from canonical source knowledge.
+
+Only genuinely supported fixed probabilities without unsupported modifier-dependent conditions belong in these
+timelines. The data type enforces the probability range and structural applicability but cannot independently verify
+the underlying evidence or prove that an encounter's drop mechanics are unconditional. That remains curator
+responsibility. Unsupported conditional probabilities are never approximated as fixed.
+
+### Deliberately Deferred Enforcement
+
+**Game applicability** and **curator authority** are separate histories. A past game-patch estimate can remain the
+accepted answer for that old patch, whereas a replaced or corrected curator estimate for the same patch must not
+remain simultaneously active. Archive/activation semantics, transactional replacement, and uniqueness across
+currently authoritative estimate records belong to the next persistence PR.
+
+Overlapping broad and league-specific scopes must not be silently resolved by repository iteration order; the later
+application read model must enforce deliberate unambiguous selection. Estimating probability also requires separately
+resolving source availability and `DropRelationship` `CAN_DROP` status; a relationship identity alone is not evidence
+that the item currently drops there.
+
+Personal overrides, probability-condition engines, resource-derived attempts, JPA mappings, and calculated acquisition
+read models remain outside this domain-only increment.
