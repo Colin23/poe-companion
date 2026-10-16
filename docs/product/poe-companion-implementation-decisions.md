@@ -576,3 +576,52 @@ that the item currently drops there.
 
 Personal overrides, probability-condition engines, resource-derived attempts, JPA mappings, and calculated acquisition
 read models remain outside this domain-only increment.
+
+---
+
+## 14. Persisting Fixed Drop Estimates Separates Game Change Points from Curator Corrections
+
+### Context
+
+Accepted `FixedDropEstimateTimeline` snapshots are game-patch change points, not revisions of curator decisions. The same
+historical patch can receive better curated evidence, but replacing that evidence must not erase earlier records or
+invalidate still-accepted estimates for other patches. The application must not select two simultaneously authoritative
+estimates for the same exact probability key.
+
+### Decision
+
+Persist one `fixed_drop_estimate` row per immutable curated `DropEstimateId` with foreign keys to the stable
+`DropRelationshipId` and optional `LeagueDefinitionId`. Each row contains the `FIXED_BERNOULLI` model and numeric
+probability, version/ruleset/league scope, optional effective patch and suffix, provenance, nonblank evidence reference,
+and review timestamp. The encounter-attempt source is reconstructed from the referenced relationship, not duplicated.
+
+Curator publication state is `ACTIVE` or `SUPERSEDED`, separate from the immutable domain snapshot, with publication
+and supersession timestamps. The semantic fields of an existing row are not updated. Publishing a replacement assigns a
+new ID, conditionally supersedes only the expected active estimate at the **same exact change-point key**, then inserts
+the replacement in one transaction. An absent expected ID declares an expected empty active slot. Competing operations
+are explicit conflicts without automatic retry; no explicit pessimistic parent-row lock is required.
+
+PostgreSQL enforces **at most one ACTIVE row** per exact
+`(DropRelationship, CompatibilityVersion, Ruleset, optional LeagueDefinition, FIXED_BERNOULLI, optional effective patch)`
+key. Its partial unique index uses `NULLS NOT DISTINCT` so that nullable league, baseline-patch, and patch-suffix
+components cannot admit duplicate active rows. Multiple past `SUPERSEDED` records remain permitted. Other database
+constraints enforce real foreign keys, valid `0 < p <= 1`, and supported provenance/model/lifecycle values.
+
+A read scoped to the **exact** `DropRelationshipId + AcquisitionKnowledgeScope` reconstructs one
+`FixedDropEstimateTimeline` from ACTIVE change-point records, or returns null if none exist. No historical/superseded
+evidence is selected as active, and no implicit league-specific precedence or best-match selection is introduced.
+
+### Explicit Deferrals
+
+Overlapping broad and league-specific estimates can both be valid exact-key records and require an explicit
+cross-scope ambiguity/selection policy in the later acquisition read model. Versioned `DropRelationship` CAN_DROP and
+source-availability knowledge must be resolved separately before using an estimate in a calculator.
+
+A known invalidation with **no replacement fixed probability** cannot be faithfully represented by a timeline
+containing only known numeric snapshots; retaining the earlier baseline would incorrectly carry it forward.
+Before presenting such cases in a read model, introduce an explicit unknown-from-patch knowledge boundary instead of
+deleting the newer estimate and silently reusing an obsolete value. No misleading retract/delete command is included
+in this persistence increment.
+
+Conditional/quantity-dependent probability models, personal overrides, curator draft UI, and resource-derived attempt
+counts are not implemented here.
