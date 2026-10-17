@@ -76,26 +76,32 @@ internal class DropRelationshipKnowledgePersistenceAdapter(
     override fun findAcceptedChangePoints(
         dropRelationshipId: DropRelationshipId,
         scope: AcquisitionKnowledgeScope,
-    ): List<AcceptedDropRelationshipChangePoint> =
-        repository.findAcceptedByExactScope(
-            relationshipId = dropRelationshipId.value,
-            major = scope.compatibilityVersion.major,
-            minor = scope.compatibilityVersion.minor,
-            ruleset = scope.ruleset.name,
-            leagueId = scope.leagueDefinitionId?.value,
-        ).map { entity ->
-            AcceptedDropRelationshipChangePoint(
-                snapshot =
-                DropRelationshipSnapshot(
-                    effectiveFromPatch =
-                    entity.effectivePatchNumber?.let { patchNumber ->
-                        GamePatch(scope.compatibilityVersion, patchNumber, entity.effectivePatchSuffix)
-                    },
-                    state = entity.state,
-                ),
-                revision = entity.revision,
+    ): List<AcceptedDropRelationshipChangePoint> {
+        val entities =
+            repository.findAcceptedByExactScope(
+                relationshipId = dropRelationshipId.value,
+                major = scope.compatibilityVersion.major,
+                minor = scope.compatibilityVersion.minor,
+                ruleset = scope.ruleset.name,
+                leagueId = scope.leagueDefinitionId?.value,
             )
-        }
+        return entities.map { entity -> toDomain(entity, scope) }
+    }
+
+    private fun toDomain(
+        entity: DropRelationshipKnowledgeEntity,
+        scope: AcquisitionKnowledgeScope,
+    ): AcceptedDropRelationshipChangePoint = AcceptedDropRelationshipChangePoint(
+        snapshot =
+        DropRelationshipSnapshot(
+            effectiveFromPatch =
+            entity.effectivePatchNumber?.let { patchNumber ->
+                GamePatch(scope.compatibilityVersion, patchNumber, entity.effectivePatchSuffix)
+            },
+            state = entity.state,
+        ),
+        revision = entity.revision,
+    )
 
     private fun translateIntegrityViolation(exception: DataIntegrityViolationException): RuntimeException =
         if (exception.hasConstraintName(CHANGE_POINT_UNIQUE_CONSTRAINT)) {

@@ -33,8 +33,7 @@ class DropRelationshipKnowledgeService internal constructor(
     fun findAcceptedChangePoints(
         dropRelationshipId: DropRelationshipId,
         scope: AcquisitionKnowledgeScope,
-    ): List<AcceptedDropRelationshipChangePoint> =
-        persistencePort.findAcceptedChangePoints(dropRelationshipId, scope)
+    ): List<AcceptedDropRelationshipChangePoint> = persistencePort.findAcceptedChangePoints(dropRelationshipId, scope)
 
     @Transactional(readOnly = true)
     fun findTimeline(

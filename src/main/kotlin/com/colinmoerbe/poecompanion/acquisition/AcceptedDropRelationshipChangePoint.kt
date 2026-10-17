@@ -5,10 +5,7 @@ package com.colinmoerbe.poecompanion.acquisition
  *
  * A changed accepted fact advances revision; this is not a historical curator revision record.
  */
-data class AcceptedDropRelationshipChangePoint(
-    val snapshot: DropRelationshipSnapshot,
-    val revision: Long,
-) {
+data class AcceptedDropRelationshipChangePoint(val snapshot: DropRelationshipSnapshot, val revision: Long) {
     init {
         require(revision >= 0) { "Accepted drop relationship knowledge revision must not be negative" }
     }
