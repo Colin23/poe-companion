@@ -611,8 +611,7 @@ internal class FixedDropEstimateServiceIntegrationTests(
         realm = GameRealm.PC,
     ).also(leagueAdapter::save)
 
-    private fun context(patch: GamePatch? = null): EvaluationContext =
-        EvaluationContext(version, Ruleset.NORMAL, patch)
+    private fun context(patch: GamePatch? = null): EvaluationContext = EvaluationContext(version, Ruleset.NORMAL, patch)
 
     private fun withdrawal(
         id: FixedProbabilityWithdrawalId = FixedProbabilityWithdrawalId.generate(),
