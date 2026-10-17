@@ -240,9 +240,11 @@ internal class DropRelationshipKnowledgeServiceIntegrationTests(
 
         assertThat(service.findTimeline(id, specificScope)?.resolve(context()))
             .isEqualTo(DropRelationshipResolution.Unknown)
-        assertThat(service.findTimeline(id, specificScope)?.resolve(
-            EvaluationContext(version, Ruleset.NORMAL, leagueDefinitionId = league),
-        )).isEqualTo(DropRelationshipResolution.Resolved(snapshot(state = DropRelationshipState.CANNOT_DROP)))
+        assertThat(
+            service.findTimeline(id, specificScope)?.resolve(
+                EvaluationContext(version, Ruleset.NORMAL, leagueDefinitionId = league),
+            ),
+        ).isEqualTo(DropRelationshipResolution.Resolved(snapshot(state = DropRelationshipState.CANNOT_DROP)))
         assertThat(service.findTimeline(id, normalScope)?.snapshots).containsExactly(snapshot())
     }
 
