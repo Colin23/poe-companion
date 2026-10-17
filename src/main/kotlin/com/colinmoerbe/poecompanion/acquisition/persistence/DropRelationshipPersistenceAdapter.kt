@@ -48,10 +48,9 @@ internal class DropRelationshipPersistenceAdapter(
         return toDomain(entity)
     }
 
-    private fun toDomain(entity: DropRelationshipEntity): DropRelationship =
-        DropRelationship(
-            id = DropRelationshipId(entity.id),
-            acquisitionSourceId = AcquisitionSourceId(entity.acquisitionSourceId),
-            uniqueDefinitionId = UniqueDefinitionId(entity.uniqueDefinitionId),
-        )
+    private fun toDomain(entity: DropRelationshipEntity): DropRelationship = DropRelationship(
+        id = DropRelationshipId(entity.id),
+        acquisitionSourceId = AcquisitionSourceId(entity.acquisitionSourceId),
+        uniqueDefinitionId = UniqueDefinitionId(entity.uniqueDefinitionId),
+    )
 }
