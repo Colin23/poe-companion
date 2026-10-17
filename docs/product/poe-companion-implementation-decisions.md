@@ -928,10 +928,11 @@ drop applicability knowledge, a 10% fixed Bernoulli estimate, and 12 available c
 Baseline compatibility version 3.30 and NORMAL ruleset are test context, not assertions about live PoE mechanics.
 A and B initially have one owned copy each; sparse ManualOwnership represents C=0 by the absence of a row.
 
-The initializer composes existing application services and module-local persistence adapters, rather than adding
-parallel fixture domain types, provider identities, or production command APIs. Its cross-module bootstrap
-coordination lives at the application root, outside individual Spring Modulith modules; no module reaches into
-another module's internal persistence packages.
+The initializer composes existing application services and narrowly scoped, module-owned development access
+points instead of referencing another module's persistence adapters. These access points use existing persistence
+operations inside each owning module, preserving Spring Modulith's public API boundaries. Coordination lives in
+the application root, and no production feature depends on development access points. We do not add parallel fixture
+domain types, provider identities, general-purpose curation APIs, or database migrations.
 
 The application initializer is a callable transactional Spring bean without autonomous startup behavior.
 Automatic loading is restricted to an ApplicationRunner enabled by **both** the `dev` Spring profile and the
