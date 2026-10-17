@@ -48,8 +48,8 @@ import java.time.Instant
  * Creates the canonical A/B/C browser-demo scenario from real persisted domain objects, exactly once.
  *
  * The bean has no startup side effects of its own. Only [DevelopmentFixtureConfiguration] invokes it on startup,
- * while integration tests invoke it explicitly. Module-owned development access points keep persistence private to each module; this orchestrator only
- * depends on exposed root-package APIs and never reaches across module persistence boundaries.
+ * while integration tests invoke it explicitly. Module-owned development access points keep persistence private
+ * to each module; this orchestrator uses exposed root-package APIs without crossing persistence boundaries.
  */
 @Component
 @Suppress("LongParameterList")
