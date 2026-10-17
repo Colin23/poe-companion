@@ -130,7 +130,12 @@ internal class AcquisitionReadModelServiceIntegrationTests(
         encounterService.recordSnapshot(relationship.acquisitionSourceId, broad, encounter(), null)
         encounterService.recordSnapshot(relationship.acquisitionSourceId, specific, encounter(), null)
         relationshipKnowledgeService.recordSnapshot(relationship.id, broad, drop(), null)
-        relationshipKnowledgeService.recordSnapshot(relationship.id, specific, drop(DropRelationshipState.CANNOT_DROP), null)
+        relationshipKnowledgeService.recordSnapshot(
+            relationship.id,
+            specific,
+            drop(DropRelationshipState.CANNOT_DROP),
+            null,
+        )
 
         val assessed = evaluated(unique).sources.single()
 
