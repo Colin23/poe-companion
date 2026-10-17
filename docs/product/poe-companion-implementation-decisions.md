@@ -608,10 +608,8 @@ cross-scope ambiguity/selection policy in the later acquisition read model. Vers
 source-availability knowledge must be resolved separately before using an estimate in a calculator.
 
 A known invalidation with **no replacement fixed probability** cannot be faithfully represented by a timeline
-containing only known numeric snapshots; retaining the earlier baseline would incorrectly carry it forward.
-Before presenting such cases in a read model, introduce an explicit unknown-from-patch knowledge boundary instead of
-deleting the newer estimate and silently reusing an obsolete value. No misleading retract/delete command is included
-in this persistence increment.
+containing only numeric snapshots; a dedicated withdrawal change point was implemented in §19 before the combined
+Acquisition read model. Previous accepted numeric change points remain available for historical game patches.
 
 Conditional/quantity-dependent probability models, personal overrides, curator draft UI, and resource-derived attempt
 counts are not implemented here.
@@ -762,3 +760,55 @@ This is a **capability/correctness order**, not a license to weaken an invariant
 queries merely as a convenience. Test concurrency, complete-row consistency and rollback at the database boundary.
 Do not mix direct JDBC with JPA by default; native bulk updates can bypass the JPA persistence context, so flush
 and clear managed state appropriately before reconstructing affected entity collections.
+
+---
+
+## 19. Accepted Fixed-Probability Withdrawal Change Points
+
+### Context
+
+A published fixed estimate can cease to be trustworthy after an official game patch, without a known replacement
+number. Removing a newer numeric snapshot would allow an older numeric rate to carry forward incorrectly. A withdrawal
+is **not** evidence that a relationship CANNOT_DROP, a source is UNAVAILABLE, or that the drop rate is zero.
+
+### Decision
+
+The accepted `FixedDropEstimateTimeline` now contains a discriminated sequence of
+`FixedProbabilityChangePoint.Known(FixedDropEstimateSnapshot)` and
+`FixedProbabilityChangePoint.Withdrawn(FixedProbabilityWithdrawal)` values. Numeric snapshots retain strictly
+validated `FixedBernoulliModel` values. An explicit withdrawal has its own application-owned
+`FixedProbabilityWithdrawalId`, effective game patch (or version baseline), mandatory nonblank reason/evidence
+reference, and curator review timestamp; it has no numeric model. `FixedProbabilityPublicationId` distinguishes an
+estimate identity from a withdrawal identity, so the expected-active token can guard either publication kind.
+
+The timeline preserves normal strict source/scope/version/patch applicability and the accepted game-change-point
+ordering. Its latest applicable numeric record resolves normally; its latest applicable withdrawal resolves
+`FixedDropEstimateResolution.Unknown`, not an invented zero, and never falls back to an earlier rate after the
+withdrawal patch. A withdrawal-only accepted timeline is valid. A missing exact-scope timeline still returns null.
+Absent patch precision stays UNKNOWN when any patch-specific change point exists.
+
+Flyway V017 extends the existing immutable `fixed_drop_estimate` publication table with a
+`knowledge_kind` discriminator (`ESTIMATE` / `WITHDRAWAL`) and nullable `withdrawal_reason`. Existing rows
+are `ESTIMATE` records; numeric/provenance columns become nullable **only for withdrawal rows**. A cross-column
+database constraint requires a validated numeric probability and provenance exclusively for ESTIMATE rows, and
+a nonblank reason but no numeric/provenance fields for WITHDRAWAL rows. Evidence, timestamps and lifecycle remain
+required for both. The model category remains `FIXED_BERNOULLI`; `knowledge_kind` identifies the explicit
+knowledge boundary for this fixed-model category.
+
+Both kinds share the existing `ACTIVE`-only unique exact-key index (`NULLS NOT DISTINCT`) and
+`ACTIVE`/`SUPERSEDED` lifecycle. Publication inserts an immutable row, conditionally superseding the expected
+**type-checked active publication ID** at exactly the same relationship/scope/effective-patch key in one transaction.
+An accepted game-patch withdrawal does **not** supersede a different earlier patch's active row; instead it becomes
+the latest applicable accepted game fact for newer evaluation contexts. A curator correction *at the same key*
+supersedes its previous active record but retains that evidence for audit. Races report conflicts without automatic
+retries. Reinstatement publishes a new fixed estimate at the same key or at a later game change point.
+
+### Persistence and Scope
+
+Spring Data JPA owns entity mapping and accepted-record reads, with narrowly targeted native PostgreSQL queries
+for compare-and-set supersession and immutable publication. Direct JDBC is not required in production. Database
+constraint tests may use JDBC to exercise invalid raw rows.
+
+Withdrawal does not independently establish or revoke drop relationship applicability, source availability,
+personal attempts, or an alternative probability model. The combined Acquisition read model will resolve those
+dimensions independently, without silently preferring league-specific facts or assuming probability from identity.

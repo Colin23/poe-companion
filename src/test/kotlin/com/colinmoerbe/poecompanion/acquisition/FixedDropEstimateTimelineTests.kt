@@ -214,6 +214,128 @@ class FixedDropEstimateTimelineTests {
             .isInstanceOf(UnsupportedOperationException::class.java)
     }
 
+    @Test
+    fun `withdrawal is a distinct canonical publication identity`() {
+        val id = FixedProbabilityWithdrawalId.generate()
+
+        assertThat(FixedProbabilityWithdrawalId(id.value)).isEqualTo(id)
+        assertThat(FixedProbabilityPublicationId.Withdrawal(id).value).isEqualTo(id.value)
+        assertThat(FixedProbabilityPublicationId.Estimate(DropEstimateId(id.value)))
+            .isNotEqualTo(FixedProbabilityPublicationId.Withdrawal(id))
+    }
+
+    @Test
+    fun `withdrawal cannot have blank reason or evidence reference`() {
+        assertThatThrownBy { withdrawal(reason = " \t ") }.isInstanceOf(IllegalArgumentException::class.java)
+        assertThatThrownBy { withdrawal(evidenceReference = " \t ") }
+            .isInstanceOf(IllegalArgumentException::class.java)
+    }
+
+    @Test
+    fun `known withdrawal and reestablished estimate should resolve by change point`() {
+        val baseline = snapshot(probability = 0.10)
+        val invalidated = withdrawal(patch = GamePatch(version, 2))
+        val reestablished = snapshot(patch = GamePatch(version, 4), probability = 0.08)
+        val timeline = withWithdrawal(listOf(baseline, reestablished), listOf(invalidated))
+
+        assertThat(timeline.changePoints).containsExactly(
+            FixedProbabilityChangePoint.Known(baseline),
+            FixedProbabilityChangePoint.Withdrawn(invalidated),
+            FixedProbabilityChangePoint.Known(reestablished),
+        )
+        assertThat(timeline.resolve(EvaluationContext(version, Ruleset.NORMAL, GamePatch(version, 1))))
+            .isEqualTo(FixedDropEstimateResolution.Resolved(baseline))
+        assertThat(timeline.resolve(EvaluationContext(version, Ruleset.NORMAL, GamePatch(version, 3))))
+            .isEqualTo(FixedDropEstimateResolution.Unknown)
+        assertThat(timeline.resolve(EvaluationContext(version, Ruleset.NORMAL, GamePatch(version, 4))))
+            .isEqualTo(FixedDropEstimateResolution.Resolved(reestablished))
+        assertThat(timeline.resolve(EvaluationContext(version, Ruleset.NORMAL)))
+            .isEqualTo(FixedDropEstimateResolution.Unknown)
+    }
+
+    @Test
+    fun `withdrawal-only baseline remains unknown even with precise or absent patch`() {
+        val invalidation = withdrawal()
+        val timeline = withWithdrawal(emptyList(), listOf(invalidation))
+
+        assertThat(timeline.snapshots).isEmpty()
+        assertThat(timeline.changePoints).containsExactly(FixedProbabilityChangePoint.Withdrawn(invalidation))
+        assertThat(timeline.resolve(EvaluationContext(version, Ruleset.NORMAL)))
+            .isEqualTo(FixedDropEstimateResolution.Unknown)
+        assertThat(timeline.resolve(EvaluationContext(version, Ruleset.NORMAL, GamePatch(version, 3))))
+            .isEqualTo(FixedDropEstimateResolution.Unknown)
+    }
+
+    @Test
+    fun `later withdrawal with no baseline should not imply prior knowledge`() {
+        val invalidation = withdrawal(patch = GamePatch(version, 2))
+        val timeline = withWithdrawal(emptyList(), listOf(invalidation))
+
+        assertThat(timeline.resolve(EvaluationContext(version, Ruleset.NORMAL, GamePatch(version, 1))))
+            .isEqualTo(FixedDropEstimateResolution.Unknown)
+        assertThat(timeline.resolve(EvaluationContext(version, Ruleset.NORMAL, GamePatch(version, 2))))
+            .isEqualTo(FixedDropEstimateResolution.Unknown)
+    }
+
+    @Test
+    fun `a withdrawal and numeric estimate cannot occupy the same accepted change point`() {
+        assertThatThrownBy {
+            withWithdrawal(listOf(snapshot()), listOf(withdrawal()))
+        }.isInstanceOf(IllegalArgumentException::class.java)
+    }
+
+    @Test
+    fun `withdrawal patches must match compatibility version and identities must be unique`() {
+        assertThatThrownBy {
+            withWithdrawal(emptyList(), listOf(withdrawal(patch = GamePatch(CompatibilityVersion(3, 31), 2))))
+        }.isInstanceOf(IllegalArgumentException::class.java)
+        val id = FixedProbabilityWithdrawalId.generate()
+        assertThatThrownBy {
+            withWithdrawal(
+                emptyList(),
+                listOf(withdrawal(id = id), withdrawal(id = id, patch = GamePatch(version, 2))),
+            )
+        }.isInstanceOf(IllegalArgumentException::class.java)
+    }
+
+    @Test
+    fun `timeline must defensively copy and freeze withdrawal and combined lists`() {
+        val invalidation = withdrawal()
+        val mutable = mutableListOf(invalidation)
+        val timeline = withWithdrawal(emptyList(), mutable)
+        mutable.add(withdrawal(patch = GamePatch(version, 2)))
+
+        assertThat(timeline.withdrawals).containsExactly(invalidation)
+        assertThatThrownBy { (timeline.withdrawals as MutableList<FixedProbabilityWithdrawal>).clear() }
+            .isInstanceOf(UnsupportedOperationException::class.java)
+        assertThatThrownBy { (timeline.changePoints as MutableList<FixedProbabilityChangePoint>).clear() }
+            .isInstanceOf(UnsupportedOperationException::class.java)
+    }
+
+    private fun withWithdrawal(
+        known: List<FixedDropEstimateSnapshot>,
+        withdrawn: List<FixedProbabilityWithdrawal>,
+    ): FixedDropEstimateTimeline = FixedDropEstimateTimeline(
+        dropRelationship = relationship,
+        scope = AcquisitionKnowledgeScope(version, Ruleset.NORMAL),
+        attemptDefinition = CompletedBossEncounterAttempt(relationship.acquisitionSourceId),
+        snapshots = known,
+        withdrawals = withdrawn,
+    )
+
+    private fun withdrawal(
+        id: FixedProbabilityWithdrawalId = FixedProbabilityWithdrawalId.generate(),
+        patch: GamePatch? = null,
+        reason: String = "Game changes invalidate the old fixed rate",
+        evidenceReference: String = "Developer-curated evidence #withdrawal",
+    ): FixedProbabilityWithdrawal = FixedProbabilityWithdrawal(
+        id = id,
+        effectiveFromPatch = patch,
+        reason = reason,
+        evidenceReference = evidenceReference,
+        reviewedAt = reviewedAt,
+    )
+
     private fun timeline(
         vararg snapshots: FixedDropEstimateSnapshot,
         leagueDefinitionId: LeagueDefinitionId? = null,

@@ -1,22 +1,20 @@
 package com.colinmoerbe.poecompanion.acquisition
 
 /**
- * Application-facing boundary for canonical fixed-estimate publication and exact-scope reconstruction.
+ * Boundary for publishing immutable accepted probability knowledge and rebuilding exact-scope game timelines.
  */
 internal interface FixedDropEstimatePersistencePort {
     fun findDropRelationshipById(id: DropRelationshipId): DropRelationship?
 
     /**
-     * Publish one new immutable estimate, superseding only the exact existing active change point if expected.
-     *
-     * A null expected identity means that the caller observed no active estimate at the exact key.
-     * Concurrent changes raise [FixedDropEstimatePublicationConflictException].
+     * One active record (numeric or withdrawal) may occupy an exact game change point.
+     * Null means the curator expects an empty slot; all races and stale expectations are explicit conflicts.
      */
     fun publish(
         dropRelationshipId: DropRelationshipId,
         scope: AcquisitionKnowledgeScope,
-        snapshot: FixedDropEstimateSnapshot,
-        expectedActiveEstimateId: DropEstimateId?,
+        changePoint: FixedProbabilityChangePoint,
+        expectedActivePublicationId: FixedProbabilityPublicationId?,
     )
 
     fun findAcceptedTimeline(

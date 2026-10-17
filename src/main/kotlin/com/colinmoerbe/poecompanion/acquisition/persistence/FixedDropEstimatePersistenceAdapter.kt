@@ -10,6 +10,10 @@ import com.colinmoerbe.poecompanion.acquisition.FixedDropEstimatePersistencePort
 import com.colinmoerbe.poecompanion.acquisition.FixedDropEstimatePublicationConflictException
 import com.colinmoerbe.poecompanion.acquisition.FixedDropEstimateSnapshot
 import com.colinmoerbe.poecompanion.acquisition.FixedDropEstimateTimeline
+import com.colinmoerbe.poecompanion.acquisition.FixedProbabilityChangePoint
+import com.colinmoerbe.poecompanion.acquisition.FixedProbabilityPublicationId
+import com.colinmoerbe.poecompanion.acquisition.FixedProbabilityWithdrawal
+import com.colinmoerbe.poecompanion.acquisition.FixedProbabilityWithdrawalId
 import com.colinmoerbe.poecompanion.league.GamePatch
 import org.hibernate.exception.ConstraintViolationException
 import org.springframework.dao.DataIntegrityViolationException
@@ -17,7 +21,8 @@ import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 
 /**
- * Atomically publishes canonical estimates; only lifecycle fields can change after a record is inserted.
+ * Publishes immutable estimate or withdrawal records with one shared ACTIVE exact-key constraint.
+ * Only ACTIVE/SUPERSEDED lifecycle fields change after insertion.
  */
 @Repository
 internal class FixedDropEstimatePersistenceAdapter(
@@ -31,54 +36,90 @@ internal class FixedDropEstimatePersistenceAdapter(
     override fun publish(
         dropRelationshipId: DropRelationshipId,
         scope: AcquisitionKnowledgeScope,
-        snapshot: FixedDropEstimateSnapshot,
-        expectedActiveEstimateId: DropEstimateId?,
+        changePoint: FixedProbabilityChangePoint,
+        expectedActivePublicationId: FixedProbabilityPublicationId?,
     ) {
-        require(!repository.existsById(snapshot.id.value)) {
-            "Drop estimate identity already exists: ${snapshot.id}"
+        require(!repository.existsById(changePoint.publicationId.value)) {
+            "Probability publication identity already exists: ${changePoint.publicationId}"
         }
-
-        val patchNumber = snapshot.effectiveFromPatch?.patch
-        val patchSuffix = snapshot.effectiveFromPatch?.suffix
-
-        if (expectedActiveEstimateId != null) {
-            val transitioned =
-                repository.supersedeActiveIfExpected(
-                    expectedId = expectedActiveEstimateId.value,
-                    relationshipId = dropRelationshipId.value,
-                    major = scope.compatibilityVersion.major,
-                    minor = scope.compatibilityVersion.minor,
-                    ruleset = scope.ruleset.name,
-                    leagueId = scope.leagueDefinitionId?.value,
-                    patchNumber = patchNumber,
-                    patchSuffix = patchSuffix,
-                )
-
-            if (transitioned != 1) {
-                throw FixedDropEstimatePublicationConflictException(
-                    "Expected active fixed drop estimate was not found at this exact probability key",
-                )
-            }
+        if (expectedActivePublicationId != null) {
+            supersedeExpected(dropRelationshipId, scope, changePoint, expectedActivePublicationId)
         }
-
         try {
-            repository.insertActive(
-                id = snapshot.id.value,
-                relationshipId = dropRelationshipId.value,
+            when (changePoint) {
+                is FixedProbabilityChangePoint.Known -> insertEstimate(dropRelationshipId, scope, changePoint.estimate)
+                is FixedProbabilityChangePoint.Withdrawn ->
+                    insertWithdrawal(dropRelationshipId, scope, changePoint.withdrawal)
+            }
+        } catch (exception: DataIntegrityViolationException) {
+            throw translateIntegrityViolation(exception)
+        }
+    }
+
+    private fun supersedeExpected(
+        relationshipId: DropRelationshipId,
+        scope: AcquisitionKnowledgeScope,
+        changePoint: FixedProbabilityChangePoint,
+        expected: FixedProbabilityPublicationId,
+    ) {
+        val transitioned =
+            repository.supersedeActiveIfExpected(
+                expectedId = expected.value,
+                expectedKnowledgeKind = kind(expected).name,
+                relationshipId = relationshipId.value,
                 major = scope.compatibilityVersion.major,
                 minor = scope.compatibilityVersion.minor,
                 ruleset = scope.ruleset.name,
                 leagueId = scope.leagueDefinitionId?.value,
-                patchNumber = patchNumber,
-                patchSuffix = patchSuffix,
-                probability = snapshot.model.probabilityPerAttempt,
-                provenance = snapshot.provenance.name,
-                evidenceReference = snapshot.evidenceReference,
-                reviewedAt = snapshot.reviewedAt,
+                patchNumber = changePoint.effectiveFromPatch?.patch,
+                patchSuffix = changePoint.effectiveFromPatch?.suffix,
             )
-        } catch (exception: DataIntegrityViolationException) {
-            throw translateIntegrityViolation(exception)
+        if (transitioned != 1) {
+            throw FixedDropEstimatePublicationConflictException(
+                "Expected active probability publication was not found at this exact change point",
+            )
         }
+    }
+
+    private fun insertEstimate(
+        relationshipId: DropRelationshipId,
+        scope: AcquisitionKnowledgeScope,
+        snapshot: FixedDropEstimateSnapshot,
+    ) {
+        repository.insertActive(
+            id = snapshot.id.value,
+            relationshipId = relationshipId.value,
+            major = scope.compatibilityVersion.major,
+            minor = scope.compatibilityVersion.minor,
+            ruleset = scope.ruleset.name,
+            leagueId = scope.leagueDefinitionId?.value,
+            patchNumber = snapshot.effectiveFromPatch?.patch,
+            patchSuffix = snapshot.effectiveFromPatch?.suffix,
+            probability = snapshot.model.probabilityPerAttempt,
+            provenance = snapshot.provenance.name,
+            evidenceReference = snapshot.evidenceReference,
+            reviewedAt = snapshot.reviewedAt,
+        )
+    }
+
+    private fun insertWithdrawal(
+        relationshipId: DropRelationshipId,
+        scope: AcquisitionKnowledgeScope,
+        withdrawal: FixedProbabilityWithdrawal,
+    ) {
+        repository.insertActiveWithdrawal(
+            id = withdrawal.id.value,
+            relationshipId = relationshipId.value,
+            major = scope.compatibilityVersion.major,
+            minor = scope.compatibilityVersion.minor,
+            ruleset = scope.ruleset.name,
+            leagueId = scope.leagueDefinitionId?.value,
+            patchNumber = withdrawal.effectiveFromPatch?.patch,
+            patchSuffix = withdrawal.effectiveFromPatch?.suffix,
+            reason = withdrawal.reason,
+            evidenceReference = withdrawal.evidenceReference,
+            reviewedAt = withdrawal.reviewedAt,
+        )
     }
 
     @Transactional(readOnly = true)
@@ -86,7 +127,7 @@ internal class FixedDropEstimatePersistenceAdapter(
         dropRelationshipId: DropRelationshipId,
         scope: AcquisitionKnowledgeScope,
     ): FixedDropEstimateTimeline? {
-        val records =
+        val accepted =
             repository.findActiveByExactScope(
                 relationshipId = dropRelationshipId.value,
                 major = scope.compatibilityVersion.major,
@@ -94,41 +135,54 @@ internal class FixedDropEstimatePersistenceAdapter(
                 ruleset = scope.ruleset.name,
                 leagueId = scope.leagueDefinitionId?.value,
             )
-        if (records.isEmpty()) {
-            return null
-        }
+        if (accepted.isEmpty()) return null
 
         val relationship =
             requireNotNull(findDropRelationshipById(dropRelationshipId)) {
-                "Published drop estimates reference an unknown relationship: $dropRelationshipId"
+                "Published probability knowledge references an unknown relationship: $dropRelationshipId"
             }
-        val snapshots =
-            records.map { entity ->
-                FixedDropEstimateSnapshot(
-                    id = DropEstimateId(entity.id),
-                    effectiveFromPatch =
-                    entity.effectivePatchNumber?.let { patchNumber ->
-                        GamePatch(scope.compatibilityVersion, patchNumber, entity.effectivePatchSuffix)
-                    },
-                    model = FixedBernoulliModel(entity.probabilityPerAttempt),
-                    provenance = entity.provenance,
-                    evidenceReference = entity.evidenceReference,
-                    reviewedAt = entity.reviewedAt,
-                )
-            }
-
         return FixedDropEstimateTimeline(
             dropRelationship = relationship,
             scope = scope,
             attemptDefinition = CompletedBossEncounterAttempt(relationship.acquisitionSourceId),
-            snapshots = snapshots,
+            snapshots = accepted.filter { it.knowledgeKind == FixedProbabilityKnowledgeKind.ESTIMATE }
+                .map { toEstimate(it, scope) },
+            withdrawals = accepted.filter { it.knowledgeKind == FixedProbabilityKnowledgeKind.WITHDRAWAL }
+                .map { toWithdrawal(it, scope) },
         )
+    }
+
+    private fun toEstimate(entity: FixedDropEstimateEntity, scope: AcquisitionKnowledgeScope): FixedDropEstimateSnapshot =
+        FixedDropEstimateSnapshot(
+            id = DropEstimateId(entity.id),
+            effectiveFromPatch = patch(entity, scope),
+            model = FixedBernoulliModel(requireNotNull(entity.probabilityPerAttempt)),
+            provenance = requireNotNull(entity.provenance),
+            evidenceReference = entity.evidenceReference,
+            reviewedAt = entity.reviewedAt,
+        )
+
+    private fun toWithdrawal(entity: FixedDropEstimateEntity, scope: AcquisitionKnowledgeScope): FixedProbabilityWithdrawal =
+        FixedProbabilityWithdrawal(
+            id = FixedProbabilityWithdrawalId(entity.id),
+            effectiveFromPatch = patch(entity, scope),
+            reason = requireNotNull(entity.withdrawalReason),
+            evidenceReference = entity.evidenceReference,
+            reviewedAt = entity.reviewedAt,
+        )
+
+    private fun patch(entity: FixedDropEstimateEntity, scope: AcquisitionKnowledgeScope): GamePatch? =
+        entity.effectivePatchNumber?.let { GamePatch(scope.compatibilityVersion, it, entity.effectivePatchSuffix) }
+
+    private fun kind(id: FixedProbabilityPublicationId): FixedProbabilityKnowledgeKind = when (id) {
+        is FixedProbabilityPublicationId.Estimate -> FixedProbabilityKnowledgeKind.ESTIMATE
+        is FixedProbabilityPublicationId.Withdrawal -> FixedProbabilityKnowledgeKind.WITHDRAWAL
     }
 
     private fun translateIntegrityViolation(exception: DataIntegrityViolationException): RuntimeException =
         if (exception.hasConstraintName(ACTIVE_ESTIMATE_UNIQUE_CONSTRAINT)) {
             FixedDropEstimatePublicationConflictException(
-                "Another active fixed drop estimate already occupies this exact probability key",
+                "Another active probability publication already occupies this exact change point",
                 exception,
             )
         } else {

@@ -12,7 +12,7 @@ import java.time.Instant
 import java.util.UUID
 
 /**
- * One immutable curated estimate with a separate mutable ACTIVE/SUPERSEDED publication lifecycle.
+ * One immutable estimate or withdrawal with a separate mutable ACTIVE/SUPERSEDED publication lifecycle.
  */
 @Entity
 @Table(name = "fixed_drop_estimate")
@@ -37,11 +37,16 @@ internal open class FixedDropEstimateEntity(
     open var effectivePatchNumber: Int?,
     @Column(name = "effective_patch_suffix", updatable = false, length = 32)
     open var effectivePatchSuffix: String?,
-    @Column(name = "probability_per_attempt", nullable = false, updatable = false)
-    open var probabilityPerAttempt: Double,
+    @Column(name = "probability_per_attempt", updatable = false)
+    open var probabilityPerAttempt: Double?,
     @Enumerated(EnumType.STRING)
-    @Column(name = "provenance", nullable = false, updatable = false, length = 32)
-    open var provenance: DropEstimateProvenance,
+    @Column(name = "provenance", updatable = false, length = 32)
+    open var provenance: DropEstimateProvenance?,
+    @Enumerated(EnumType.STRING)
+    @Column(name = "knowledge_kind", nullable = false, updatable = false, length = 16)
+    open var knowledgeKind: FixedProbabilityKnowledgeKind,
+    @Column(name = "withdrawal_reason", updatable = false, columnDefinition = "TEXT")
+    open var withdrawalReason: String?,
     @Column(name = "evidence_reference", nullable = false, updatable = false, columnDefinition = "TEXT")
     open var evidenceReference: String,
     @Column(name = "reviewed_at", nullable = false, updatable = false)
