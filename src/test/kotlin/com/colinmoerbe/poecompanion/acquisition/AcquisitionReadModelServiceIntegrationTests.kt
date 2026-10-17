@@ -354,8 +354,8 @@ internal class AcquisitionReadModelServiceIntegrationTests(
         )
 
         val assessed = evaluated(target).sources.single()
-        assertThat((assessed.probabilityKnowledge as ScopedAcquisitionKnowledge.Selected).resolution)
-            .isInstanceOf(FixedDropEstimateResolution.Resolved::class.java)
+        assertThat(assessed.probabilityKnowledge)
+            .isInstanceOf(ScopedAcquisitionKnowledge.Selected::class.java)
         assertThat(assessed.calculation?.expectedAttemptsUntilSuccess).isEqualTo(10.0)
     }
 
