@@ -4,10 +4,10 @@ import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.acquisition.persistence.AcquisitionSourcePersistenceAdapter
 import com.colinmoerbe.poecompanion.acquisition.persistence.DropRelationshipPersistenceAdapter
 import com.colinmoerbe.poecompanion.acquisition.persistence.SpringDataAvailableAttemptsRepository
-import com.colinmoerbe.poecompanion.acquisition.persistence.SpringDataFixedDropEstimateRepository
 import com.colinmoerbe.poecompanion.acquisition.persistence.SpringDataBossEncounterKnowledgeRepository
 import com.colinmoerbe.poecompanion.acquisition.persistence.SpringDataDropRelationshipKnowledgeRepository
 import com.colinmoerbe.poecompanion.acquisition.persistence.SpringDataDropRelationshipRepository
+import com.colinmoerbe.poecompanion.acquisition.persistence.SpringDataFixedDropEstimateRepository
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinition
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
 import com.colinmoerbe.poecompanion.catalog.persistence.UniqueDefinitionPersistenceAdapter
@@ -222,7 +222,6 @@ internal class AcquisitionReadModelServiceIntegrationTests(
         )
     }
 
-
     @Test
     fun `known fixed probability and twelve recorded attempts should produce the canonical outlook`() {
         val accountId = selectAccount()
@@ -398,8 +397,9 @@ internal class AcquisitionReadModelServiceIntegrationTests(
         val target = unique()
         val siblingUnique = unique()
         val primary = relationship(target)
-        val sibling = DropRelationship(DropRelationshipId.generate(), primary.acquisitionSourceId, siblingUnique)
-            .also(relationshipAdapter::save)
+        val sibling =
+            DropRelationship(DropRelationshipId.generate(), primary.acquisitionSourceId, siblingUnique)
+                .also(relationshipAdapter::save)
         makeApplicable(primary)
         relationshipKnowledgeService.recordSnapshot(sibling.id, broad, drop(), null)
         fixedEstimateService.publish(primary.id, broad, estimate(), null)
