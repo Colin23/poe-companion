@@ -8,8 +8,8 @@ import com.colinmoerbe.poecompanion.acquisition.BossDefinitionCreationConflictEx
 import com.colinmoerbe.poecompanion.acquisition.BossDefinitionId
 import com.colinmoerbe.poecompanion.acquisition.BossDefinitionService
 import com.colinmoerbe.poecompanion.acquisition.FixedDropEstimateResolution
-import com.colinmoerbe.poecompanion.acquisition.ScopedAcquisitionKnowledge
 import com.colinmoerbe.poecompanion.acquisition.AvailableAttemptsService
+import com.colinmoerbe.poecompanion.acquisition.ScopedAcquisitionKnowledge
 import com.colinmoerbe.poecompanion.build.BuildReadinessQueryResult
 import com.colinmoerbe.poecompanion.build.BuildReadinessService
 import com.colinmoerbe.poecompanion.build.UniqueReadiness
@@ -84,8 +84,8 @@ internal class DevelopmentFixtureIntegrationTests(
         val source = (acquisitionReadModel.findForUnique(ids.uniqueC) as AcquisitionQueryResult.Evaluated)
             .sources.single()
         val probability = source.probabilityKnowledge as ScopedAcquisitionKnowledge.Selected
-        assertThat((probability.resolution as FixedDropEstimateResolution.Resolved).snapshot.model.probabilityPerAttempt)
-            .isEqualTo(0.10)
+        val estimate = probability.resolution as FixedDropEstimateResolution.Resolved
+        assertThat(estimate.snapshot.model.probabilityPerAttempt).isEqualTo(0.10)
         assertThat(source.calculation?.probabilityWithinAvailableAttempts)
             .isCloseTo(0.717570463519, offset(1e-10))
         assertThat(source.calculation?.attemptsFor95Percent).isEqualTo(29)
@@ -112,9 +112,9 @@ internal class DevelopmentFixtureIntegrationTests(
 
         assertThat(accountEvaluation.getSelected()?.accountContextId).isEqualTo(otherAccount.id)
         accountEvaluation.select(ids.account, CompatibilityVersion(3, 30))
-        val readiness = buildReadiness.evaluate(ids.variant) as BuildReadinessQueryResult.Evaluated
-        assertThat(readiness.readiness.readiness).isEqualTo(UniqueReadiness.UNIQUE_READY)
-        val a = readiness.readiness.groups.flatMap { it.requirements }
+        val result = buildReadiness.evaluate(ids.variant) as BuildReadinessQueryResult.Evaluated
+        assertThat(result.readiness.readiness).isEqualTo(UniqueReadiness.UNIQUE_READY)
+        val a = result.readiness.groups.flatMap { it.requirements }
             .single { it.requirement.uniqueDefinitionId == ids.uniqueA }
         assertThat(a.ownedQuantity).isEqualTo(2)
         val source = (acquisitionReadModel.findForUnique(ids.uniqueC) as AcquisitionQueryResult.Evaluated)
