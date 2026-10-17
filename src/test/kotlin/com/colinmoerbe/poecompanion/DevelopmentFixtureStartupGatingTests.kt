@@ -2,17 +2,12 @@ package com.colinmoerbe.poecompanion
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.springframework.boot.autoconfigure.AutoConfigurations
 import org.springframework.boot.test.context.runner.ApplicationContextRunner
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
-import org.springframework.boot.ApplicationRunner
 
 /** Verify profile/property gating independently of a database and without running a fixture. */
 internal class DevelopmentFixtureStartupGatingTests {
-    private val contextRunner = ApplicationContextRunner()
-        .withConfiguration(AutoConfigurations.of(DevelopmentFixtureConfiguration::class.java))
-        .withUserConfiguration(TestInitializerConfiguration::class.java)
+    private val contextRunner =
+        ApplicationContextRunner().withUserConfiguration(DevelopmentFixtureConfiguration::class.java)
 
     @Test
     fun `property alone cannot activate the development fixture runner`() {
@@ -33,11 +28,5 @@ internal class DevelopmentFixtureStartupGatingTests {
         contextRunner.run { context ->
             assertThat(context).doesNotHaveBean("developmentFixtureRunner")
         }
-    }
-
-    @Configuration(proxyBeanMethods = false)
-    internal class TestInitializerConfiguration {
-        @Bean
-        fun unusedInitializer(): ApplicationRunner = ApplicationRunner { }
     }
 }
