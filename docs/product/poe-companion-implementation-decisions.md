@@ -909,3 +909,45 @@ Personal probability overrides, conditional/modifier-dependent probability model
 resource reservations, cross-source probability aggregation, and UI/controller work are deferred. The selected
 accepted withdrawal currently resolves as Unknown rather than carrying a separate displayable reason; richer
 withdrawal explanations can be revisited for the Acquisition browser flow.
+
+---
+
+## 22. Persistent Development-Only Vertical Slice Fixture
+
+### Context
+
+Vertical Slice 1 requires the canonical A/B/C → Build X → Boss Y scenario to exist as ordinary PostgreSQL-backed
+application data before the server-rendered browser views are implemented. The current Catalog deliberately has no
+persisted Unique display names; provider ingestion and real metadata belong to later milestones.
+
+### Decision
+
+Create deterministic synthetic application-owned IDs for three UniqueDefinitions, a league/account, Build X's
+activated revision and requirement groups, Boss Y's definition/source, source-to-C relationship, accepted source and
+drop applicability knowledge, a 10% fixed Bernoulli estimate, and 12 available completed-encounter attempts.
+Baseline compatibility version 3.30 and NORMAL ruleset are test context, not assertions about live PoE mechanics.
+A and B initially have one owned copy each; sparse ManualOwnership represents C=0 by the absence of a row.
+
+The initializer composes existing application services and module-local persistence adapters, rather than adding
+parallel fixture domain types, provider identities, or production command APIs. Its cross-module bootstrap
+coordination lives at the application root, outside individual Spring Modulith modules; no module reaches into
+another module's internal persistence packages.
+
+The application initializer is a callable transactional Spring bean without autonomous startup behavior.
+Automatic loading is restricted to an ApplicationRunner enabled by **both** the `dev` Spring profile and the
+explicit `poe-companion.dev-fixture.enabled=true` flag. Production/default startup performs no synthetic inserts.
+Tests invoke the initializer directly without these switches, using Testcontainers PostgreSQL; a separate startup
+test verifies the enabled runner, and lightweight gating tests verify disabled conditions. Standard CI needs no
+extra environment variables or workflow changes.
+
+The first initialization is atomic. A subsequent run verifies the existing canonical scaffold rather than
+creating duplicate identities or silently repairing changes. Player-editable ownership, AvailableAttempts, and an
+already-selected AccountContext are preserved. An inconsistent/partial synthetic fixture is an explicit failure,
+not a reason to overwrite data. A/B/C display labels remain development-only aliases until Catalog metadata is
+designed; synthetic evidence labels must not be presented as real measured PoE facts.
+
+### Scope Limits
+
+The fixture isn't a production Flyway data migration or a replacement for future provider ingestion/curator UI.
+No schema changes, generic seed framework, browser navigation, or automatic reset are introduced. Browser-level
+flow tests will follow when the relevant views exist.
