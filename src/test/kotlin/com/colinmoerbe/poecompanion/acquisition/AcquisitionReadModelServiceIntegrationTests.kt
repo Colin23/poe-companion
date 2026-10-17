@@ -419,17 +419,15 @@ internal class AcquisitionReadModelServiceIntegrationTests(
         assertThat(evaluated(target).sources.single().availableAttempts?.count).isEqualTo(12)
     }
 
-    private fun estimate(
-        probability: Double = 0.10,
-        patch: GamePatch? = null,
-    ): FixedDropEstimateSnapshot = FixedDropEstimateSnapshot(
-        id = DropEstimateId.generate(),
-        effectiveFromPatch = patch,
-        model = FixedBernoulliModel(probability),
-        provenance = DropEstimateProvenance.MEASURED,
-        evidenceReference = "test-evidence",
-        reviewedAt = Instant.parse("2026-10-01T00:00:00Z"),
-    )
+    private fun estimate(probability: Double = 0.10, patch: GamePatch? = null): FixedDropEstimateSnapshot =
+        FixedDropEstimateSnapshot(
+            id = DropEstimateId.generate(),
+            effectiveFromPatch = patch,
+            model = FixedBernoulliModel(probability),
+            provenance = DropEstimateProvenance.MEASURED,
+            evidenceReference = "test-evidence",
+            reviewedAt = Instant.parse("2026-10-01T00:00:00Z"),
+        )
 
     private fun makeApplicable(relationship: DropRelationship) {
         encounterService.recordSnapshot(relationship.acquisitionSourceId, broad, encounter(), null)
