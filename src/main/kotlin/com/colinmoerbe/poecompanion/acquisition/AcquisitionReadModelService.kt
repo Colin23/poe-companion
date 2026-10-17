@@ -60,27 +60,14 @@ class AcquisitionReadModelService internal constructor(
                         relationship.acquisitionSourceId,
                     )
 
-                // Accepted probability alone never makes an unavailable source or inapplicable drop farmable.
-                val sourceAvailable =
-                    (sourceKnowledge as? ScopedAcquisitionKnowledge.Selected<*>)?.resolution.let { resolution ->
-                        resolution is BossEncounterKnowledgeResolution.Resolved &&
-                            resolution.snapshot.availability == AcquisitionSourceAvailability.AVAILABLE
-                    }
-                val relationshipCanDrop =
-                    (relationshipKnowledge as? ScopedAcquisitionKnowledge.Selected<*>)?.resolution.let { resolution ->
-                        resolution is DropRelationshipResolution.Resolved &&
-                            resolution.snapshot.state == DropRelationshipState.CAN_DROP
-                    }
-                val acceptedEstimate =
-                    ((probabilityKnowledge as? ScopedAcquisitionKnowledge.Selected<*>)?.resolution
-                        as? FixedDropEstimateResolution.Resolved)?.snapshot
-
                 val calculation =
-                    if (sourceAvailable && relationshipCanDrop && acceptedEstimate != null) {
-                        FixedProbabilityCalculation.from(relationship, acceptedEstimate.model, availableAttempts)
-                    } else {
-                        null
-                    }
+                    calculateIfApplicable(
+                        relationship,
+                        sourceKnowledge,
+                        relationshipKnowledge,
+                        probabilityKnowledge,
+                        availableAttempts,
+                    )
 
                 AcquisitionSourceAssessment(
                     relationship = relationship,
@@ -93,5 +80,34 @@ class AcquisitionReadModelService internal constructor(
             }
 
         return AcquisitionQueryResult.Evaluated(accountEvaluation, uniqueDefinitionId, assessments)
+    }
+
+    /**
+     * Preserve all separately resolved facts, but calculate only when each canonical prerequisite is affirmative.
+     */
+    private fun calculateIfApplicable(
+        relationship: DropRelationship,
+        sourceKnowledge: ScopedAcquisitionKnowledge<BossEncounterKnowledgeResolution>,
+        relationshipKnowledge: ScopedAcquisitionKnowledge<DropRelationshipResolution>,
+        probabilityKnowledge: ScopedAcquisitionKnowledge<FixedDropEstimateResolution>,
+        availableAttempts: AvailableAttempts?,
+    ): FixedProbabilityCalculation? {
+        val sourceResolution = (sourceKnowledge as? ScopedAcquisitionKnowledge.Selected<*>)?.resolution
+        val dropResolution = (relationshipKnowledge as? ScopedAcquisitionKnowledge.Selected<*>)?.resolution
+        val estimateResolution = (probabilityKnowledge as? ScopedAcquisitionKnowledge.Selected<*>)?.resolution
+
+        val sourceAvailable =
+            sourceResolution is BossEncounterKnowledgeResolution.Resolved &&
+                sourceResolution.snapshot.availability == AcquisitionSourceAvailability.AVAILABLE
+        val relationshipCanDrop =
+            dropResolution is DropRelationshipResolution.Resolved &&
+                dropResolution.snapshot.state == DropRelationshipState.CAN_DROP
+        val acceptedEstimate = (estimateResolution as? FixedDropEstimateResolution.Resolved)?.snapshot
+
+        return if (sourceAvailable && relationshipCanDrop && acceptedEstimate != null) {
+            FixedProbabilityCalculation.from(relationship, acceptedEstimate.model, availableAttempts)
+        } else {
+            null
+        }
     }
 }
