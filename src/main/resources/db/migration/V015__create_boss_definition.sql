@@ -4,7 +4,7 @@ CREATE TABLE poe_companion.boss_definition (
     display_name TEXT NOT NULL,
     CONSTRAINT pk_boss_definition PRIMARY KEY (id),
     -- Require at least one non-whitespace character. POSIX space covers tabs/newlines;
-    -- explicit Unicode/control ranges cover Kotlin Char.isWhitespace values across database locales.
+    -- C collation fixes range/class semantics; explicit Unicode/control ranges cover Kotlin Char.isWhitespace.
     CONSTRAINT chk_boss_definition_display_name_nonblank
-        CHECK (display_name ~ '[^[:space:]\u00A0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\u001C-\u001F]')
+        CHECK (display_name COLLATE "C" ~ '[^[:space:]\u00A0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\u001C-\u001F]')
 );
