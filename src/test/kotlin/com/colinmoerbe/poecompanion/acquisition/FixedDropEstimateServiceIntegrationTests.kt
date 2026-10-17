@@ -107,7 +107,7 @@ internal class FixedDropEstimateServiceIntegrationTests(
         val replacement = snapshot(probability = 0.09, evidenceReference = "research-new")
         service.publish(relationship.id, normalScope, previous, null)
 
-        service.publish(relationship.id, normalScope, replacement, previous.id)
+        service.publish(relationship.id, normalScope, replacement, FixedProbabilityPublicationId.Estimate(previous.id))
 
         val timeline = service.findAcceptedTimeline(relationship.id, normalScope)
         assertThat(timeline?.snapshots).containsExactly(replacement)
@@ -173,7 +173,12 @@ internal class FixedDropEstimateServiceIntegrationTests(
         service.publish(relationship.id, normalScope, original, null)
 
         assertThatThrownBy {
-            service.publish(relationship.id, normalScope, snapshot(probability = 0.25), DropEstimateId.generate())
+            service.publish(
+                relationship.id,
+                normalScope,
+                snapshot(probability = 0.25),
+                FixedProbabilityPublicationId.Estimate(DropEstimateId.generate()),
+            )
         }.isInstanceOf(FixedDropEstimatePublicationConflictException::class.java)
 
         assertThat(service.findAcceptedTimeline(relationship.id, normalScope)?.snapshots).containsExactly(original)
@@ -191,7 +196,7 @@ internal class FixedDropEstimateServiceIntegrationTests(
                 relationship.id,
                 normalScope,
                 snapshot(patch = GamePatch(version, 2)),
-                baseline.id,
+                FixedProbabilityPublicationId.Estimate(baseline.id),
             )
         }.isInstanceOf(FixedDropEstimatePublicationConflictException::class.java)
 
@@ -204,10 +209,15 @@ internal class FixedDropEstimateServiceIntegrationTests(
         val first = snapshot()
         val second = snapshot(probability = 0.20)
         service.publish(relationship.id, normalScope, first, null)
-        service.publish(relationship.id, normalScope, second, first.id)
+        service.publish(relationship.id, normalScope, second, FixedProbabilityPublicationId.Estimate(first.id))
 
         assertThatThrownBy {
-            service.publish(relationship.id, normalScope, snapshot(id = first.id, probability = 0.15), second.id)
+            service.publish(
+                relationship.id,
+                normalScope,
+                snapshot(id = first.id, probability = 0.15),
+                FixedProbabilityPublicationId.Estimate(second.id),
+            )
         }.isInstanceOf(InvalidDataAccessApiUsageException::class.java)
             .hasCauseInstanceOf(IllegalArgumentException::class.java)
 
@@ -322,10 +332,20 @@ internal class FixedDropEstimateServiceIntegrationTests(
         val results =
             racePublications(
                 {
-                    service.publish(relationship.id, normalScope, candidates[0], initial.id)
+                    service.publish(
+                        relationship.id,
+                        normalScope,
+                        candidates[0],
+                        FixedProbabilityPublicationId.Estimate(initial.id),
+                    )
                 },
                 {
-                    service.publish(relationship.id, normalScope, candidates[1], initial.id)
+                    service.publish(
+                        relationship.id,
+                        normalScope,
+                        candidates[1],
+                        FixedProbabilityPublicationId.Estimate(initial.id),
+                    )
                 },
             )
 
@@ -335,6 +355,232 @@ internal class FixedDropEstimateServiceIntegrationTests(
         assertThat(estimateRepository.count()).isEqualTo(2L)
         assertThat(service.findAcceptedTimeline(relationship.id, normalScope)?.snapshots).hasSize(1)
         assertThat(estimateRepository.findById(initial.id.value).orElseThrow().status.name).isEqualTo("SUPERSEDED")
+    }
+
+    @Test
+    fun `accepted withdrawal must stop baseline carry forward until a later estimate`() {
+        val relationship = relationship()
+        val baseline = snapshot(probability = 0.10)
+        val invalidation = withdrawal(patch = GamePatch(version, 2))
+        val restored = snapshot(probability = 0.08, patch = GamePatch(version, 4))
+
+        service.publish(relationship.id, normalScope, baseline, null)
+        service.withdraw(relationship.id, normalScope, invalidation, null)
+        service.publish(relationship.id, normalScope, restored, null)
+
+        val timeline = service.findAcceptedTimeline(relationship.id, normalScope)
+        assertThat(timeline?.snapshots).containsExactly(baseline, restored)
+        assertThat(timeline?.withdrawals).containsExactly(invalidation)
+        assertThat(timeline?.changePoints).containsExactly(
+            FixedProbabilityChangePoint.Known(baseline),
+            FixedProbabilityChangePoint.Withdrawn(invalidation),
+            FixedProbabilityChangePoint.Known(restored),
+        )
+        assertThat(timeline?.resolve(context(GamePatch(version, 1))))
+            .isEqualTo(FixedDropEstimateResolution.Resolved(baseline))
+        assertThat(timeline?.resolve(context(GamePatch(version, 2))))
+            .isEqualTo(FixedDropEstimateResolution.Unknown)
+        assertThat(timeline?.resolve(context(GamePatch(version, 3))))
+            .isEqualTo(FixedDropEstimateResolution.Unknown)
+        assertThat(timeline?.resolve(context(GamePatch(version, 5))))
+            .isEqualTo(FixedDropEstimateResolution.Resolved(restored))
+        assertThat(timeline?.resolve(context())).isEqualTo(FixedDropEstimateResolution.Unknown)
+        assertThat(estimateRepository.count()).isEqualTo(3L)
+    }
+
+    @Test
+    fun `withdrawal can be the only accepted baseline knowledge`() {
+        val relationship = relationship()
+        val invalidation = withdrawal()
+
+        service.withdraw(relationship.id, normalScope, invalidation, null)
+
+        val timeline = service.findAcceptedTimeline(relationship.id, normalScope)
+        assertThat(timeline?.snapshots).isEmpty()
+        assertThat(timeline?.withdrawals).containsExactly(invalidation)
+        assertThat(timeline?.resolve(context())).isEqualTo(FixedDropEstimateResolution.Unknown)
+        assertThat(estimateRepository.findById(invalidation.id.value).orElseThrow().knowledgeKind.name)
+            .isEqualTo("WITHDRAWAL")
+    }
+
+    @Test
+    fun `correcting a baseline estimate into withdrawal retains original immutable evidence`() {
+        val relationship = relationship()
+        val original = snapshot(probability = 0.10, evidenceReference = "earlier-study")
+        val invalidation = withdrawal(evidenceReference = "mechanics-correction")
+        service.publish(relationship.id, normalScope, original, null)
+
+        service.withdraw(
+            relationship.id,
+            normalScope,
+            invalidation,
+            FixedProbabilityPublicationId.Estimate(original.id),
+        )
+
+        assertThat(service.findAcceptedTimeline(relationship.id, normalScope)?.resolve(context()))
+            .isEqualTo(FixedDropEstimateResolution.Unknown)
+        assertThat(service.findAcceptedTimeline(relationship.id, normalScope)?.snapshots).isEmpty()
+        val old = estimateRepository.findById(original.id.value).orElseThrow()
+        assertThat(old.status.name).isEqualTo("SUPERSEDED")
+        assertThat(old.evidenceReference).isEqualTo("earlier-study")
+        assertThat(old.probabilityPerAttempt).isEqualTo(0.10)
+        assertThat(old.supersededAt).isNotNull()
+    }
+
+    @Test
+    fun `a fresh estimate can replace accepted withdrawal without deleting the withdrawal evidence`() {
+        val relationship = relationship()
+        val invalidation = withdrawal()
+        val replacement = snapshot(probability = 0.08)
+        service.withdraw(relationship.id, normalScope, invalidation, null)
+
+        service.publish(
+            relationship.id,
+            normalScope,
+            replacement,
+            FixedProbabilityPublicationId.Withdrawal(invalidation.id),
+        )
+
+        assertThat(service.findAcceptedTimeline(relationship.id, normalScope)?.snapshots).containsExactly(replacement)
+        assertThat(service.findAcceptedTimeline(relationship.id, normalScope)?.withdrawals).isEmpty()
+        assertThat(estimateRepository.findById(invalidation.id.value).orElseThrow().status.name)
+            .isEqualTo("SUPERSEDED")
+        assertThat(estimateRepository.findById(invalidation.id.value).orElseThrow().withdrawalReason)
+            .isEqualTo("Old probability no longer applies")
+    }
+
+    @Test
+    fun `withdrawal validation must reject missing reason evidence and wrong patch version`() {
+        val relationship = relationship()
+        assertThatThrownBy { withdrawal(reason = " \t ") }
+            .isInstanceOf(IllegalArgumentException::class.java)
+        assertThatThrownBy { withdrawal(evidenceReference = " \t ") }
+            .isInstanceOf(IllegalArgumentException::class.java)
+        assertThatThrownBy {
+            service.withdraw(
+                relationship.id,
+                normalScope,
+                withdrawal(patch = GamePatch(CompatibilityVersion(3, 31), 2)),
+                null,
+            )
+        }.isInstanceOf(IllegalArgumentException::class.java)
+        assertThatThrownBy {
+            service.withdraw(DropRelationshipId.generate(), normalScope, withdrawal(), null)
+        }.isInstanceOf(IllegalArgumentException::class.java)
+        assertThat(estimateRepository.count()).isZero()
+    }
+
+    @Test
+    fun `wrong expected publication kind and stale ID cannot supersede a withdrawal`() {
+        val relationship = relationship()
+        val invalidation = withdrawal()
+        service.withdraw(relationship.id, normalScope, invalidation, null)
+
+        assertThatThrownBy {
+            service.publish(
+                relationship.id,
+                normalScope,
+                snapshot(),
+                FixedProbabilityPublicationId.Estimate(DropEstimateId(invalidation.id.value)),
+            )
+        }.isInstanceOf(FixedDropEstimatePublicationConflictException::class.java)
+        assertThatThrownBy {
+            service.withdraw(
+                relationship.id,
+                normalScope,
+                withdrawal(),
+                FixedProbabilityPublicationId.Withdrawal(FixedProbabilityWithdrawalId.generate()),
+            )
+        }.isInstanceOf(FixedDropEstimatePublicationConflictException::class.java)
+        assertThat(service.findAcceptedTimeline(relationship.id, normalScope)?.withdrawals)
+            .containsExactly(invalidation)
+        assertThat(estimateRepository.count()).isEqualTo(1L)
+    }
+
+    @Test
+    fun `active estimate and withdrawal cannot share one exact key`() {
+        val relationship = relationship()
+        val first = snapshot()
+        service.publish(relationship.id, normalScope, first, null)
+
+        assertThatThrownBy {
+            service.withdraw(relationship.id, normalScope, withdrawal(), null)
+        }.isInstanceOf(FixedDropEstimatePublicationConflictException::class.java)
+        assertThat(service.findAcceptedTimeline(relationship.id, normalScope)?.snapshots).containsExactly(first)
+        assertThat(estimateRepository.count()).isEqualTo(1L)
+    }
+
+    @Test
+    fun `database must enforce mutually exclusive withdrawal and numeric payloads`() {
+        val relationship = relationship()
+        assertThatThrownBy { insertRawWithdrawal(relationship.id, reason = " \t ") }
+            .isInstanceOf(DataIntegrityViolationException::class.java)
+        assertThatThrownBy { insertRawWithdrawal(relationship.id, probability = 0.10) }
+            .isInstanceOf(DataIntegrityViolationException::class.java)
+        assertThatThrownBy { insertRawWithdrawal(relationship.id, provenance = "MEASURED") }
+            .isInstanceOf(DataIntegrityViolationException::class.java)
+        assertThatThrownBy { insertRawWithdrawal(relationship.id, reason = null) }
+            .isInstanceOf(DataIntegrityViolationException::class.java)
+        assertThatThrownBy { insertRawWithdrawal(relationship.id, kind = "UNVERIFIED") }
+            .isInstanceOf(DataIntegrityViolationException::class.java)
+        assertThatThrownBy { insertRawWithdrawal(relationship.id, kind = "ESTIMATE") }
+            .isInstanceOf(DataIntegrityViolationException::class.java)
+        assertThat(estimateRepository.count()).isZero()
+    }
+
+    @Test
+    fun `withdrawals should remain exact scope and league isolated`() {
+        val relationship = relationship()
+        val leagueScope = AcquisitionKnowledgeScope(version, Ruleset.NORMAL, league().id)
+        val ruthlessScope = AcquisitionKnowledgeScope(version, Ruleset.RUTHLESS)
+        val initial = snapshot(probability = 0.10)
+        val invalidation = withdrawal()
+        service.publish(relationship.id, normalScope, initial, null)
+        service.withdraw(relationship.id, leagueScope, invalidation, null)
+        service.withdraw(relationship.id, ruthlessScope, withdrawal(), null)
+
+        assertThat(service.findAcceptedTimeline(relationship.id, normalScope)?.resolve(context()))
+            .isEqualTo(FixedDropEstimateResolution.Resolved(initial))
+        assertThat(service.findAcceptedTimeline(relationship.id, leagueScope)?.withdrawals)
+            .containsExactly(invalidation)
+        assertThat(service.findAcceptedTimeline(relationship.id, ruthlessScope)?.snapshots).isEmpty()
+        assertThat(estimateRepository.count()).isEqualTo(3L)
+    }
+
+    @Test
+    fun `competing withdrawal and replacement must protect the same exact active slot`() {
+        val relationship = relationship()
+        val original = snapshot()
+        service.publish(relationship.id, normalScope, original, null)
+        val invalidation = withdrawal()
+        val replacement = snapshot(probability = 0.08)
+        val expected = FixedProbabilityPublicationId.Estimate(original.id)
+
+        val results = racePublications(
+            { service.withdraw(relationship.id, normalScope, invalidation, expected) },
+            { service.publish(relationship.id, normalScope, replacement, expected) },
+        )
+
+        assertThat(results.count { it.isSuccess }).isEqualTo(1)
+        assertThat(results.count { it.exceptionOrNull() is FixedDropEstimatePublicationConflictException })
+            .isEqualTo(1)
+        assertThat(estimateRepository.count()).isEqualTo(2L)
+        assertThat(estimateRepository.findById(original.id.value).orElseThrow().status.name).isEqualTo("SUPERSEDED")
+        assertThat(service.findAcceptedTimeline(relationship.id, normalScope)?.changePoints).hasSize(1)
+    }
+
+    @Test
+    fun `competing first withdrawal and estimate publication allow only one accepted value`() {
+        val relationship = relationship()
+        val results = racePublications(
+            { service.withdraw(relationship.id, normalScope, withdrawal(), null) },
+            { service.publish(relationship.id, normalScope, snapshot(), null) },
+        )
+
+        assertThat(results.count { it.isSuccess }).isEqualTo(1)
+        assertThat(results.count { it.exceptionOrNull() is FixedDropEstimatePublicationConflictException })
+            .isEqualTo(1)
+        assertThat(estimateRepository.count()).isEqualTo(1L)
     }
 
     private fun acceptedProbability(
@@ -364,6 +610,47 @@ internal class FixedDropEstimateServiceIntegrationTests(
         mortality = LeagueMortality.SOFTCORE,
         realm = GameRealm.PC,
     ).also(leagueAdapter::save)
+
+    private fun context(patch: GamePatch? = null): EvaluationContext = EvaluationContext(version, Ruleset.NORMAL, patch)
+
+    private fun withdrawal(
+        id: FixedProbabilityWithdrawalId = FixedProbabilityWithdrawalId.generate(),
+        patch: GamePatch? = null,
+        reason: String = "Old probability no longer applies",
+        evidenceReference: String = "https://example.org/invalidation",
+    ): FixedProbabilityWithdrawal = FixedProbabilityWithdrawal(
+        id = id,
+        effectiveFromPatch = patch,
+        reason = reason,
+        evidenceReference = evidenceReference,
+        reviewedAt = reviewedAt,
+    )
+
+    private fun insertRawWithdrawal(
+        relationshipId: DropRelationshipId,
+        reason: String? = "Invalidated",
+        probability: Double? = null,
+        provenance: String? = null,
+        kind: String = "WITHDRAWAL",
+    ) {
+        jdbcTemplate.update(
+            """
+            INSERT INTO poe_companion.fixed_drop_estimate (
+                id, drop_relationship_id, compatibility_version_major, compatibility_version_minor,
+                ruleset, model_type, evidence_reference, reviewed_at, status, published_at,
+                knowledge_kind, withdrawal_reason, probability_per_attempt, provenance
+            ) VALUES (?, ?, 3, 30, 'NORMAL', 'FIXED_BERNOULLI', ?, ?, 'ACTIVE', CURRENT_TIMESTAMP, ?, ?, ?, ?)
+            """.trimIndent(),
+            UUID.randomUUID(),
+            relationshipId.value,
+            "https://example.org/invalidation",
+            Timestamp.from(reviewedAt),
+            kind,
+            reason,
+            probability,
+            provenance,
+        )
+    }
 
     private fun snapshot(
         id: DropEstimateId = DropEstimateId.generate(),

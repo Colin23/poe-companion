@@ -2,53 +2,59 @@ package com.colinmoerbe.poecompanion.acquisition
 
 import com.colinmoerbe.poecompanion.league.ApplicabilityResult
 import com.colinmoerbe.poecompanion.league.EvaluationContext
+import com.colinmoerbe.poecompanion.league.GamePatch
 import java.util.Collections
 
 /**
- * Currently accepted fixed-probability knowledge for one source-to-Unique relationship in one scope.
+ * Accepted game-patch probability knowledge for one source-to-Unique relationship and one exact scope.
  *
- * Snapshots are game-patch change points, not curator-edit history. Superseded evidence/estimate records and
- * transactional activation are the responsibility of the later persistence workflow.
+ * A withdrawal remains a change point in this timeline, preventing an obsolete numeric rate from carrying forward.
+ * Superseded curator publications are retained only in persistence and never presented as accepted game knowledge.
  */
 class FixedDropEstimateTimeline(
     val dropRelationship: DropRelationship,
     val scope: AcquisitionKnowledgeScope,
     val attemptDefinition: CompletedBossEncounterAttempt,
     snapshots: List<FixedDropEstimateSnapshot>,
+    withdrawals: List<FixedProbabilityWithdrawal> = emptyList(),
 ) {
     val snapshots: List<FixedDropEstimateSnapshot>
+    val withdrawals: List<FixedProbabilityWithdrawal>
+    val changePoints: List<FixedProbabilityChangePoint>
 
     init {
         require(dropRelationship.acquisitionSourceId == attemptDefinition.acquisitionSourceId) {
-            "Fixed drop estimate attempt must refer to the drop relationship's acquisition source"
+            "Fixed probability attempt must refer to the drop relationship's acquisition source"
         }
-        require(snapshots.isNotEmpty()) { "Fixed drop estimate timeline must contain at least one snapshot" }
-        require(snapshots.map { it.id }.distinct().size == snapshots.size) {
-            "Fixed drop estimate timeline must not repeat a canonical estimate identity"
+        val points =
+            snapshots.map { FixedProbabilityChangePoint.Known(it) } +
+                withdrawals.map { FixedProbabilityChangePoint.Withdrawn(it) }
+        require(points.isNotEmpty()) { "Fixed probability timeline must contain at least one accepted change point" }
+        require(points.map { it.publicationId.value }.distinct().size == points.size) {
+            "Fixed probability timeline must not repeat a publication identity"
         }
-        require(snapshots.map { it.effectiveFromPatch }.distinct().size == snapshots.size) {
-            "Fixed drop estimate timeline must not contain duplicate change points"
+        require(points.map { it.effectiveFromPatch }.distinct().size == points.size) {
+            "Fixed probability timeline must not contain duplicate game change points"
         }
         require(
-            snapshots.all {
-                it.effectiveFromPatch == null ||
-                    it.effectiveFromPatch.compatibilityVersion == scope.compatibilityVersion
+            points.all { point ->
+                val effectivePatch = point.effectiveFromPatch
+                effectivePatch == null || effectivePatch.compatibilityVersion == scope.compatibilityVersion
             },
         ) {
-            "Fixed drop estimate snapshot patch must belong to the timeline compatibility version"
+            "Fixed probability change points must belong to the timeline compatibility version"
         }
 
-        this.snapshots =
-            Collections.unmodifiableList(
-                snapshots.sortedWith(Comparator(::compareSnapshotsByEffectivePatch)),
-            )
+        changePoints = Collections.unmodifiableList(points.sortedWith(Comparator(::compareByEffectivePatch)))
+        this.snapshots = Collections.unmodifiableList(
+            changePoints.filterIsInstance<FixedProbabilityChangePoint.Known>().map { it.estimate },
+        )
+        this.withdrawals = Collections.unmodifiableList(
+            changePoints.filterIsInstance<FixedProbabilityChangePoint.Withdrawn>().map { it.withdrawal },
+        )
     }
 
-    /**
-     * Resolves a fixed probability only where its known game-version scope and patch precision allow it.
-     *
-     * Callers must separately establish that the source is available and the relationship currently CAN_DROP.
-     */
+    /** The caller must independently resolve CAN_DROP and source availability. */
     fun resolve(context: EvaluationContext): FixedDropEstimateResolution = when (scope.evaluateAgainst(context)) {
         ApplicabilityResult.DOES_NOT_APPLY -> FixedDropEstimateResolution.DoesNotApply
         ApplicabilityResult.UNKNOWN -> FixedDropEstimateResolution.Unknown
@@ -58,35 +64,29 @@ class FixedDropEstimateTimeline(
     @Suppress("ReturnCount")
     private fun resolvePatch(context: EvaluationContext): FixedDropEstimateResolution {
         val contextPatch = context.gamePatch
-
         if (contextPatch == null) {
-            if (snapshots.any { it.effectiveFromPatch != null }) {
+            if (changePoints.any { it.effectiveFromPatch != null }) {
                 return FixedDropEstimateResolution.Unknown
             }
-
-            return FixedDropEstimateResolution.Resolved(snapshots.single())
+            return resolveAccepted(changePoints.single())
         }
-
-        val applicableSnapshot =
-            snapshots.lastOrNull { snapshot ->
-                val effectivePatch = snapshot.effectiveFromPatch
+        val applicable =
+            changePoints.lastOrNull { changePoint ->
+                val effectivePatch = changePoint.effectiveFromPatch
                 effectivePatch == null || effectivePatch.compareWithinCompatibilityVersion(contextPatch) <= 0
             }
-
-        return applicableSnapshot?.let { FixedDropEstimateResolution.Resolved(it) }
-            ?: FixedDropEstimateResolution.Unknown
+        return applicable?.let(::resolveAccepted) ?: FixedDropEstimateResolution.Unknown
     }
 
-    /**
-     * Baseline first, then patch-specific snapshots in chronological order within the same compatibility version.
-     */
-    private fun compareSnapshotsByEffectivePatch(
-        first: FixedDropEstimateSnapshot,
-        second: FixedDropEstimateSnapshot,
-    ): Int {
-        val firstPatch = first.effectiveFromPatch
-        val secondPatch = second.effectiveFromPatch
+    private fun resolveAccepted(changePoint: FixedProbabilityChangePoint): FixedDropEstimateResolution =
+        when (changePoint) {
+            is FixedProbabilityChangePoint.Known -> FixedDropEstimateResolution.Resolved(changePoint.estimate)
+            is FixedProbabilityChangePoint.Withdrawn -> FixedDropEstimateResolution.Unknown
+        }
 
+    private fun compareByEffectivePatch(first: FixedProbabilityChangePoint, second: FixedProbabilityChangePoint): Int {
+        val firstPatch: GamePatch? = first.effectiveFromPatch
+        val secondPatch: GamePatch? = second.effectiveFromPatch
         return when {
             firstPatch == null && secondPatch == null -> 0
             firstPatch == null -> -1

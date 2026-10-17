@@ -4,9 +4,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 /**
- * Publishes canonical fixed-probability knowledge and retrieves currently accepted estimates for an exact scope.
- *
- * Selection across overlapping scopes and composition with CAN_DROP/source availability belong to a later read model.
+ * Publishes known estimates and explicit withdrawals without inferring CAN_DROP or source availability.
  */
 @Service
 class FixedDropEstimateService internal constructor(private val persistencePort: FixedDropEstimatePersistencePort) {
@@ -15,24 +13,53 @@ class FixedDropEstimateService internal constructor(private val persistencePort:
         dropRelationshipId: DropRelationshipId,
         scope: AcquisitionKnowledgeScope,
         snapshot: FixedDropEstimateSnapshot,
-        expectedActiveEstimateId: DropEstimateId?,
+        expectedActivePublicationId: FixedProbabilityPublicationId?,
+    ) = recordChangePoint(
+        dropRelationshipId,
+        scope,
+        FixedProbabilityChangePoint.Known(snapshot),
+        expectedActivePublicationId,
+    )
+
+    @Transactional
+    fun withdraw(
+        dropRelationshipId: DropRelationshipId,
+        scope: AcquisitionKnowledgeScope,
+        withdrawal: FixedProbabilityWithdrawal,
+        expectedActivePublicationId: FixedProbabilityPublicationId?,
+    ) = recordChangePoint(
+        dropRelationshipId,
+        scope,
+        FixedProbabilityChangePoint.Withdrawn(withdrawal),
+        expectedActivePublicationId,
+    )
+
+    private fun recordChangePoint(
+        dropRelationshipId: DropRelationshipId,
+        scope: AcquisitionKnowledgeScope,
+        changePoint: FixedProbabilityChangePoint,
+        expectedActivePublicationId: FixedProbabilityPublicationId?,
     ) {
-        require(snapshot.id != expectedActiveEstimateId) {
-            "A replacement estimate must have a new identity"
+        require(changePoint.publicationId.value != expectedActivePublicationId?.value) {
+            "A replacement probability publication must have a new identity"
         }
         val relationship =
             requireNotNull(persistencePort.findDropRelationshipById(dropRelationshipId)) {
                 "Unknown drop relationship: $dropRelationshipId"
             }
-
-        // Reuse the exact domain invariants before writing; the database enforces them independently.
         FixedDropEstimateTimeline(
             dropRelationship = relationship,
             scope = scope,
             attemptDefinition = CompletedBossEncounterAttempt(relationship.acquisitionSourceId),
-            snapshots = listOf(snapshot),
+            snapshots =
+            if (changePoint is FixedProbabilityChangePoint.Known) listOf(changePoint.estimate) else emptyList(),
+            withdrawals = if (changePoint is FixedProbabilityChangePoint.Withdrawn) {
+                listOf(changePoint.withdrawal)
+            } else {
+                emptyList()
+            },
         )
-        persistencePort.publish(dropRelationshipId, scope, snapshot, expectedActiveEstimateId)
+        persistencePort.publish(dropRelationshipId, scope, changePoint, expectedActivePublicationId)
     }
 
     @Transactional(readOnly = true)
