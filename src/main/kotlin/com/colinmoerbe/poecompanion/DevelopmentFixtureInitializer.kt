@@ -211,8 +211,7 @@ internal class DevelopmentFixtureInitializer(
         }
     }
 
-    private fun noOtherFixtureIdentitiesExist(): Boolean =
-        uniques.findById(ids.uniqueB) == null &&
+    private fun noOtherFixtureIdentitiesExist(): Boolean = uniques.findById(ids.uniqueB) == null &&
             uniques.findById(ids.uniqueC) == null &&
             leagues.findById(ids.league) == null &&
             accounts.findById(ids.account) == null &&
@@ -236,23 +235,21 @@ internal class DevelopmentFixtureInitializer(
         ),
     )
 
-    private fun encounterSnapshot(): BossEncounterKnowledgeSnapshot =
-        BossEncounterKnowledgeSnapshot(
-            effectiveFromPatch = null,
-            displayLabel = "Boss Y",
-            availability = AcquisitionSourceAvailability.AVAILABLE,
-            bossParticipation = BossParticipation.Fixed(setOf(ids.boss)),
-        )
+    private fun encounterSnapshot(): BossEncounterKnowledgeSnapshot = BossEncounterKnowledgeSnapshot(
+        effectiveFromPatch = null,
+        displayLabel = "Boss Y",
+        availability = AcquisitionSourceAvailability.AVAILABLE,
+        bossParticipation = BossParticipation.Fixed(setOf(ids.boss)),
+    )
 
-    private fun estimateSnapshot(): FixedDropEstimateSnapshot =
-        FixedDropEstimateSnapshot(
-            id = ids.estimate,
-            effectiveFromPatch = null,
-            model = FixedBernoulliModel(FIXED_PROBABILITY),
-            provenance = DropEstimateProvenance.MEASURED,
-            evidenceReference = "synthetic-development-fixture:boss-y-to-unique-c",
-            reviewedAt = Instant.parse("2026-10-01T00:00:00Z"),
-        )
+    private fun estimateSnapshot(): FixedDropEstimateSnapshot = FixedDropEstimateSnapshot(
+        id = ids.estimate,
+        effectiveFromPatch = null,
+        model = FixedBernoulliModel(FIXED_PROBABILITY),
+        provenance = DropEstimateProvenance.MEASURED,
+        evidenceReference = "synthetic-development-fixture:boss-y-to-unique-c",
+        reviewedAt = Instant.parse("2026-10-01T00:00:00Z"),
+    )
     private companion object {
         const val COMPATIBILITY_MAJOR = 3
         const val COMPATIBILITY_MINOR = 30
