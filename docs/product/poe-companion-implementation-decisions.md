@@ -336,21 +336,12 @@ Normal curator workflows should prevent or strongly guard against accidentally c
 
 Do not add a domain test asserting that two same-named bosses are a supported semantic case merely because different `BossDefinitionId` values technically allow construction in isolation.
 
-### Deferred Enforcement
+### Persistence/Curator Follow-Up
 
-Revisit duplicate protection when the first real BossDefinition persistence/curator authoring workflow is implemented.
-
-That workflow must decide what counts as an effective duplicate, including at least:
-
-```text
-leading/trailing whitespace
-case differences
-Unicode normalization
-boss renames or aliases
-whether a legitimate same-display-name/different-entity case exists
-```
-
-The normal path should reject or otherwise strongly block accidental duplicates. A database `UNIQUE(display_name)` constraint must not be introduced before those semantics are decided, because display text remains metadata rather than canonical identity.
+The first BossDefinition persistence and curator-create workflow is implemented in §16. It blocks likely accidental
+duplicates using a conservative display-name comparison while keeping names separate from identity. Rename/alias
+support and exceptional true same-name cases remain explicit future curator decisions, not implicit name keys.
+A database `UNIQUE(display_name)` constraint is intentionally not introduced.
 
 ---
 
@@ -663,3 +654,45 @@ Source availability and encounter metadata remain a separate source-knowledge pe
 league-specific relationship scopes can overlap; cross-scope resolution/ambiguity remains the responsibility of
 the later Acquisition read model. No source availability, probability estimate, calculator or UI is derived from
 these identities or facts alone.
+
+---
+
+## 16. Persisted BossDefinition Identity and Conservative Curator Duplicate Protection
+
+### Context
+
+V2.1.2 separates a stable boss identity from any boss encounter, roster, arena, or display label. The first
+BossDefinition persistence increment must provide stable foreign-key targets for later multi-boss encounter knowledge,
+without turning a human-facing name into identity or allowing ordinary curator errors to create obvious duplicates.
+
+### Decision
+
+Flyway V015 persists `boss_definition(id UUID PRIMARY KEY, display_name TEXT NOT NULL)` and rejects blank SQL
+display text. `BossDefinitionId.generate()` remains the application-owned identity generator. No provider or arena
+identifier is used as the key. Normal creation is an idempotent insert on an absent ID: replay with the exact same
+display metadata succeeds, but a changed name for an existing ID is an explicit conflict. Rename/edit is **not**
+implemented by silently upserting; it requires a future deliberate operation.
+
+A small curator-facing `BossDefinitionService` rejects likely duplicate names under **distinct** IDs after
+Unicode NFKC compatibility normalization, trimming/collapsing Unicode whitespace, and locale-independent case
+normalization. This is a conservative human-review guard, not a global claim that two distinct bosses can never
+share the same displayed name. Provider aliases, translations, name history, and genuinely distinct same-name
+entities require explicit curator resolution. Display names remain metadata, and no database
+`UNIQUE(display_name)` or normalized-name natural key is established.
+
+The normal service checks an existing ID first, reviews potential name collisions, and uses atomic
+`INSERT ... ON CONFLICT (id) DO NOTHING` to protect immutable identity metadata even across competing insertions.
+The application write is transactional and the adapter also has a defensive transaction boundary.
+
+### Explicit Limitations and Deferrals
+
+The current small manually curated corpus permits an in-memory comparison across persisted boss display names;
+introduce a scalable normalized-name lookup only when concrete curator volume requires it. The application-level
+name guard does **not** serialize simultaneous creations with *different IDs* but equivalent normalized names.
+The primary-key constraint protects the same ID, not different IDs with matching display metadata. Revisit stronger
+reservation/coordination if multi-curator concurrent creation becomes a supported workflow. Do not claim that the
+absence of a database name-uniqueness constraint is a guarantee of semantic non-duplication.
+
+Persisting the boss identity does not create an AcquisitionSource, assign it exactly one boss, or imply the
+source's availability. Encounter knowledge and fixed/configuration-dependent boss participation remain the next
+separate persistence increment.
