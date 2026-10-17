@@ -525,9 +525,8 @@ to bind an existing ID to another pair is rejected rather than updating it. Anot
 rejected by the database uniqueness constraint.
 
 The presence of a relationship identity is not itself a claim that the source currently drops the Unique. Current
-CAN_DROP/CANNOT_DROP state remains separately resolved by `DropRelationshipTimeline`; its own persistence is deferred
-until a concrete versioned-knowledge authoring/read workflow requires it. No DropEstimate or attempt probability is
-stored here.
+CAN_DROP/CANNOT_DROP state remains separately resolved by `DropRelationshipTimeline`; its accepted change points are
+persisted separately (see §15). No DropEstimate or attempt probability is stored here.
 
 ---
 
