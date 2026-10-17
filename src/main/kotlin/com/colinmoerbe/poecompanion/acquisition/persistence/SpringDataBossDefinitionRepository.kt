@@ -17,8 +17,5 @@ internal interface SpringDataBossDefinitionRepository : JpaRepository<BossDefini
             """,
         nativeQuery = true,
     )
-    fun insertIfAbsent(
-        @Param("id") id: UUID,
-        @Param("displayName") displayName: String,
-    ): Int
+    fun insertIfAbsent(@Param("id") id: UUID, @Param("displayName") displayName: String): Int
 }

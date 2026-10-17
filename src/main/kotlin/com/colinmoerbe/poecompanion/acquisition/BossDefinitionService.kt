@@ -50,11 +50,10 @@ class BossDefinitionService internal constructor(private val persistencePort: Bo
         }
     }
 
-    private fun normalizedName(displayName: String): String =
-        Normalizer.normalize(displayName, Normalizer.Form.NFKC)
-            .trim()
-            .replace(WHITESPACE, " ")
-            .lowercase(Locale.ROOT)
+    private fun normalizedName(displayName: String): String = Normalizer.normalize(displayName, Normalizer.Form.NFKC)
+        .trim()
+        .replace(WHITESPACE, " ")
+        .lowercase(Locale.ROOT)
 
     private companion object {
         val WHITESPACE = Regex("(?U)\\s+")

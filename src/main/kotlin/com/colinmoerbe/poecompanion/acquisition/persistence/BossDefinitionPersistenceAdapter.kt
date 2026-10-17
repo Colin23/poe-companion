@@ -10,9 +10,8 @@ import org.springframework.transaction.annotation.Transactional
  * Maps canonical boss identity to PostgreSQL without exposing JPA objects outside the persistence adapter.
  */
 @Repository
-internal class BossDefinitionPersistenceAdapter(
-    private val repository: SpringDataBossDefinitionRepository,
-) : BossDefinitionPersistencePort {
+internal class BossDefinitionPersistenceAdapter(private val repository: SpringDataBossDefinitionRepository) :
+    BossDefinitionPersistencePort {
     @Transactional
     override fun insertIfAbsent(bossDefinition: BossDefinition): Boolean =
         repository.insertIfAbsent(bossDefinition.id.value, bossDefinition.displayName) == 1

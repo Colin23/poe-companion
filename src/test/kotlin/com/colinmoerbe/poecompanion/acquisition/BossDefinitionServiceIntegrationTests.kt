@@ -179,10 +179,7 @@ internal class BossDefinitionServiceIntegrationTests(
         assertThat(service.findById(id)?.displayName).isIn("The Elder", "The Shaper")
     }
 
-    private fun definition(
-        id: BossDefinitionId = BossDefinitionId.generate(),
-        name: String,
-    ): BossDefinition = BossDefinition(id, name)
+    private fun definition(name: String): BossDefinition = BossDefinition(BossDefinitionId.generate(), name)
 
     private fun insertRaw(id: UUID, displayName: String?) {
         jdbcTemplate.update(
@@ -192,10 +189,7 @@ internal class BossDefinitionServiceIntegrationTests(
         )
     }
 
-    private fun raceCreations(
-        first: () -> Unit,
-        second: () -> Unit,
-    ): List<Result<Unit>> {
+    private fun raceCreations(first: () -> Unit, second: () -> Unit): List<Result<Unit>> {
         val executor = Executors.newFixedThreadPool(2)
         val ready = CountDownLatch(2)
         val start = CountDownLatch(1)
