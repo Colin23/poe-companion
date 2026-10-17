@@ -70,6 +70,7 @@ internal interface SpringDataBossEncounterKnowledgeRepository : JpaRepository<Bo
         @Param("participationKind") participationKind: String,
         @Param("expectedRevision") expectedRevision: Long,
     ): Int
+
     /**
      * JPA collection fetch join: one SQL SELECT retrieves every parent and its entire participating-boss set.
      * Separate nullable-league variants avoid ambiguous nullable UUID parameters in PostgreSQL.
@@ -151,8 +152,5 @@ internal interface SpringDataBossEncounterKnowledgeRepository : JpaRepository<Bo
             """,
         nativeQuery = true,
     )
-    fun insertParticipant(
-        @Param("knowledgeId") knowledgeId: UUID,
-        @Param("bossId") bossId: UUID,
-    ): Int
+    fun insertParticipant(@Param("knowledgeId") knowledgeId: UUID, @Param("bossId") bossId: UUID): Int
 }

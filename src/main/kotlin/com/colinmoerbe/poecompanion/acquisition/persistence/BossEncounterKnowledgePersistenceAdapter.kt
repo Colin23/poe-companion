@@ -137,10 +137,17 @@ internal class BossEncounterKnowledgePersistenceAdapter(
         val accepted =
             scope.leagueDefinitionId?.let { leagueId ->
                 knowledgeRepository.findLeagueSpecificChangePointsWithParticipants(
-                    sourceId, major, minor, scope.ruleset, leagueId.value,
+                    sourceId,
+                    major,
+                    minor,
+                    scope.ruleset,
+                    leagueId.value,
                 )
             } ?: knowledgeRepository.findLeagueIndependentChangePointsWithParticipants(
-                sourceId, major, minor, scope.ruleset,
+                sourceId,
+                major,
+                minor,
+                scope.ruleset,
             )
         return accepted.map { toDomain(it, scope) }
     }
