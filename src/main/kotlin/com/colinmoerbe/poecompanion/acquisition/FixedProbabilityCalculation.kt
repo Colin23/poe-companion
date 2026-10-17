@@ -44,15 +44,14 @@ data class FixedProbabilityCalculation(
             )
         }
 
-        private fun attemptsOrNull(model: FixedBernoulliModel, targetProbability: Double): Int? =
-            try {
-                model.attemptsToReachProbability(targetProbability)
-            } catch (exception: IllegalArgumentException) {
-                // Both inputs are validated and these fixed targets are < 100%; only Int-range overflow is expected.
-                if (exception.message != "Required attempt count exceeds the supported integer range") {
-                    throw exception
-                }
-                null
+        private fun attemptsOrNull(model: FixedBernoulliModel, targetProbability: Double): Int? = try {
+            model.attemptsToReachProbability(targetProbability)
+        } catch (exception: IllegalArgumentException) {
+            // Both inputs are validated and these fixed targets are < 100%; only Int-range overflow is expected.
+            if (exception.message != "Required attempt count exceeds the supported integer range") {
+                throw exception
             }
+            null
+        }
     }
 }
