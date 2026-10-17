@@ -48,6 +48,7 @@ internal class FixedDropEstimatePersistenceAdapter(
         try {
             when (changePoint) {
                 is FixedProbabilityChangePoint.Known -> insertEstimate(dropRelationshipId, scope, changePoint.estimate)
+
                 is FixedProbabilityChangePoint.Withdrawn ->
                     insertWithdrawal(dropRelationshipId, scope, changePoint.withdrawal)
             }
@@ -156,28 +157,28 @@ internal class FixedDropEstimatePersistenceAdapter(
         entity: FixedDropEstimateEntity,
         scope: AcquisitionKnowledgeScope,
     ): FixedDropEstimateSnapshot = FixedDropEstimateSnapshot(
-            id = DropEstimateId(entity.id),
-            effectiveFromPatch = entity.effectivePatchNumber?.let { number ->
-                GamePatch(scope.compatibilityVersion, number, entity.effectivePatchSuffix)
-            },
-            model = FixedBernoulliModel(requireNotNull(entity.probabilityPerAttempt)),
-            provenance = requireNotNull(entity.provenance),
-            evidenceReference = entity.evidenceReference,
-            reviewedAt = entity.reviewedAt,
-        )
+        id = DropEstimateId(entity.id),
+        effectiveFromPatch = entity.effectivePatchNumber?.let { number ->
+            GamePatch(scope.compatibilityVersion, number, entity.effectivePatchSuffix)
+        },
+        model = FixedBernoulliModel(requireNotNull(entity.probabilityPerAttempt)),
+        provenance = requireNotNull(entity.provenance),
+        evidenceReference = entity.evidenceReference,
+        reviewedAt = entity.reviewedAt,
+    )
 
     private fun toWithdrawal(
         entity: FixedDropEstimateEntity,
         scope: AcquisitionKnowledgeScope,
     ): FixedProbabilityWithdrawal = FixedProbabilityWithdrawal(
-            id = FixedProbabilityWithdrawalId(entity.id),
-            effectiveFromPatch = entity.effectivePatchNumber?.let { number ->
-                GamePatch(scope.compatibilityVersion, number, entity.effectivePatchSuffix)
-            },
-            reason = requireNotNull(entity.withdrawalReason),
-            evidenceReference = entity.evidenceReference,
-            reviewedAt = entity.reviewedAt,
-        )
+        id = FixedProbabilityWithdrawalId(entity.id),
+        effectiveFromPatch = entity.effectivePatchNumber?.let { number ->
+            GamePatch(scope.compatibilityVersion, number, entity.effectivePatchSuffix)
+        },
+        reason = requireNotNull(entity.withdrawalReason),
+        evidenceReference = entity.evidenceReference,
+        reviewedAt = entity.reviewedAt,
+    )
 
     private fun kind(id: FixedProbabilityPublicationId): FixedProbabilityKnowledgeKind = when (id) {
         is FixedProbabilityPublicationId.Estimate -> FixedProbabilityKnowledgeKind.ESTIMATE

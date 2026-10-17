@@ -84,10 +84,7 @@ class FixedDropEstimateTimeline(
             is FixedProbabilityChangePoint.Withdrawn -> FixedDropEstimateResolution.Unknown
         }
 
-    private fun compareByEffectivePatch(
-        first: FixedProbabilityChangePoint,
-        second: FixedProbabilityChangePoint,
-    ): Int {
+    private fun compareByEffectivePatch(first: FixedProbabilityChangePoint, second: FixedProbabilityChangePoint): Int {
         val firstPatch: GamePatch? = first.effectiveFromPatch
         val secondPatch: GamePatch? = second.effectiveFromPatch
         return when {
