@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional
  * Discovers candidate sources for a Unique and independently resolves accepted acquisition knowledge.
  *
  * A canonical source-to-Unique identity is not proof of current availability or CAN_DROP.
- * Probability and personalized available-attempt composition are separate, later read-model work.
+ * Fixed probability and personalized attempts are resolved separately before any actionable calculation.
  */
 @Service
 class AcquisitionReadModelService internal constructor(
@@ -19,6 +19,8 @@ class AcquisitionReadModelService internal constructor(
     private val relationshipPersistenceAdapter: DropRelationshipPersistenceAdapter,
     private val bossEncounterKnowledgeService: BossEncounterKnowledgeService,
     private val dropRelationshipKnowledgeService: DropRelationshipKnowledgeService,
+    private val fixedDropEstimateService: FixedDropEstimateService,
+    private val availableAttemptsService: AvailableAttemptsService,
 ) {
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     fun findForUnique(uniqueDefinitionId: UniqueDefinitionId): AcquisitionQueryResult {
@@ -46,7 +48,48 @@ class AcquisitionReadModelService internal constructor(
                         dropRelationshipKnowledgeService.findTimeline(relationship.id, leagueScope),
                     ) { timeline -> timeline.resolve(context) }
 
-                AcquisitionSourceAssessment(relationship, sourceKnowledge, relationshipKnowledge)
+                val probabilityKnowledge =
+                    resolveScopedAcquisitionKnowledge(
+                        fixedDropEstimateService.findAcceptedTimeline(relationship.id, generalScope),
+                        fixedDropEstimateService.findAcceptedTimeline(relationship.id, leagueScope),
+                    ) { timeline -> timeline.resolve(context) }
+
+                val availableAttempts =
+                    availableAttemptsService.getAvailableAttempts(
+                        accountEvaluation.accountContextId,
+                        relationship.acquisitionSourceId,
+                    )
+
+                // Accepted probability alone never makes an unavailable source or inapplicable drop farmable.
+                val sourceAvailable =
+                    (sourceKnowledge as? ScopedAcquisitionKnowledge.Selected)?.resolution.let { resolution ->
+                        resolution is BossEncounterKnowledgeResolution.Resolved &&
+                            resolution.snapshot.availability == AcquisitionSourceAvailability.AVAILABLE
+                    }
+                val relationshipCanDrop =
+                    (relationshipKnowledge as? ScopedAcquisitionKnowledge.Selected)?.resolution.let { resolution ->
+                        resolution is DropRelationshipResolution.Resolved &&
+                            resolution.snapshot.state == DropRelationshipState.CAN_DROP
+                    }
+                val acceptedEstimate =
+                    ((probabilityKnowledge as? ScopedAcquisitionKnowledge.Selected)?.resolution
+                        as? FixedDropEstimateResolution.Resolved)?.snapshot
+
+                val calculation =
+                    if (sourceAvailable && relationshipCanDrop && acceptedEstimate != null) {
+                        FixedProbabilityCalculation.from(relationship, acceptedEstimate.model, availableAttempts)
+                    } else {
+                        null
+                    }
+
+                AcquisitionSourceAssessment(
+                    relationship = relationship,
+                    sourceKnowledge = sourceKnowledge,
+                    relationshipKnowledge = relationshipKnowledge,
+                    probabilityKnowledge = probabilityKnowledge,
+                    availableAttempts = availableAttempts,
+                    calculation = calculation,
+                )
             }
 
         return AcquisitionQueryResult.Evaluated(accountEvaluation, uniqueDefinitionId, assessments)
