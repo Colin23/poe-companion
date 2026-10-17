@@ -812,3 +812,52 @@ constraint tests may use JDBC to exercise invalid raw rows.
 Withdrawal does not independently establish or revoke drop relationship applicability, source availability,
 personal attempts, or an alternative probability model. The combined Acquisition read model will resolve those
 dimensions independently, without silently preferring league-specific facts or assuming probability from identity.
+
+---
+
+## 20. Acquisition Read-Model Scope Ambiguity Is Explicit
+
+### Context
+
+Canonical source availability, source-to-Unique drop applicability, and fixed-probability knowledge have separate
+accepted timelines. Each timeline is scoped by CompatibilityVersion, Ruleset, and an optional LeagueDefinitionId.
+A null league constraint means the knowledge is genuinely league-independent, not a low-priority default.
+A league-independent timeline and a timeline for the selected league may therefore both be authored and applicable.
+Earlier persistence increments intentionally did not establish a cross-scope precedence rule.
+
+### Decision
+
+The Acquisition read model must resolve each knowledge dimension **independently** for the same explicit
+EvaluationContext; source availability does not imply CAN_DROP, and neither implies a usable probability.
+
+For a selected AccountEvaluation, CompatibilityVersion, Ruleset and LeagueDefinitionId are known. For one canonical
+source or relationship and one knowledge dimension, examine the exact league-independent scope and the exact
+selected-league scope:
+
+- **Neither timeline exists:** knowledge is `Missing`, not an authored negative fact.
+- **Exactly one timeline exists:** select it and use its existing game-patch resolution. That resolution may itself
+  be `Unknown` because the EvaluationContext lacks patch precision or applicable accepted change points.
+- **Both timelines exist:** knowledge is explicitly `Ambiguous`. Neither overrides the other, even when their
+  current resolved values agree or one would resolve `Unknown`; do not use database row order, league-specific
+  preference, or fallback to choose an authority.
+
+Selection happens before resolving a timeline's game-patch state. A source-availability timeline may use one scope
+while its drop-relationship timeline uses another; that is not a conflict between dimensions. Any ambiguity belongs
+to the affected dimension and must not be hidden by the other dimensions' results. A durable DropRelationship
+identity alone never establishes current CAN_DROP applicability.
+
+The first Acquisition read-model increment covers relationship discovery, source availability, and drop
+applicability. It reuses the existing exact-scope persistence queries and domain timeline resolvers; it adds no
+new tables or Flyway migration. Fixed-probability, withdrawal, and personalized AvailableAttempts composition
+will follow as a separate increment and must apply the same no-implicit-precedence principle.
+
+### Deliberate Limits and Revisit Triggers
+
+This is a conservative V0.1 ambiguity policy, **not** a general rule that league-specific knowledge always overrides
+league-independent knowledge. A future explicit override/precedence model would require a separate product decision,
+clear authority semantics, and tests before changing this rule.
+
+The current selected-account query has a known LeagueDefinitionId. Future queries that permit an absent or
+uncertain league identity must preserve that insufficient precision as unknown rather than treating a broad-scope
+lookup as evidence that no league-specific knowledge could apply. Existing strict game-patch resolution remains
+unchanged. Query indexing and broader batching can be revisited with measured data volume or performance needs.
