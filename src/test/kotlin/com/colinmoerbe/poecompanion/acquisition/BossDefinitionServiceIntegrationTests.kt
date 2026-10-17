@@ -144,7 +144,7 @@ internal class BossDefinitionServiceIntegrationTests(
     }
 
     @Test
-    fun \`database should reject whitespace-only names that Kotlin regards as blank\`() {
+    fun `database should reject whitespace-only names that Kotlin regards as blank`() {
         val whitespaceOnlyNames = listOf("\t", "\n", "\u00a0", "\u2003", "\u001c", " \t\u00a0 ")
 
         whitespaceOnlyNames.forEach { name ->
@@ -157,7 +157,7 @@ internal class BossDefinitionServiceIntegrationTests(
     }
 
     @Test
-    fun \`database should allow meaningful text surrounded by whitespace\`() {
+    fun `database should allow meaningful text surrounded by whitespace`() {
         val id = UUID.randomUUID()
         insertRaw(id, " \tThe Elder\n ")
 
