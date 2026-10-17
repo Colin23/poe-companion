@@ -132,7 +132,12 @@ internal class DevelopmentFixtureInitializer(
         sources.save(AcquisitionSource(ids.source))
         encounters.recordSnapshot(ids.source, scope, encounterSnapshot(), null)
         relationships.save(DropRelationship(ids.relationship, ids.source, ids.uniqueC))
-        drops.recordSnapshot(ids.relationship, scope, DropRelationshipSnapshot(null, DropRelationshipState.CAN_DROP), null)
+        drops.recordSnapshot(
+            ids.relationship,
+            scope,
+            DropRelationshipSnapshot(null, DropRelationshipState.CAN_DROP),
+            null,
+        )
         estimates.publish(ids.relationship, scope, estimateSnapshot(), null)
         attempts.setAvailableAttempts(ids.account, ids.source, 12)
     }
@@ -182,7 +187,11 @@ internal class DevelopmentFixtureInitializer(
         check(sources.findById(ids.source) != null) { "Development fixture source is missing" }
 
         val relationship = relationships.findById(ids.relationship)
-        check(relationship == DropRelationship(ids.relationship, ids.source, ids.uniqueC)) {
+        check(
+            relationship?.id == ids.relationship &&
+                relationship.acquisitionSourceId == ids.source &&
+                relationship.uniqueDefinitionId == ids.uniqueC,
+        ) {
             "Development fixture source-to-C relationship was modified or removed"
         }
         check(encounters.findTimeline(ids.source, scope)?.snapshots == listOf(encounterSnapshot())) {
