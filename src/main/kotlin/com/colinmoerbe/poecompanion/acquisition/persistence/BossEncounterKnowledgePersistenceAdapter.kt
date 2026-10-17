@@ -13,9 +13,9 @@ import com.colinmoerbe.poecompanion.league.GamePatch
 import org.hibernate.exception.ConstraintViolationException
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.jdbc.core.ResultSetExtractor
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
-import org.springframework.jdbc.core.ResultSetExtractor
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -159,6 +159,7 @@ internal class BossEncounterKnowledgePersistenceAdapter(
                     check(row.bossIds.isNotEmpty()) { "Persisted FIXED encounter cannot have an empty boss roster" }
                     BossParticipation.Fixed(row.bossIds)
                 }
+
                 BossEncounterParticipationKind.CONFIGURATION_DEPENDENT -> {
                     check(row.bossIds.isEmpty()) {
                         "Persisted CONFIGURATION_DEPENDENT encounter must not have fixed participants"

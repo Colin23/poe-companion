@@ -181,9 +181,11 @@ internal class BossEncounterKnowledgeServiceIntegrationTests(
 
         assertThat(service.findTimeline(source, normalScope)?.resolve(context()))
             .isEqualTo(BossEncounterKnowledgeResolution.Resolved(normal))
-        assertThat(service.findTimeline(source, ruthlessScope)?.resolve(
-            EvaluationContext(version, Ruleset.RUTHLESS),
-        )).isEqualTo(BossEncounterKnowledgeResolution.Resolved(ruthless))
+        assertThat(
+            service.findTimeline(source, ruthlessScope)?.resolve(
+                EvaluationContext(version, Ruleset.RUTHLESS),
+            ),
+        ).isEqualTo(BossEncounterKnowledgeResolution.Resolved(ruthless))
         assertThat(service.findTimeline(source, later)?.resolve(context()))
             .isEqualTo(BossEncounterKnowledgeResolution.DoesNotApply)
         assertThat(service.findAcceptedChangePoints(source, normalScope)).hasSize(1)
@@ -207,9 +209,11 @@ internal class BossEncounterKnowledgeServiceIntegrationTests(
             .containsExactly(AcceptedBossEncounterChangePoint(general, 0L))
         assertThat(service.findTimeline(source, specific)?.resolve(context()))
             .isEqualTo(BossEncounterKnowledgeResolution.Unknown)
-        assertThat(service.findTimeline(source, specific)?.resolve(
-            EvaluationContext(version, Ruleset.NORMAL, leagueDefinitionId = league),
-        )).isEqualTo(BossEncounterKnowledgeResolution.Resolved(specificSnapshot))
+        assertThat(
+            service.findTimeline(source, specific)?.resolve(
+                EvaluationContext(version, Ruleset.NORMAL, leagueDefinitionId = league),
+            ),
+        ).isEqualTo(BossEncounterKnowledgeResolution.Resolved(specificSnapshot))
     }
 
     @Test
@@ -436,10 +440,12 @@ internal class BossEncounterKnowledgeServiceIntegrationTests(
         bossIds: Set<BossDefinitionId> = emptySet(),
         availability: AcquisitionSourceAvailability = AcquisitionSourceAvailability.AVAILABLE,
         label: String = "Uber Elder",
-        participation: BossParticipation = if (bossIds.isEmpty()) BossParticipation.ConfigurationDependent else
-            BossParticipation.Fixed(bossIds),
+        participation: BossParticipation = defaultParticipation(bossIds),
     ): BossEncounterKnowledgeSnapshot =
         BossEncounterKnowledgeSnapshot(patch, label, availability, participation)
+
+    private fun defaultParticipation(ids: Set<BossDefinitionId>): BossParticipation =
+        if (ids.isEmpty()) BossParticipation.ConfigurationDependent else BossParticipation.Fixed(ids)
 
     private fun participantCount(): Int = jdbc.queryForObject(
         "SELECT count(*) FROM poe_companion.boss_encounter_participant",

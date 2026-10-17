@@ -34,8 +34,7 @@ class BossEncounterKnowledgeService internal constructor(
     fun findAcceptedChangePoints(
         acquisitionSourceId: AcquisitionSourceId,
         scope: AcquisitionKnowledgeScope,
-    ): List<AcceptedBossEncounterChangePoint> =
-        persistencePort.findAcceptedChangePoints(acquisitionSourceId, scope)
+    ): List<AcceptedBossEncounterChangePoint> = persistencePort.findAcceptedChangePoints(acquisitionSourceId, scope)
 
     @Transactional(readOnly = true)
     fun findTimeline(
