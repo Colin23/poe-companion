@@ -77,7 +77,7 @@ internal class DevelopmentFixtureInitializer(
     private val attempts: AvailableAttemptsService,
 ) {
     private val ids = DevelopmentFixtureIds
-    private val compatibilityVersion = CompatibilityVersion(3, 30)
+    private val compatibilityVersion = CompatibilityVersion(COMPATIBILITY_MAJOR, COMPATIBILITY_MINOR)
     private val scope = AcquisitionKnowledgeScope(compatibilityVersion, Ruleset.NORMAL)
 
     /** Creates an atomic fixture or verifies an existing fixture without resetting player-editable state. */
@@ -139,7 +139,7 @@ internal class DevelopmentFixtureInitializer(
             null,
         )
         estimates.publish(ids.relationship, scope, estimateSnapshot(), null)
-        attempts.setAvailableAttempts(ids.account, ids.source, 12)
+        attempts.setAvailableAttempts(ids.account, ids.source, INITIAL_ATTEMPTS)
     }
 
     private fun verifyExistingFixture() {
@@ -203,7 +203,10 @@ internal class DevelopmentFixtureInitializer(
         ) { "Development fixture drop applicability was modified or removed" }
 
         val probability = estimates.findAcceptedTimeline(ids.relationship, scope)
-        check(probability?.snapshots == listOf(estimateSnapshot()) && probability.withdrawals.isEmpty()) {
+        check(
+            probability?.snapshots == listOf(estimateSnapshot()) &&
+                probability?.withdrawals?.isEmpty() == true,
+        ) {
             "Development fixture accepted probability was modified or withdrawn"
         }
     }
@@ -245,9 +248,15 @@ internal class DevelopmentFixtureInitializer(
         FixedDropEstimateSnapshot(
             id = ids.estimate,
             effectiveFromPatch = null,
-            model = FixedBernoulliModel(0.10),
+            model = FixedBernoulliModel(FIXED_PROBABILITY),
             provenance = DropEstimateProvenance.MEASURED,
             evidenceReference = "synthetic-development-fixture:boss-y-to-unique-c",
             reviewedAt = Instant.parse("2026-10-01T00:00:00Z"),
         )
+    private companion object {
+        const val COMPATIBILITY_MAJOR = 3
+        const val COMPATIBILITY_MINOR = 30
+        const val INITIAL_ATTEMPTS = 12
+        const val FIXED_PROBABILITY = 0.10
+    }
 }
