@@ -694,5 +694,71 @@ reservation/coordination if multi-curator concurrent creation becomes a supporte
 absence of a database name-uniqueness constraint is a guarantee of semantic non-duplication.
 
 Persisting the boss identity does not create an AcquisitionSource, assign it exactly one boss, or imply the
-source's availability. Encounter knowledge and fixed/configuration-dependent boss participation remain the next
-separate persistence increment.
+source's availability. Versioned encounter knowledge and boss participation are persisted separately in §17.
+
+---
+
+## 17. Persisting Complete BossEncounter Knowledge and Its Participant Set
+
+### Context
+
+An AcquisitionSource is a stable identity, not proof of current availability or a fixed association with one boss.
+The already implemented BossEncounterKnowledgeTimeline represents complete historical source/encounter snapshots,
+including labels, AVAILABLE/UNAVAILABLE authoring and fixed or configuration-dependent participation.
+
+### Decision
+
+Flyway V016 introduces `boss_encounter_knowledge`: one **currently accepted** complete snapshot per exact
+`(AcquisitionSourceId, CompatibilityVersion, Ruleset, optional LeagueDefinitionId, optional effective GamePatch)`.
+It has source/league foreign keys, allowed availability and participation-kind constraints, nonblank display labels,
+nonnegative revisions and a `NULLS NOT DISTINCT` index covering baseline and league-independent change points.
+The row UUID is persistence-only; curated source identity and knowledge scope remain the domain keys.
+
+`boss_encounter_participant` stores a set of `BossDefinitionId` references for each fixed snapshot, with both
+foreign keys and a composite primary key disallowing duplicate participants. One snapshot can reference multiple
+bosses, and one boss can occur in multiple different source snapshots. A `CONFIGURATION_DEPENDENT` snapshot uses
+no participant rows: it is **not** an empty fixed roster. The domain application service validates FIXED nonempty
+rosters and existing boss references; the database does not use cross-table deferred triggers to enforce the
+presence/absence of child rows. The read adapter explicitly rejects inconsistent persisted roster shapes.
+
+A first publication inserts the parent and any fixed participants together; a curator correction conditionally
+increments the accepted parent's revision, then **replaces** that exact snapshot's full participant set, all in
+one transaction. Lost races are conflicts, not automatic retries. Other game-patch rows and source history remain
+unchanged. Corrections of the same game-patch change point update the accepted state **in place** (no separate
+curator edit audit records), matching the earlier DropRelationshipKnowledge decision.
+
+A versioned exact-scope query reconstructs the existing BossEncounterKnowledgeTimeline, or null when no accepted
+knowledge exists. The Spring Data JPA repository uses a **single JPQL collection fetch join** to load all parent
+snapshots and participants in one SQL SELECT. Under READ COMMITTED, that prevents combining a parent revision from
+one statement with participant rows from a different statement. Native SQL within Spring Data repositories is
+retained for conditional revision updates, exact NULL-aware key lookups and atomic participant replacement.
+Modifying queries clear the persistence context to avoid stale JPA collection state after native DML.
+Resolution of patch order, ambiguous scope and UNKNOWN contexts stays in the pure domain/read-model boundary.
+
+### Explicit Limits
+
+Source availability does not infer source→Unique drop applicability, probability, player attempt inventory or
+immediate access. Cross-scope precedence, structured access rules, area/arena and provider metadata, encounter
+source-kind taxonomy, editor UI, curator audit history and database trigger enforcement of roster cardinality
+remain outside this increment. Different scope timelines can overlap; later read-model composition must not
+arbitrarily select a winner.
+
+---
+
+## 18. Persistence Technology Escalation Policy
+
+Use the least-specialized persistence mechanism that **correctly and reliably implements the requirements**:
+
+1. **Spring Data JPA first.** Prefer typed entities, repository queries, entity relationships/element collections
+   and JPQL fetches when they express the domain and transactional requirements without compromising correctness.
+2. **Spring Data JPA with native SQL where needed.** Use explicit PostgreSQL capabilities such as
+   `IS NOT DISTINCT FROM`, conditional compare-and-set updates, atomic conflict handling and indexed null semantics
+   when JPA/JPQL cannot express the required guarantees equally well.
+3. **Direct JDBC only as a justified exception.** Introduce `JdbcTemplate`/`NamedParameterJdbcTemplate` only when
+   the JPA repository + native-query approaches genuinely cannot meet the requirements appropriately. Document
+   the specific missing capability and preserve domain/persistence separation.
+
+This is a **capability/correctness order**, not a license to weaken an invariant for simpler code or to use native
+queries merely as a convenience. Test concurrency, complete-row consistency and rollback at the database boundary.
+Do not mix direct JDBC with JPA by default; native bulk updates can bypass the JPA persistence context, so flush
+and clear managed state appropriately before reconstructing affected entity collections.
