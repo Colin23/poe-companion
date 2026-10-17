@@ -40,12 +40,18 @@ internal class DropRelationshipPersistenceAdapter(
         }
     }
 
+    fun findByUniqueDefinitionId(uniqueDefinitionId: UniqueDefinitionId): List<DropRelationship> =
+        springDataRepository.findByUniqueDefinitionId(uniqueDefinitionId.value).map(::toDomain)
+
     fun findById(id: DropRelationshipId): DropRelationship? {
         val entity = springDataRepository.findById(id.value).orElse(null) ?: return null
-        return DropRelationship(
+        return toDomain(entity)
+    }
+
+    private fun toDomain(entity: DropRelationshipEntity): DropRelationship =
+        DropRelationship(
             id = DropRelationshipId(entity.id),
             acquisitionSourceId = AcquisitionSourceId(entity.acquisitionSourceId),
             uniqueDefinitionId = UniqueDefinitionId(entity.uniqueDefinitionId),
         )
-    }
 }
