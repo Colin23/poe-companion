@@ -173,7 +173,12 @@ internal class FixedDropEstimateServiceIntegrationTests(
         service.publish(relationship.id, normalScope, original, null)
 
         assertThatThrownBy {
-            service.publish(relationship.id, normalScope, snapshot(probability = 0.25), FixedProbabilityPublicationId.Estimate(DropEstimateId.generate()))
+            service.publish(
+                relationship.id,
+                normalScope,
+                snapshot(probability = 0.25),
+                FixedProbabilityPublicationId.Estimate(DropEstimateId.generate()),
+            )
         }.isInstanceOf(FixedDropEstimatePublicationConflictException::class.java)
 
         assertThat(service.findAcceptedTimeline(relationship.id, normalScope)?.snapshots).containsExactly(original)
@@ -207,7 +212,12 @@ internal class FixedDropEstimateServiceIntegrationTests(
         service.publish(relationship.id, normalScope, second, FixedProbabilityPublicationId.Estimate(first.id))
 
         assertThatThrownBy {
-            service.publish(relationship.id, normalScope, snapshot(id = first.id, probability = 0.15), FixedProbabilityPublicationId.Estimate(second.id))
+            service.publish(
+                relationship.id,
+                normalScope,
+                snapshot(id = first.id, probability = 0.15),
+                FixedProbabilityPublicationId.Estimate(second.id),
+            )
         }.isInstanceOf(InvalidDataAccessApiUsageException::class.java)
             .hasCauseInstanceOf(IllegalArgumentException::class.java)
 
@@ -322,10 +332,20 @@ internal class FixedDropEstimateServiceIntegrationTests(
         val results =
             racePublications(
                 {
-                    service.publish(relationship.id, normalScope, candidates[0], FixedProbabilityPublicationId.Estimate(initial.id))
+                    service.publish(
+                        relationship.id,
+                        normalScope,
+                        candidates[0],
+                        FixedProbabilityPublicationId.Estimate(initial.id),
+                    )
                 },
                 {
-                    service.publish(relationship.id, normalScope, candidates[1], FixedProbabilityPublicationId.Estimate(initial.id))
+                    service.publish(
+                        relationship.id,
+                        normalScope,
+                        candidates[1],
+                        FixedProbabilityPublicationId.Estimate(initial.id),
+                    )
                 },
             )
 

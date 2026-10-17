@@ -51,7 +51,8 @@ class FixedDropEstimateService internal constructor(private val persistencePort:
             dropRelationship = relationship,
             scope = scope,
             attemptDefinition = CompletedBossEncounterAttempt(relationship.acquisitionSourceId),
-            snapshots = if (changePoint is FixedProbabilityChangePoint.Known) listOf(changePoint.estimate) else emptyList(),
+            snapshots =
+            if (changePoint is FixedProbabilityChangePoint.Known) listOf(changePoint.estimate) else emptyList(),
             withdrawals = if (changePoint is FixedProbabilityChangePoint.Withdrawn) {
                 listOf(changePoint.withdrawal)
             } else {

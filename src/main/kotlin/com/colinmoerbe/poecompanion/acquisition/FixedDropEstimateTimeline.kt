@@ -36,7 +36,12 @@ class FixedDropEstimateTimeline(
         require(points.map { it.effectiveFromPatch }.distinct().size == points.size) {
             "Fixed probability timeline must not contain duplicate game change points"
         }
-        require(points.all { it.effectiveFromPatch == null || it.effectiveFromPatch.compatibilityVersion == scope.compatibilityVersion }) {
+        require(
+            points.all { point ->
+                val effectivePatch = point.effectiveFromPatch
+                effectivePatch == null || effectivePatch.compatibilityVersion == scope.compatibilityVersion
+            },
+        ) {
             "Fixed probability change points must belong to the timeline compatibility version"
         }
 

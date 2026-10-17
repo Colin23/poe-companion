@@ -152,27 +152,32 @@ internal class FixedDropEstimatePersistenceAdapter(
         )
     }
 
-    private fun toEstimate(entity: FixedDropEstimateEntity, scope: AcquisitionKnowledgeScope): FixedDropEstimateSnapshot =
-        FixedDropEstimateSnapshot(
+    private fun toEstimate(
+        entity: FixedDropEstimateEntity,
+        scope: AcquisitionKnowledgeScope,
+    ): FixedDropEstimateSnapshot = FixedDropEstimateSnapshot(
             id = DropEstimateId(entity.id),
-            effectiveFromPatch = patch(entity, scope),
+            effectiveFromPatch = entity.effectivePatchNumber?.let { number ->
+                GamePatch(scope.compatibilityVersion, number, entity.effectivePatchSuffix)
+            },
             model = FixedBernoulliModel(requireNotNull(entity.probabilityPerAttempt)),
             provenance = requireNotNull(entity.provenance),
             evidenceReference = entity.evidenceReference,
             reviewedAt = entity.reviewedAt,
         )
 
-    private fun toWithdrawal(entity: FixedDropEstimateEntity, scope: AcquisitionKnowledgeScope): FixedProbabilityWithdrawal =
-        FixedProbabilityWithdrawal(
+    private fun toWithdrawal(
+        entity: FixedDropEstimateEntity,
+        scope: AcquisitionKnowledgeScope,
+    ): FixedProbabilityWithdrawal = FixedProbabilityWithdrawal(
             id = FixedProbabilityWithdrawalId(entity.id),
-            effectiveFromPatch = patch(entity, scope),
+            effectiveFromPatch = entity.effectivePatchNumber?.let { number ->
+                GamePatch(scope.compatibilityVersion, number, entity.effectivePatchSuffix)
+            },
             reason = requireNotNull(entity.withdrawalReason),
             evidenceReference = entity.evidenceReference,
             reviewedAt = entity.reviewedAt,
         )
-
-    private fun patch(entity: FixedDropEstimateEntity, scope: AcquisitionKnowledgeScope): GamePatch? =
-        entity.effectivePatchNumber?.let { GamePatch(scope.compatibilityVersion, it, entity.effectivePatchSuffix) }
 
     private fun kind(id: FixedProbabilityPublicationId): FixedProbabilityKnowledgeKind = when (id) {
         is FixedProbabilityPublicationId.Estimate -> FixedProbabilityKnowledgeKind.ESTIMATE
