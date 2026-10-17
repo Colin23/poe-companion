@@ -728,8 +728,11 @@ unchanged. Corrections of the same game-patch change point update the accepted s
 curator edit audit records), matching the earlier DropRelationshipKnowledge decision.
 
 A versioned exact-scope query reconstructs the existing BossEncounterKnowledgeTimeline, or null when no accepted
-knowledge exists. It uses a **single outer-joined SQL SELECT** for all parent snapshots and participants so that
-READ COMMITTED queries cannot combine a parent revision from one statement with participant rows from another.
+knowledge exists. The Spring Data JPA repository uses a **single JPQL collection fetch join** to load all parent
+snapshots and participants in one SQL SELECT. Under READ COMMITTED, that prevents combining a parent revision from
+one statement with participant rows from a different statement. Native SQL within Spring Data repositories is
+retained for conditional revision updates, exact NULL-aware key lookups and atomic participant replacement.
+Modifying queries clear the persistence context to avoid stale JPA collection state after native DML.
 Resolution of patch order, ambiguous scope and UNKNOWN contexts stays in the pure domain/read-model boundary.
 
 ### Explicit Limits
@@ -739,3 +742,23 @@ immediate access. Cross-scope precedence, structured access rules, area/arena an
 source-kind taxonomy, editor UI, curator audit history and database trigger enforcement of roster cardinality
 remain outside this increment. Different scope timelines can overlap; later read-model composition must not
 arbitrarily select a winner.
+
+---
+
+## 18. Persistence Technology Escalation Policy
+
+Use the least-specialized persistence mechanism that **correctly and reliably implements the requirements**:
+
+1. **Spring Data JPA first.** Prefer typed entities, repository queries, entity relationships/element collections
+   and JPQL fetches when they express the domain and transactional requirements without compromising correctness.
+2. **Spring Data JPA with native SQL where needed.** Use explicit PostgreSQL capabilities such as
+   `IS NOT DISTINCT FROM`, conditional compare-and-set updates, atomic conflict handling and indexed null semantics
+   when JPA/JPQL cannot express the required guarantees equally well.
+3. **Direct JDBC only as a justified exception.** Introduce `JdbcTemplate`/`NamedParameterJdbcTemplate` only when
+   the JPA repository + native-query approaches genuinely cannot meet the requirements appropriately. Document
+   the specific missing capability and preserve domain/persistence separation.
+
+This is a **capability/correctness order**, not a license to weaken an invariant for simpler code or to use native
+queries merely as a convenience. Test concurrency, complete-row consistency and rollback at the database boundary.
+Do not mix direct JDBC with JPA by default; native bulk updates can bypass the JPA persistence context, so flush
+and clear managed state appropriately before reconstructing affected entity collections.

@@ -2,11 +2,15 @@ package com.colinmoerbe.poecompanion.acquisition.persistence
 
 import com.colinmoerbe.poecompanion.acquisition.AcquisitionSourceAvailability
 import com.colinmoerbe.poecompanion.league.Ruleset
+import jakarta.persistence.CollectionTable
 import jakarta.persistence.Column
+import jakarta.persistence.ElementCollection
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
+import jakarta.persistence.FetchType
 import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
 import jakarta.persistence.Table
 import java.util.UUID
 
@@ -46,4 +50,8 @@ internal open class BossEncounterKnowledgeEntity(
     open var participationKind: BossEncounterParticipationKind,
     @Column(name = "revision", nullable = false)
     open var revision: Long,
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "boss_encounter_participant", joinColumns = [JoinColumn(name = "knowledge_id")])
+    @Column(name = "boss_definition_id", nullable = false)
+    open var bossDefinitionIds: MutableSet<UUID> = linkedSetOf(),
 )
