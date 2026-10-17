@@ -694,5 +694,48 @@ reservation/coordination if multi-curator concurrent creation becomes a supporte
 absence of a database name-uniqueness constraint is a guarantee of semantic non-duplication.
 
 Persisting the boss identity does not create an AcquisitionSource, assign it exactly one boss, or imply the
-source's availability. Encounter knowledge and fixed/configuration-dependent boss participation remain the next
-separate persistence increment.
+source's availability. Versioned encounter knowledge and boss participation are persisted separately in §17.
+
+---
+
+## 17. Persisting Complete BossEncounter Knowledge and Its Participant Set
+
+### Context
+
+An AcquisitionSource is a stable identity, not proof of current availability or a fixed association with one boss.
+The already implemented BossEncounterKnowledgeTimeline represents complete historical source/encounter snapshots,
+including labels, AVAILABLE/UNAVAILABLE authoring and fixed or configuration-dependent participation.
+
+### Decision
+
+Flyway V016 introduces `boss_encounter_knowledge`: one **currently accepted** complete snapshot per exact
+`(AcquisitionSourceId, CompatibilityVersion, Ruleset, optional LeagueDefinitionId, optional effective GamePatch)`.
+It has source/league foreign keys, allowed availability and participation-kind constraints, nonblank display labels,
+nonnegative revisions and a `NULLS NOT DISTINCT` index covering baseline and league-independent change points.
+The row UUID is persistence-only; curated source identity and knowledge scope remain the domain keys.
+
+`boss_encounter_participant` stores a set of `BossDefinitionId` references for each fixed snapshot, with both
+foreign keys and a composite primary key disallowing duplicate participants. One snapshot can reference multiple
+bosses, and one boss can occur in multiple different source snapshots. A `CONFIGURATION_DEPENDENT` snapshot uses
+no participant rows: it is **not** an empty fixed roster. The domain application service validates FIXED nonempty
+rosters and existing boss references; the database does not use cross-table deferred triggers to enforce the
+presence/absence of child rows. The read adapter explicitly rejects inconsistent persisted roster shapes.
+
+A first publication inserts the parent and any fixed participants together; a curator correction conditionally
+increments the accepted parent's revision, then **replaces** that exact snapshot's full participant set, all in
+one transaction. Lost races are conflicts, not automatic retries. Other game-patch rows and source history remain
+unchanged. Corrections of the same game-patch change point update the accepted state **in place** (no separate
+curator edit audit records), matching the earlier DropRelationshipKnowledge decision.
+
+A versioned exact-scope query reconstructs the existing BossEncounterKnowledgeTimeline, or null when no accepted
+knowledge exists. It uses a **single outer-joined SQL SELECT** for all parent snapshots and participants so that
+READ COMMITTED queries cannot combine a parent revision from one statement with participant rows from another.
+Resolution of patch order, ambiguous scope and UNKNOWN contexts stays in the pure domain/read-model boundary.
+
+### Explicit Limits
+
+Source availability does not infer source→Unique drop applicability, probability, player attempt inventory or
+immediate access. Cross-scope precedence, structured access rules, area/arena and provider metadata, encounter
+source-kind taxonomy, editor UI, curator audit history and database trigger enforcement of roster cardinality
+remain outside this increment. Different scope timelines can overlap; later read-model composition must not
+arbitrarily select a winner.
