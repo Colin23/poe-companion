@@ -144,6 +144,27 @@ internal class BossDefinitionServiceIntegrationTests(
     }
 
     @Test
+    fun \`database should reject whitespace-only names that Kotlin regards as blank\`() {
+        val whitespaceOnlyNames = listOf("\t", "\n", "\u00a0", "\u2003", "\u001c", " \t\u00a0 ")
+
+        whitespaceOnlyNames.forEach { name ->
+            assertThat(name.isBlank()).isTrue()
+            assertThatThrownBy { insertRaw(UUID.randomUUID(), name) }
+                .isInstanceOf(DataIntegrityViolationException::class.java)
+        }
+
+        assertThat(repository.count()).isZero()
+    }
+
+    @Test
+    fun \`database should allow meaningful text surrounded by whitespace\`() {
+        val id = UUID.randomUUID()
+        insertRaw(id, " \tThe Elder\n ")
+
+        assertThat(service.findById(BossDefinitionId(id))?.displayName).isEqualTo(" \tThe Elder\n ")
+    }
+
+    @Test
     fun `database primary key should reject different names under same identity`() {
         val boss = definition(name = "The Elder")
         service.create(boss)
