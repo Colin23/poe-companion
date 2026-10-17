@@ -625,3 +625,42 @@ in this persistence increment.
 
 Conditional/quantity-dependent probability models, personal overrides, curator draft UI, and resource-derived attempt
 counts are not implemented here.
+
+---
+
+## 15. Persisting Accepted DropRelationship Knowledge Without Curator Revision History
+
+### Context
+
+A durable DropRelationship identity is not evidence of a currently applicable CAN_DROP state. The acquisition read model
+must reconstruct actual curated CAN_DROP/CANNOT_DROP game-version change points, not infer applicability from an
+estimate or the mere existence of a source-to-Unique association.
+
+### Decision
+
+The `drop_relationship_knowledge` table introduced in V014 stores **currently accepted** authored states at exact
+`(DropRelationshipId, CompatibilityVersion, Ruleset, optional LeagueDefinitionId, optional effective GamePatch)` keys.
+The table has FK protection to both the relationship and optional league identity, supported state/version/patch
+checks, and a unique index using `NULLS NOT DISTINCT` to prevent duplicate league-independent or baseline facts.
+
+An existing accepted fact may be corrected **in place** at the same key; a newly authored game-patch change point
+creates a separate row. The persisted revision starts at zero and increments on every accepted correction, even if
+the replacement state is the same. Commands require the curator's expected revision for correction and null for
+first creation. A conditional SQL UPDATE and the database unique index protect both update and insert races.
+Losing commands raise an explicit conflict without automatic retry. A database row ID is a persistence detail,
+not an application-owned `DropRelationshipSnapshot` or curator-revision identity.
+
+Reconstruction reads the exact requested scope and maps accepted records back into the existing
+`DropRelationshipTimeline`; empty knowledge returns no timeline, never a CANNOT_DROP claim. Existing strict
+CompatibilityVersion/Ruleset/optional LeagueDefinition and effective-patch resolution remains in domain code.
+
+### Deliberate Deferrals
+
+These accepted state corrections are not a curator revision/audit log, unlike the immutable DropEstimate evidence
+records. If auditability is later required for relationship curation, introduce an explicit immutable correction
+history at that time; do not conflate it with historical **game** states already preserved by effective-patch points.
+
+Source availability and encounter metadata remain a separate source-knowledge persistence increment. Broad and
+league-specific relationship scopes can overlap; cross-scope resolution/ambiguity remains the responsibility of
+the later Acquisition read model. No source availability, probability estimate, calculator or UI is derived from
+these identities or facts alone.
