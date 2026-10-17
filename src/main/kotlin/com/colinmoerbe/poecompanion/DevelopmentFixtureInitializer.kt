@@ -212,15 +212,15 @@ internal class DevelopmentFixtureInitializer(
     }
 
     private fun noOtherFixtureIdentitiesExist(): Boolean = uniques.findById(ids.uniqueB) == null &&
-            uniques.findById(ids.uniqueC) == null &&
-            leagues.findById(ids.league) == null &&
-            accounts.findById(ids.account) == null &&
-            archetypes.findById(ids.archetype) == null &&
-            variants.findById(ids.variant) == null &&
-            revisions.findById(ids.revision) == null &&
-            bosses.findById(ids.boss) == null &&
-            sources.findById(ids.source) == null &&
-            relationships.findById(ids.relationship) == null
+        uniques.findById(ids.uniqueC) == null &&
+        leagues.findById(ids.league) == null &&
+        accounts.findById(ids.account) == null &&
+        archetypes.findById(ids.archetype) == null &&
+        variants.findById(ids.variant) == null &&
+        revisions.findById(ids.revision) == null &&
+        bosses.findById(ids.boss) == null &&
+        sources.findById(ids.source) == null &&
+        relationships.findById(ids.relationship) == null
 
     private fun requirementGroups(): List<RequirementGroup> = listOf(
         RequirementGroup(
