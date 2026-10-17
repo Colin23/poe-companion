@@ -94,16 +94,16 @@ internal class AcquisitionReadModelServiceIntegrationTests(
     @Test
     fun `multiple sources should be discovered and their availability and drops resolved independently`() {
         selectLeague()
-        val unique = unique()
-        val first = relationship(unique)
-        val second = relationship(unique)
+        val targetUnique = unique()
+        val first = relationship(targetUnique)
+        val second = relationship(targetUnique)
         val otherUnique = unique()
         relationship(otherUnique)
         encounterService.recordSnapshot(first.acquisitionSourceId, broad, encounter(), null)
         relationshipKnowledgeService.recordSnapshot(first.id, broad, drop(), null)
         relationshipKnowledgeService.recordSnapshot(second.id, broad, drop(DropRelationshipState.CANNOT_DROP), null)
 
-        val result = evaluated(unique)
+        val result = evaluated(targetUnique)
         assertThat(result.sources).hasSize(2)
         val byId = result.sources.associateBy { it.relationship.id }
         assertThat(byId.keys).containsExactlyInAnyOrder(first.id, second.id)
