@@ -9,6 +9,7 @@ import com.colinmoerbe.poecompanion.acquisition.BossEncounterKnowledgeConflictEx
 import com.colinmoerbe.poecompanion.acquisition.BossEncounterKnowledgePersistencePort
 import com.colinmoerbe.poecompanion.acquisition.BossEncounterKnowledgeSnapshot
 import com.colinmoerbe.poecompanion.acquisition.BossParticipation
+import com.colinmoerbe.poecompanion.acquisition.CorruptBossEncounterKnowledgeException
 import com.colinmoerbe.poecompanion.league.GamePatch
 import org.hibernate.exception.ConstraintViolationException
 import org.springframework.dao.DataIntegrityViolationException
@@ -156,13 +157,19 @@ internal class BossEncounterKnowledgePersistenceAdapter(
         val participation =
             when (row.participationKind) {
                 BossEncounterParticipationKind.FIXED -> {
-                    check(row.bossIds.isNotEmpty()) { "Persisted FIXED encounter cannot have an empty boss roster" }
+                    if (row.bossIds.isEmpty()) {
+                        throw CorruptBossEncounterKnowledgeException(
+                            "Persisted FIXED encounter cannot have an empty boss roster",
+                        )
+                    }
                     BossParticipation.Fixed(row.bossIds)
                 }
 
                 BossEncounterParticipationKind.CONFIGURATION_DEPENDENT -> {
-                    check(row.bossIds.isEmpty()) {
-                        "Persisted CONFIGURATION_DEPENDENT encounter must not have fixed participants"
+                    if (row.bossIds.isNotEmpty()) {
+                        throw CorruptBossEncounterKnowledgeException(
+                            "Persisted CONFIGURATION_DEPENDENT encounter must not have fixed participants",
+                        )
                     }
                     BossParticipation.ConfigurationDependent
                 }

@@ -358,14 +358,14 @@ internal class BossEncounterKnowledgeServiceIntegrationTests(
         val id = UUID.randomUUID()
         insertRaw(source.value, id = id)
         assertThatThrownBy { service.findTimeline(source, normalScope) }
-            .isInstanceOf(IllegalStateException::class.java)
+            .isInstanceOf(CorruptBossEncounterKnowledgeException::class.java)
 
         jdbc.update("DELETE FROM poe_companion.boss_encounter_knowledge WHERE id = ?", id)
         val secondId = UUID.randomUUID()
         insertRaw(source.value, id = secondId, kind = "CONFIGURATION_DEPENDENT")
         insertParticipant(secondId, boss("The Elder").value)
         assertThatThrownBy { service.findTimeline(source, normalScope) }
-            .isInstanceOf(IllegalStateException::class.java)
+            .isInstanceOf(CorruptBossEncounterKnowledgeException::class.java)
     }
 
     @Test
