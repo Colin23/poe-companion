@@ -2,6 +2,7 @@ package com.colinmoerbe.poecompanion
 
 import com.colinmoerbe.poecompanion.account.ManualOwnershipService
 import com.colinmoerbe.poecompanion.acquisition.AcquisitionKnowledgeScope
+import com.colinmoerbe.poecompanion.acquisition.DevelopmentAcquisitionAccess
 import com.colinmoerbe.poecompanion.acquisition.AcquisitionSource
 import com.colinmoerbe.poecompanion.acquisition.AcquisitionSourceAvailability
 import com.colinmoerbe.poecompanion.acquisition.AvailableAttemptsService
@@ -18,23 +19,19 @@ import com.colinmoerbe.poecompanion.acquisition.DropRelationshipState
 import com.colinmoerbe.poecompanion.acquisition.FixedBernoulliModel
 import com.colinmoerbe.poecompanion.acquisition.FixedDropEstimateService
 import com.colinmoerbe.poecompanion.acquisition.FixedDropEstimateSnapshot
-import com.colinmoerbe.poecompanion.acquisition.persistence.AcquisitionSourcePersistenceAdapter
-import com.colinmoerbe.poecompanion.acquisition.persistence.DropRelationshipPersistenceAdapter
 import com.colinmoerbe.poecompanion.build.BuildArchetype
+import com.colinmoerbe.poecompanion.build.DevelopmentBuildAccess
 import com.colinmoerbe.poecompanion.build.BuildVariant
 import com.colinmoerbe.poecompanion.build.BuildVariantRevision
-import com.colinmoerbe.poecompanion.build.BuildVariantRevisionActivationService
 import com.colinmoerbe.poecompanion.build.BuildVariantRevisionStatus
 import com.colinmoerbe.poecompanion.build.Requirement
 import com.colinmoerbe.poecompanion.build.RequirementGroup
 import com.colinmoerbe.poecompanion.build.RequirementImportance
 import com.colinmoerbe.poecompanion.build.RequirementLogic
-import com.colinmoerbe.poecompanion.build.persistence.BuildArchetypePersistenceAdapter
-import com.colinmoerbe.poecompanion.build.persistence.BuildVariantPersistenceAdapter
-import com.colinmoerbe.poecompanion.build.persistence.BuildVariantRevisionPersistenceAdapter
+import com.colinmoerbe.poecompanion.catalog.DevelopmentCatalogAccess
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinition
-import com.colinmoerbe.poecompanion.catalog.persistence.UniqueDefinitionPersistenceAdapter
 import com.colinmoerbe.poecompanion.league.AccountContext
+import com.colinmoerbe.poecompanion.league.DevelopmentLeagueAccess
 import com.colinmoerbe.poecompanion.league.AccountEvaluationService
 import com.colinmoerbe.poecompanion.league.CompatibilityVersion
 import com.colinmoerbe.poecompanion.league.GameRealm
@@ -43,8 +40,6 @@ import com.colinmoerbe.poecompanion.league.LeagueMortality
 import com.colinmoerbe.poecompanion.league.LeagueParticipation
 import com.colinmoerbe.poecompanion.league.LeagueType
 import com.colinmoerbe.poecompanion.league.Ruleset
-import com.colinmoerbe.poecompanion.league.persistence.AccountContextPersistenceAdapter
-import com.colinmoerbe.poecompanion.league.persistence.LeagueDefinitionPersistenceAdapter
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -53,24 +48,19 @@ import java.time.Instant
  * Creates the canonical A/B/C browser-demo scenario from real persisted domain objects, exactly once.
  *
  * The bean has no startup side effects of its own. Only [DevelopmentFixtureConfiguration] invokes it on startup,
- * while integration tests invoke it explicitly. The many injected adapters are confined to this developer-only
- * cross-module bootstrap; no production module depends on another module's persistence implementation.
+ * while integration tests invoke it explicitly. Module-owned development access points keep persistence private to each module; this orchestrator only
+ * depends on exposed root-package APIs and never reaches across module persistence boundaries.
  */
 @Component
 @Suppress("LongParameterList")
 internal class DevelopmentFixtureInitializer(
-    private val uniques: UniqueDefinitionPersistenceAdapter,
-    private val leagues: LeagueDefinitionPersistenceAdapter,
-    private val accounts: AccountContextPersistenceAdapter,
+    private val uniques: DevelopmentCatalogAccess,
+    private val leagueAccess: DevelopmentLeagueAccess,
     private val accountEvaluation: AccountEvaluationService,
     private val ownership: ManualOwnershipService,
-    private val archetypes: BuildArchetypePersistenceAdapter,
-    private val variants: BuildVariantPersistenceAdapter,
-    private val revisions: BuildVariantRevisionPersistenceAdapter,
-    private val activation: BuildVariantRevisionActivationService,
+    private val buildAccess: DevelopmentBuildAccess,
     private val bosses: BossDefinitionService,
-    private val sources: AcquisitionSourcePersistenceAdapter,
-    private val relationships: DropRelationshipPersistenceAdapter,
+    private val acquisitionAccess: DevelopmentAcquisitionAccess,
     private val encounters: BossEncounterKnowledgeService,
     private val drops: DropRelationshipKnowledgeService,
     private val estimates: FixedDropEstimateService,
@@ -102,7 +92,7 @@ internal class DevelopmentFixtureInitializer(
 
     private fun createCatalogAndAccount() {
         listOf(ids.uniqueA, ids.uniqueB, ids.uniqueC).forEach { uniques.save(UniqueDefinition(it)) }
-        leagues.save(
+        leagueAccess.saveLeague(
             LeagueDefinition(
                 id = ids.league,
                 name = "Development SSF league",
@@ -112,26 +102,27 @@ internal class DevelopmentFixtureInitializer(
                 realm = GameRealm.PC,
             ),
         )
-        accounts.save(AccountContext(ids.account, ids.league, Ruleset.NORMAL))
+        leagueAccess.saveAccount(AccountContext(ids.account, ids.league, Ruleset.NORMAL))
         ownership.setOwnedQuantity(ids.account, ids.uniqueA, 1)
         ownership.setOwnedQuantity(ids.account, ids.uniqueB, 1)
         // C=0 is represented by an absent ownership row.
     }
 
     private fun createBuild() {
-        archetypes.save(BuildArchetype(ids.archetype, "Build X"))
-        variants.save(BuildVariant(ids.variant, ids.archetype))
         val revision = BuildVariantRevision(ids.revision, ids.variant, compatibilityVersion)
         revision.updateRequirementGroups(requirementGroups())
-        revisions.saveDraftSnapshot(revision)
-        activation.activate(ids.revision)
+        buildAccess.createAndActivate(
+            BuildArchetype(ids.archetype, "Build X"),
+            BuildVariant(ids.variant, ids.archetype),
+            revision,
+        )
     }
 
     private fun createAcquisition() {
         bosses.create(BossDefinition(ids.boss, "Boss Y"))
-        sources.save(AcquisitionSource(ids.source))
+        acquisitionAccess.saveSource(AcquisitionSource(ids.source))
         encounters.recordSnapshot(ids.source, scope, encounterSnapshot(), null)
-        relationships.save(DropRelationship(ids.relationship, ids.source, ids.uniqueC))
+        acquisitionAccess.saveRelationship(DropRelationship(ids.relationship, ids.source, ids.uniqueC))
         drops.recordSnapshot(
             ids.relationship,
             scope,
@@ -146,21 +137,21 @@ internal class DevelopmentFixtureInitializer(
         check(uniques.findById(ids.uniqueB) != null && uniques.findById(ids.uniqueC) != null) {
             "Development fixture is missing Unique B or C"
         }
-        val league = leagues.findById(ids.league)
+        val league = leagueAccess.findLeagueById(ids.league)
         check(
             league?.name == "Development SSF league" && league.type == LeagueType.CHALLENGE &&
                 league.participation == LeagueParticipation.SSF && league.mortality == LeagueMortality.SOFTCORE &&
                 league.realm == GameRealm.PC,
         ) { "Development fixture league definition was modified or removed" }
 
-        val account = accounts.findById(ids.account)
+        val account = leagueAccess.findAccountById(ids.account)
         check(account?.leagueDefinitionId == ids.league && account.ruleset == Ruleset.NORMAL) {
             "Development fixture AccountContext was modified or removed"
         }
-        check(archetypes.findById(ids.archetype)?.name == "Build X") {
+        check(buildAccess.findArchetypeById(ids.archetype)?.name == "Build X") {
             "Development fixture Build X archetype was modified or removed"
         }
-        val variant = variants.findById(ids.variant)
+        val variant = buildAccess.findVariantById(ids.variant)
         check(variant?.buildArchetypeId == ids.archetype && variant.label == null) {
             "Development fixture Build X variant was modified or removed"
         }
@@ -170,7 +161,7 @@ internal class DevelopmentFixtureInitializer(
     }
 
     private fun verifyExistingBuild() {
-        val revision = revisions.findById(ids.revision)
+        val revision = buildAccess.findRevisionById(ids.revision)
         check(
             revision?.buildVariantId == ids.variant &&
                 revision.compatibilityVersion == compatibilityVersion &&
@@ -184,9 +175,9 @@ internal class DevelopmentFixtureInitializer(
         check(bosses.findById(ids.boss)?.displayName == "Boss Y") {
             "Development fixture Boss Y definition was modified or removed"
         }
-        check(sources.findById(ids.source) != null) { "Development fixture source is missing" }
+        check(acquisitionAccess.findSourceById(ids.source) != null) { "Development fixture source is missing" }
 
-        val relationship = relationships.findById(ids.relationship)
+        val relationship = acquisitionAccess.findRelationshipById(ids.relationship)
         check(
             relationship?.id == ids.relationship &&
                 relationship.acquisitionSourceId == ids.source &&
@@ -213,14 +204,14 @@ internal class DevelopmentFixtureInitializer(
 
     private fun noOtherFixtureIdentitiesExist(): Boolean = uniques.findById(ids.uniqueB) == null &&
         uniques.findById(ids.uniqueC) == null &&
-        leagues.findById(ids.league) == null &&
-        accounts.findById(ids.account) == null &&
-        archetypes.findById(ids.archetype) == null &&
-        variants.findById(ids.variant) == null &&
-        revisions.findById(ids.revision) == null &&
+        leagueAccess.findLeagueById(ids.league) == null &&
+        leagueAccess.findAccountById(ids.account) == null &&
+        buildAccess.findArchetypeById(ids.archetype) == null &&
+        buildAccess.findVariantById(ids.variant) == null &&
+        buildAccess.findRevisionById(ids.revision) == null &&
         bosses.findById(ids.boss) == null &&
-        sources.findById(ids.source) == null &&
-        relationships.findById(ids.relationship) == null
+        acquisitionAccess.findSourceById(ids.source) == null &&
+        acquisitionAccess.findRelationshipById(ids.relationship) == null
 
     private fun requirementGroups(): List<RequirementGroup> = listOf(
         RequirementGroup(
