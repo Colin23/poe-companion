@@ -73,6 +73,29 @@ set +a
 Spring Boot starts the PostgreSQL Compose service when required. Compose lifecycle management is `start-only`, so the
 database remains running after the application stops.
 
+### Optional development scenario
+
+To load the synthetic A/B/C, Build X and Boss Y scenario into your **local** PostgreSQL database, run:
+
+```bash
+SPRING_PROFILES_ACTIVE=dev POE_COMPANION_DEV_FIXTURE_ENABLED=true ./gradlew bootRun
+```
+
+This requires both switches; an ordinary startup never automatically seeds development data. The fixture uses stable,
+synthetic UUIDs and does not claim that A/B/C are real PoE item names or external-provider identities. It installs
+three Unique definitions, the active Build X revision, Boss Y knowledge, 10% fixed chance, and 12 available attempts.
+The scenario starts with A/B owned and C missing, producing `PARTIAL` readiness and approximately 71.8% success
+chance within 12 attempts (95% threshold: 29).
+
+The fixture is persistent: repeated opt-in startups **preserve** ownership edits, changes to available attempts, and
+any already-selected account. An incomplete or modified canonical fixture fails instead of being silently overwritten.
+There is no automatic reset. The later browser views will use the development-only A/B/C labels until real catalog
+metadata ingestion exists.
+
+Integration tests explicitly call the initializer against Testcontainers PostgreSQL; their execution does not
+require the `dev` profile or the fixture environment variable. GitHub Actions continues to run the standard
+`./gradlew build` with no global development profile.
+
 Useful local endpoints:
 
 - Application: <http://localhost:8080>
