@@ -411,7 +411,10 @@ internal class FixedDropEstimateServiceIntegrationTests(
         service.publish(relationship.id, normalScope, original, null)
 
         service.withdraw(
-            relationship.id, normalScope, invalidation, FixedProbabilityPublicationId.Estimate(original.id),
+            relationship.id,
+            normalScope,
+            invalidation,
+            FixedProbabilityPublicationId.Estimate(original.id),
         )
 
         assertThat(service.findAcceptedTimeline(relationship.id, normalScope)?.resolve(context()))
@@ -432,7 +435,10 @@ internal class FixedDropEstimateServiceIntegrationTests(
         service.withdraw(relationship.id, normalScope, invalidation, null)
 
         service.publish(
-            relationship.id, normalScope, replacement, FixedProbabilityPublicationId.Withdrawal(invalidation.id),
+            relationship.id,
+            normalScope,
+            replacement,
+            FixedProbabilityPublicationId.Withdrawal(invalidation.id),
         )
 
         assertThat(service.findAcceptedTimeline(relationship.id, normalScope)?.snapshots).containsExactly(replacement)
@@ -452,7 +458,10 @@ internal class FixedDropEstimateServiceIntegrationTests(
             .isInstanceOf(IllegalArgumentException::class.java)
         assertThatThrownBy {
             service.withdraw(
-                relationship.id, normalScope, withdrawal(patch = GamePatch(CompatibilityVersion(3, 31), 2)), null,
+                relationship.id,
+                normalScope,
+                withdrawal(patch = GamePatch(CompatibilityVersion(3, 31), 2)),
+                null,
             )
         }.isInstanceOf(IllegalArgumentException::class.java)
         assertThatThrownBy {
@@ -469,13 +478,17 @@ internal class FixedDropEstimateServiceIntegrationTests(
 
         assertThatThrownBy {
             service.publish(
-                relationship.id, normalScope, snapshot(),
+                relationship.id,
+                normalScope,
+                snapshot(),
                 FixedProbabilityPublicationId.Estimate(DropEstimateId(invalidation.id.value)),
             )
         }.isInstanceOf(FixedDropEstimatePublicationConflictException::class.java)
         assertThatThrownBy {
             service.withdraw(
-                relationship.id, normalScope, withdrawal(),
+                relationship.id,
+                normalScope,
+                withdrawal(),
                 FixedProbabilityPublicationId.Withdrawal(FixedProbabilityWithdrawalId.generate()),
             )
         }.isInstanceOf(FixedDropEstimatePublicationConflictException::class.java)
