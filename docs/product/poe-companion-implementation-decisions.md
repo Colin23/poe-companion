@@ -861,3 +861,51 @@ The current selected-account query has a known LeagueDefinitionId. Future querie
 uncertain league identity must preserve that insufficient precision as unknown rather than treating a broad-scope
 lookup as evidence that no league-specific knowledge could apply. Existing strict game-patch resolution remains
 unchanged. Query indexing and broader batching can be revisited with measured data volume or performance needs.
+
+---
+
+## 21. Actionable Fixed-Probability Read-Model Composition
+
+### Context
+
+The Acquisition read model already discovers source-to-Unique relationships and resolves source availability and
+drop applicability independently. Accepted fixed-probability timelines, explicit withdrawals, and manually recorded
+AvailableAttempts exist as separate authorities. The MVP's Bernoulli calculator needs these facts composed without
+conflating accepted canonical estimates, personal resources, or proof of current farming eligibility.
+
+### Decision
+
+For each known DropRelationship, preserve independent scoped source-availability, relationship-applicability, and
+fixed-probability resolutions. Probability uses the same league-independent versus selected-league ambiguity policy
+as §20, including ambiguity when accepted values agree. Timeline patch resolution and withdrawal semantics from
+§19 remain authoritative: a withdrawn estimate resolves UNKNOWN and an older numeric rate is never reused afterward.
+
+Only produce an **actionable fixed-probability calculation** when source availability resolves to AVAILABLE,
+the relationship resolves to CAN_DROP, and exactly one selected probability scope resolves to an accepted numeric
+FixedBernoulliModel. Missing, unknown, does-not-apply, ambiguous or known negative prerequisites block that
+calculation, **without hiding the independent canonical facts or any recorded attempt count**. A numeric estimate
+alone does not establish that its encounter is currently available or that it can drop the Unique.
+
+The existing selected AccountEvaluation supplies the EvaluationContext for canonical knowledge and the
+AccountContextId for personalized attempts. AvailableAttempts is looked up by AccountContextId and
+AcquisitionSourceId, so a count is shared across relationships of one source but never transferred across accounts.
+Absence of a record is distinct from an explicitly recorded zero. When attempts are unrecorded, the probability
+within personal available attempts is omitted, but model-only expected attempts and canonical thresholds remain
+calculable. Zero recorded attempts produces zero cumulative chance.
+
+V0.1 exposes the supported probability of at least one success within recorded attempts, expected attempts until
+first success, and whole-attempt thresholds for 50%, 75%, 90%, 95% and 99%. These results reuse the pure
+FixedBernoulliModel and its source-defined CompletedBossEncounterAttempt semantics. When valid extreme probability
+values require more than Int.MAX_VALUE attempts or yield a nonfinite Double expectation, represent the metric as
+unsupported/absent instead of throwing away otherwise valid knowledge or inventing a finite result. The supported
+threshold targets are fixed for this slice; arbitrary 100% target requests are not introduced.
+
+The read model stays an in-memory, read-only composition under its existing repeatable-read transaction. No
+additional persisted projection, Flyway migration or alternative canonical probability authority is introduced.
+
+### Non-scope
+
+Personal probability overrides, conditional/modifier-dependent probability models, automatic attempt derivation,
+resource reservations, cross-source probability aggregation, and UI/controller work are deferred. The selected
+accepted withdrawal currently resolves as Unknown rather than carrying a separate displayable reason; richer
+withdrawal explanations can be revisited for the Acquisition browser flow.
