@@ -441,8 +441,7 @@ internal class BossEncounterKnowledgeServiceIntegrationTests(
         availability: AcquisitionSourceAvailability = AcquisitionSourceAvailability.AVAILABLE,
         label: String = "Uber Elder",
         participation: BossParticipation = defaultParticipation(bossIds),
-    ): BossEncounterKnowledgeSnapshot =
-        BossEncounterKnowledgeSnapshot(patch, label, availability, participation)
+    ): BossEncounterKnowledgeSnapshot = BossEncounterKnowledgeSnapshot(patch, label, availability, participation)
 
     private fun defaultParticipation(ids: Set<BossDefinitionId>): BossParticipation =
         if (ids.isEmpty()) BossParticipation.ConfigurationDependent else BossParticipation.Fixed(ids)
@@ -475,7 +474,12 @@ internal class BossEncounterKnowledgeServiceIntegrationTests(
                 ruleset, league_definition_id, display_label, availability, participation_kind, revision
             ) VALUES (?, ?, 3, 30, 'NORMAL', ?, ?, ?, ?, 0)
             """.trimIndent(),
-            id, sourceId, leagueId, label, availability, kind,
+            id,
+            sourceId,
+            leagueId,
+            label,
+            availability,
+            kind,
         )
     }
 
