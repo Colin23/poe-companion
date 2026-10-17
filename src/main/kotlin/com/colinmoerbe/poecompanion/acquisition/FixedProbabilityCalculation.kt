@@ -18,6 +18,12 @@ data class FixedProbabilityCalculation(
     val probabilityWithinAvailableAttempts: Double?,
 ) {
     companion object {
+        private const val FIFTY_PERCENT = 0.50
+        private const val SEVENTY_FIVE_PERCENT = 0.75
+        private const val NINETY_PERCENT = 0.90
+        private const val NINETY_FIVE_PERCENT = 0.95
+        private const val NINETY_NINE_PERCENT = 0.99
+
         /** Calculates from accepted knowledge; the caller checks source and relationship eligibility. */
         internal fun from(
             relationship: DropRelationship,
@@ -28,11 +34,11 @@ data class FixedProbabilityCalculation(
             return FixedProbabilityCalculation(
                 attemptDefinition = CompletedBossEncounterAttempt(relationship.acquisitionSourceId),
                 expectedAttemptsUntilSuccess = expected.takeIf { it.isFinite() },
-                attemptsFor50Percent = attemptsOrNull(model, 0.50),
-                attemptsFor75Percent = attemptsOrNull(model, 0.75),
-                attemptsFor90Percent = attemptsOrNull(model, 0.90),
-                attemptsFor95Percent = attemptsOrNull(model, 0.95),
-                attemptsFor99Percent = attemptsOrNull(model, 0.99),
+                attemptsFor50Percent = attemptsOrNull(model, FIFTY_PERCENT),
+                attemptsFor75Percent = attemptsOrNull(model, SEVENTY_FIVE_PERCENT),
+                attemptsFor90Percent = attemptsOrNull(model, NINETY_PERCENT),
+                attemptsFor95Percent = attemptsOrNull(model, NINETY_FIVE_PERCENT),
+                attemptsFor99Percent = attemptsOrNull(model, NINETY_NINE_PERCENT),
                 probabilityWithinAvailableAttempts =
                 availableAttempts?.let { model.probabilityOfAtLeastOneSuccessWithin(it.count) },
             )
