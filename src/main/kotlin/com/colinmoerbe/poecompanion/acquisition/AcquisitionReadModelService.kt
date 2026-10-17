@@ -62,17 +62,17 @@ class AcquisitionReadModelService internal constructor(
 
                 // Accepted probability alone never makes an unavailable source or inapplicable drop farmable.
                 val sourceAvailable =
-                    (sourceKnowledge as? ScopedAcquisitionKnowledge.Selected)?.resolution.let { resolution ->
+                    (sourceKnowledge as? ScopedAcquisitionKnowledge.Selected<*>)?.resolution.let { resolution ->
                         resolution is BossEncounterKnowledgeResolution.Resolved &&
                             resolution.snapshot.availability == AcquisitionSourceAvailability.AVAILABLE
                     }
                 val relationshipCanDrop =
-                    (relationshipKnowledge as? ScopedAcquisitionKnowledge.Selected)?.resolution.let { resolution ->
+                    (relationshipKnowledge as? ScopedAcquisitionKnowledge.Selected<*>)?.resolution.let { resolution ->
                         resolution is DropRelationshipResolution.Resolved &&
                             resolution.snapshot.state == DropRelationshipState.CAN_DROP
                     }
                 val acceptedEstimate =
-                    ((probabilityKnowledge as? ScopedAcquisitionKnowledge.Selected)?.resolution
+                    ((probabilityKnowledge as? ScopedAcquisitionKnowledge.Selected<*>)?.resolution
                         as? FixedDropEstimateResolution.Resolved)?.snapshot
 
                 val calculation =
