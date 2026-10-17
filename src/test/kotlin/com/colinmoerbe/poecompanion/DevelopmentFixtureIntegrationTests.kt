@@ -3,12 +3,12 @@ package com.colinmoerbe.poecompanion
 import com.colinmoerbe.poecompanion.account.ManualOwnershipService
 import com.colinmoerbe.poecompanion.acquisition.AcquisitionQueryResult
 import com.colinmoerbe.poecompanion.acquisition.AcquisitionReadModelService
+import com.colinmoerbe.poecompanion.acquisition.AvailableAttemptsService
 import com.colinmoerbe.poecompanion.acquisition.BossDefinition
 import com.colinmoerbe.poecompanion.acquisition.BossDefinitionCreationConflictException
 import com.colinmoerbe.poecompanion.acquisition.BossDefinitionId
 import com.colinmoerbe.poecompanion.acquisition.BossDefinitionService
 import com.colinmoerbe.poecompanion.acquisition.FixedDropEstimateResolution
-import com.colinmoerbe.poecompanion.acquisition.AvailableAttemptsService
 import com.colinmoerbe.poecompanion.acquisition.ScopedAcquisitionKnowledge
 import com.colinmoerbe.poecompanion.build.BuildReadinessQueryResult
 import com.colinmoerbe.poecompanion.build.BuildReadinessService
@@ -76,13 +76,13 @@ internal class DevelopmentFixtureIntegrationTests(
         assertThat(accountEvaluation.getSelected()?.accountContextId).isEqualTo(ids.account)
         val before = buildReadiness.evaluate(ids.variant) as BuildReadinessQueryResult.Evaluated
         assertThat(before.readiness.readiness).isEqualTo(UniqueReadiness.PARTIAL)
-        val missing = before.readiness.groups.flatMap { it.requirements }
-            .single { it.requirement.uniqueDefinitionId == ids.uniqueC }
+        val beforeRequirements = before.readiness.groups.flatMap { it.requirements }
+        val missing = beforeRequirements.single { it.requirement.uniqueDefinitionId == ids.uniqueC }
         assertThat(missing.ownedQuantity).isZero()
         assertThat(missing.satisfied).isFalse()
 
-        val source = (acquisitionReadModel.findForUnique(ids.uniqueC) as AcquisitionQueryResult.Evaluated)
-            .sources.single()
+        val assessment = acquisitionReadModel.findForUnique(ids.uniqueC) as AcquisitionQueryResult.Evaluated
+        val source = assessment.sources.single()
         val probability = source.probabilityKnowledge as ScopedAcquisitionKnowledge.Selected
         val estimate = probability.resolution as FixedDropEstimateResolution.Resolved
         assertThat(estimate.snapshot.model.probabilityPerAttempt).isEqualTo(0.10)
@@ -114,8 +114,8 @@ internal class DevelopmentFixtureIntegrationTests(
         accountEvaluation.select(ids.account, CompatibilityVersion(3, 30))
         val result = buildReadiness.evaluate(ids.variant) as BuildReadinessQueryResult.Evaluated
         assertThat(result.readiness.readiness).isEqualTo(UniqueReadiness.UNIQUE_READY)
-        val a = result.readiness.groups.flatMap { it.requirements }
-            .single { it.requirement.uniqueDefinitionId == ids.uniqueA }
+        val requirements = result.readiness.groups.flatMap { it.requirements }
+        val a = requirements.single { it.requirement.uniqueDefinitionId == ids.uniqueA }
         assertThat(a.ownedQuantity).isEqualTo(2)
         val source = (acquisitionReadModel.findForUnique(ids.uniqueC) as AcquisitionQueryResult.Evaluated)
             .sources.single()
