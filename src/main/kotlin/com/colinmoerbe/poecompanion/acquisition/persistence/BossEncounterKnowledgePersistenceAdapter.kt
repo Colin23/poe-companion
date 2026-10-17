@@ -40,73 +40,81 @@ internal class BossEncounterKnowledgePersistenceAdapter(
         snapshot: BossEncounterKnowledgeSnapshot,
         expectedRevision: Long?,
     ): Long {
-        val sourceId = acquisitionSourceId.value
-        val major = scope.compatibilityVersion.major
-        val minor = scope.compatibilityVersion.minor
-        val ruleset = scope.ruleset.name
-        val leagueId = scope.leagueDefinitionId?.value
-        val patchNumber = snapshot.effectiveFromPatch?.patch
-        val patchSuffix = snapshot.effectiveFromPatch?.suffix
-        val participationKind = kind(snapshot.bossParticipation).name
-
         val knowledgeId =
             if (expectedRevision == null) {
-                val id = UUID.randomUUID()
-                try {
-                    knowledgeRepository.insertAccepted(
-                        id = id,
-                        sourceId = sourceId,
-                        major = major,
-                        minor = minor,
-                        ruleset = ruleset,
-                        leagueId = leagueId,
-                        patchNumber = patchNumber,
-                        patchSuffix = patchSuffix,
-                        label = snapshot.displayLabel,
-                        availability = snapshot.availability.name,
-                        participationKind = participationKind,
-                    )
-                } catch (exception: DataIntegrityViolationException) {
-                    throw translateIntegrityViolation(exception)
-                }
-                id
+                publishFirstChangePoint(acquisitionSourceId, scope, snapshot)
             } else {
-                val id = knowledgeRepository.findAcceptedId(
-                    sourceId = sourceId,
-                    major = major,
-                    minor = minor,
-                    ruleset = ruleset,
-                    leagueId = leagueId,
-                    patchNumber = patchNumber,
-                    patchSuffix = patchSuffix,
-                ) ?: throw BossEncounterKnowledgeConflictException(
-                    "No accepted encounter knowledge exists at this exact change point",
-                )
-
-                val updated =
-                    knowledgeRepository.replaceIfCurrent(
-                        sourceId = sourceId,
-                        major = major,
-                        minor = minor,
-                        ruleset = ruleset,
-                        leagueId = leagueId,
-                        patchNumber = patchNumber,
-                        patchSuffix = patchSuffix,
-                        label = snapshot.displayLabel,
-                        availability = snapshot.availability.name,
-                        participationKind = participationKind,
-                        expectedRevision = expectedRevision,
-                    )
-                if (updated != 1) {
-                    throw BossEncounterKnowledgeConflictException(
-                        "Expected encounter knowledge revision no longer matches this exact change point",
-                    )
-                }
-                id
+                correctAcceptedChangePoint(acquisitionSourceId, scope, snapshot, expectedRevision)
             }
-
         replaceParticipants(knowledgeId, snapshot.bossParticipation)
         return expectedRevision?.plus(1) ?: 0
+    }
+
+    private fun publishFirstChangePoint(
+        sourceId: AcquisitionSourceId,
+        scope: AcquisitionKnowledgeScope,
+        snapshot: BossEncounterKnowledgeSnapshot,
+    ): UUID {
+        val id = UUID.randomUUID()
+        try {
+            knowledgeRepository.insertAccepted(
+                id = id,
+                sourceId = sourceId.value,
+                major = scope.compatibilityVersion.major,
+                minor = scope.compatibilityVersion.minor,
+                ruleset = scope.ruleset.name,
+                leagueId = scope.leagueDefinitionId?.value,
+                patchNumber = snapshot.effectiveFromPatch?.patch,
+                patchSuffix = snapshot.effectiveFromPatch?.suffix,
+                label = snapshot.displayLabel,
+                availability = snapshot.availability.name,
+                participationKind = kind(snapshot.bossParticipation).name,
+            )
+        } catch (exception: DataIntegrityViolationException) {
+            throw translateIntegrityViolation(exception)
+        }
+        return id
+    }
+
+    private fun correctAcceptedChangePoint(
+        sourceId: AcquisitionSourceId,
+        scope: AcquisitionKnowledgeScope,
+        snapshot: BossEncounterKnowledgeSnapshot,
+        expectedRevision: Long,
+    ): UUID {
+        val id =
+            knowledgeRepository.findAcceptedId(
+                sourceId = sourceId.value,
+                major = scope.compatibilityVersion.major,
+                minor = scope.compatibilityVersion.minor,
+                ruleset = scope.ruleset.name,
+                leagueId = scope.leagueDefinitionId?.value,
+                patchNumber = snapshot.effectiveFromPatch?.patch,
+                patchSuffix = snapshot.effectiveFromPatch?.suffix,
+            ) ?: throw BossEncounterKnowledgeConflictException(
+                "No accepted encounter knowledge exists at this exact change point",
+            )
+
+        val updated =
+            knowledgeRepository.replaceIfCurrent(
+                sourceId = sourceId.value,
+                major = scope.compatibilityVersion.major,
+                minor = scope.compatibilityVersion.minor,
+                ruleset = scope.ruleset.name,
+                leagueId = scope.leagueDefinitionId?.value,
+                patchNumber = snapshot.effectiveFromPatch?.patch,
+                patchSuffix = snapshot.effectiveFromPatch?.suffix,
+                label = snapshot.displayLabel,
+                availability = snapshot.availability.name,
+                participationKind = kind(snapshot.bossParticipation).name,
+                expectedRevision = expectedRevision,
+            )
+        if (updated != 1) {
+            throw BossEncounterKnowledgeConflictException(
+                "Expected encounter knowledge revision no longer matches this exact change point",
+            )
+        }
+        return id
     }
 
     private fun replaceParticipants(knowledgeId: UUID, participation: BossParticipation) {
@@ -166,7 +174,9 @@ internal class BossEncounterKnowledgePersistenceAdapter(
             snapshot =
             BossEncounterKnowledgeSnapshot(
                 effectiveFromPatch =
-                entity.effectivePatchNumber?.let { GamePatch(scope.compatibilityVersion, it, entity.effectivePatchSuffix) },
+                entity.effectivePatchNumber?.let { patch ->
+                    GamePatch(scope.compatibilityVersion, patch, entity.effectivePatchSuffix)
+                },
                 displayLabel = entity.displayLabel,
                 availability = entity.availability,
                 bossParticipation = participation,
