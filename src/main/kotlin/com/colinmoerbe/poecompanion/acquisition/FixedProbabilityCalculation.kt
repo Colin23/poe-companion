@@ -18,7 +18,7 @@ data class FixedProbabilityCalculation(
     val probabilityWithinAvailableAttempts: Double?,
 ) {
     companion object {
-        /** Calculates only from already accepted knowledge; source/relationship eligibility is checked by the caller. */
+        /** Calculates from accepted knowledge; the caller checks source and relationship eligibility. */
         internal fun from(
             relationship: DropRelationship,
             model: FixedBernoulliModel,
