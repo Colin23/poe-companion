@@ -21,41 +21,54 @@ internal object AcquisitionBrowserKnowledgeLabels {
     fun sourceAvailability(knowledge: ScopedAcquisitionKnowledge<BossEncounterKnowledgeResolution>?): String =
         when (knowledge) {
             null -> "Unknown — no account selected"
+
             ScopedAcquisitionKnowledge.Missing -> "Unknown — no accepted encounter knowledge"
+
             ScopedAcquisitionKnowledge.Ambiguous -> "Ambiguous encounter scope"
+
             is ScopedAcquisitionKnowledge.Selected -> when (val resolution = knowledge.resolution) {
                 is BossEncounterKnowledgeResolution.Resolved -> when (resolution.snapshot.availability) {
                     AcquisitionSourceAvailability.AVAILABLE -> "AVAILABLE"
                     AcquisitionSourceAvailability.UNAVAILABLE -> "UNAVAILABLE"
                 }
+
                 BossEncounterKnowledgeResolution.Unknown -> "Unknown for selected patch"
+
                 BossEncounterKnowledgeResolution.DoesNotApply -> "Not applicable to selected context"
             }
         }
 
-    fun relationship(knowledge: ScopedAcquisitionKnowledge<DropRelationshipResolution>?): String =
-        when (knowledge) {
+    fun relationship(knowledge: ScopedAcquisitionKnowledge<DropRelationshipResolution>?): String = when (knowledge) {
             null -> "Unknown — no account selected"
+
             ScopedAcquisitionKnowledge.Missing -> "Unknown — no accepted relationship knowledge"
+
             ScopedAcquisitionKnowledge.Ambiguous -> "Ambiguous relationship scope"
+
             is ScopedAcquisitionKnowledge.Selected -> when (val resolution = knowledge.resolution) {
                 is DropRelationshipResolution.Resolved -> when (resolution.snapshot.state) {
                     DropRelationshipState.CAN_DROP -> "CAN_DROP"
                     DropRelationshipState.CANNOT_DROP -> "CANNOT_DROP"
                 }
+
                 DropRelationshipResolution.Unknown -> "Unknown for selected patch"
+
                 DropRelationshipResolution.DoesNotApply -> "Not applicable to selected context"
             }
         }
 
-    fun estimate(knowledge: ScopedAcquisitionKnowledge<FixedDropEstimateResolution>?): String =
-        when (knowledge) {
+    fun estimate(knowledge: ScopedAcquisitionKnowledge<FixedDropEstimateResolution>?): String = when (knowledge) {
             null -> "Unknown — no account selected"
+
             ScopedAcquisitionKnowledge.Missing -> "No accepted fixed estimate"
+
             ScopedAcquisitionKnowledge.Ambiguous -> "Ambiguous estimate scope"
+
             is ScopedAcquisitionKnowledge.Selected -> when (knowledge.resolution) {
                 is FixedDropEstimateResolution.Resolved -> "Accepted fixed estimate"
+
                 FixedDropEstimateResolution.Unknown -> "Unknown or withdrawn for selected patch"
+
                 FixedDropEstimateResolution.DoesNotApply -> "Not applicable to selected context"
             }
         }
