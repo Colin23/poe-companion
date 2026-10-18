@@ -952,3 +952,46 @@ designed; synthetic evidence labels must not be presented as real measured PoE f
 The fixture isn't a production Flyway data migration or a replacement for future provider ingestion/curator UI.
 No schema changes, generic seed framework, browser navigation, or automatic reset are introduced. Browser-level
 flow tests will follow when the relevant views exist.
+
+---
+
+## 23. Initial Read-Only Unique Collection Browser
+
+### Context
+
+Milestone 5's first browser flow needs to show Catalog identities and the selected AccountContext's current owned
+quantities without importing PoE Wiki data or prematurely creating Catalog metadata tables. Catalog's stable
+UniqueDefinition identities already exist in PostgreSQL, but names, tiers, item classes, availability and other
+enrichment belong to Milestone 7. The current development fixture explicitly supplies only A/B/C display aliases.
+
+### Decision
+
+Expose normal Catalog-owned read operations to enumerate all known UniqueDefinitions and look up one identity.
+Keep Catalog persistence private to the Catalog module; the existing DevelopmentCatalogAccess remains exclusively
+a development-bootstrap entry point. A small application-root browser read model composes Catalog identities,
+AccountEvaluationService's selected AccountContext and the single CurrentOwnership projection for that account.
+The composition uses a read-only repeatable-read transaction, returns presentation DTOs rather than new domain
+facts, and never queries ownership once per Unique.
+
+The initial server-rendered URLs are `/uniques` and `/uniques/{id}`. List filters are **All / Owned / Missing**,
+where Owned means quantity > 0 and Missing means quantity = 0 in the selected AccountContext. These are not
+ItemAvailability judgments. Without a selection, all catalog identities remain browseable but ownership is
+unknown, not zero; Owned and Missing navigation is disabled, and directly requesting those filtered states without
+a selected account is rejected. Invalid filter and malformed UUID inputs produce HTTP 400, unknown existing-format
+Unique IDs produce HTTP 404. An empty catalog renders an explicit empty state without initializing fixture data.
+
+The presentation may render the existing development-only A/B/C alias map, clearly labelled as synthetic.
+Unlabelled catalog identities display `Unique (name unavailable)` alongside their stable UUID; neither label is
+saved to Catalog or treated as a provider identity. This allows ordinary non-fixture identities to appear correctly
+even before catalog ingestion. Real names, base types, tiers, ItemAvailability and name-based search await
+Milestone 7. Basic All/Owned/Missing filtering works independently of that metadata.
+
+Use the existing Spring MVC, Thymeleaf, Spring Security and CSS stack. Controllers handle only routing, input
+validation and view dispatch, while read-model services assemble consistent display data. Tests exercise rendered
+HTTP responses with authenticated/anonymous callers against Testcontainers PostgreSQL, including ownership
+changes, missing account selection and unknown Unique identities.
+
+### Non-scope
+
+No ownership-editing controller, Build/Acquisition associations or navigation, probability presentation, SPA,
+new schema, real provider import, tier filters, generic presentation mapper, or full browser automation.
