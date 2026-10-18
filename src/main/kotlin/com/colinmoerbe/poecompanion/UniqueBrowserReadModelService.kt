@@ -57,11 +57,11 @@ internal class UniqueBrowserReadModelService(
     }
 
     private fun entry(id: UniqueDefinitionId, ownership: CurrentOwnership?): UniqueBrowserEntry {
-        val fixtureLabel = DevelopmentFixtureIds.uniqueLabels[id]
+        val label = UniqueDisplayLabels.forId(id)
         return UniqueBrowserEntry(
             id = id.value,
-            displayName = fixtureLabel ?: "Unique (name unavailable)",
-            developmentLabel = fixtureLabel != null,
+            displayName = label.name,
+            developmentLabel = label.synthetic,
             ownedQuantity = ownership?.quantityOf(id),
         )
     }

@@ -1101,3 +1101,56 @@ Start the behavior-preserving, domain-capability-oriented reorganization with en
 
 Follow-up internal capability migrations (relationship, probability, attempts) are **not** implied by this
 first move and should be proposed only when their concrete dependency structure justifies them.
+
+---
+
+## 26. Read-Only Build Browser, Explainable Readiness and Shared Navigation
+
+### Context
+
+Milestone 5 extends the authenticated Unique Collection with Build browsing, using real persisted BuildArchetypes,
+BuildVariants and compatible activated BuildVariantRevisions. The V0.1 Build browser must explain readiness using
+the existing ENABLING/CORE/UPGRADE and ALL/ANY semantics, without inventing scores, copying ownership rules into
+the presentation layer or depending on optional development fixture beans.
+
+### Decision
+
+- Expose authenticated `GET /builds` and `GET /builds/{BuildVariantId UUID}` as Spring MVC/Thymeleaf pages.
+  Browse known variants from persistent Build identity regardless of whether their readiness is evaluable.
+  List evaluated variants grouped by `UNIQUE_READY`, `PARTIAL`, `BLOCKED`, and separate unavailable outcomes
+  (no account selected / no compatible active revision). A malformed UUID is HTTP 400 and unknown variant is 404;
+  no compatible active revision is **not** a missing or blocked Unique requirement.
+- Add a narrowly scoped `BuildCatalogQueryService` in Build's public root package, backed by existing Build-owned
+  archetype/variant persistence adapters. Keep `BuildReadinessService` responsible for readiness and offer a
+  batch evaluation API that selects one account and fetches CurrentOwnership once for the whole list.
+  Compose browser DTOs at the application root in a read-only repeatable-read transaction; do not use
+  `DevelopmentBuildAccess` in normal browsing, cross into another module's persistence, or implement a second
+  readiness algorithm in the controller.
+- Detail renders the active compatible revision, requirement importance and logic, each owned/required quantity,
+  group-level satisfaction, and Unique detail links. `ANY` groups can be satisfied even when other alternatives
+  are individually missing. UPGRADE failures don't affect primary readiness. A zero-group or upgrade-only revision
+  shows **No required Uniques** while its domain readiness remains `UNIQUE_READY`. An absent account or revision
+  produces no fabricated ownership information.
+- Share a single temporary `UniqueDisplayLabels` helper with the Unique Collection for synthetic A/B/C aliases;
+  non-fixture identities remain `Unique (name unavailable)` with the UUID available. Replace the helper with
+  real Catalog metadata in Milestone 7; avoid duplicating aliases in other browser models.
+- Add a shared Thymeleaf header fragment (Home, Uniques, Builds, signed-in user and CSRF-protected logout) to
+  all currently implemented pages. Navigation advertises only working destinations. Retain existing CSS with
+  clearly marked feature sections and responsive behavior.
+- BuildReference persists nowhere yet. A truthful unavailable references section in this read-only browser
+  does not satisfy V0.1's eventual BuildReference persistence/curation requirement: implement and track that
+  separately. Likewise, missing Unique → acquisition navigation awaits later Milestone 5 increments.
+
+### Exclusions
+
+No Build editor, revision activation UI, persistence migration, external metadata ingestion, calculated build
+strength/DPS, advanced searching/pagination, new web Modulith module or unrelated domain package reshuffle.
+Review touched files for cohesion continuously; move internal classes only where a small related change clearly
+improves the structure. Larger capability migrations remain separate, reviewable refactors.
+
+### Verification
+
+Authenticated and anonymous HTTP tests against PostgreSQL cover Build X's PARTIAL state, the A/B/C ownership
+transition to UNIQUE_READY, BLOCKED enabling groups, ANY alternatives, multi-copy requirements, UPGRADE-only and
+zero-group revisions, missing account/compatible revision, absent catalogue, malformed/unknown IDs, synthetic
+labels and navigation. Existing Build domain and Spring Modulith tests continue to apply.

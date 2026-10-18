@@ -20,6 +20,14 @@ internal class BuildVariantPersistenceAdapter(private val springDataRepository: 
         )
     }
 
+    fun findAll(): List<BuildVariant> = springDataRepository.findAll().map { entity ->
+        BuildVariant(
+            id = BuildVariantId(entity.id),
+            buildArchetypeId = BuildArchetypeId(entity.buildArchetypeId),
+            label = entity.label,
+        )
+    }
+
     fun findById(id: BuildVariantId): BuildVariant? = springDataRepository
         .findById(id.value)
         .map { entity ->

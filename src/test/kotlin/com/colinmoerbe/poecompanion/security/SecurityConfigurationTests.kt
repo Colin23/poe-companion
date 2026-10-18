@@ -71,6 +71,7 @@ class SecurityConfigurationTests(@Autowired private val mockMvc: MockMvc) {
             .andExpect(content().string(containsString("PoE Companion")))
             .andExpect(content().string(containsString("test-user")))
             .andExpect(content().string(containsString("Open Unique Collection")))
+            .andExpect(content().string(containsString("Browse Builds")))
     }
 
     @Test

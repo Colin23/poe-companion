@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${page.displayName} + ' — PoE Companion'">Build Detail — PoE Companion</title>
+    <link rel="stylesheet" th:href="@{/css/application.css}">
+</head>
+<body>
+<header th:replace="~{fragments/site-header :: siteHeader('builds', ${username})}"></header>
+<main>
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a th:href="@{/}">Home</a>
+        <span aria-hidden="true"> / </span>
+        <a th:href="@{/builds}">Builds</a>
+        <span aria-hidden="true"> / </span>
+        <span aria-current="page" th:text="${page.displayName}">Build X</span>
+    </nav>
+    <section class="panel">
+        <h1 th:text="${page.displayName}">Build X</h1>
+        <p class="readiness-status" th:text="${page.state.title}">Partial</p>
+        <p th:text="${page.explanation}">Enabling requirements satisfied; core incomplete.</p>
+        <dl class="detail-facts">
+            <div>
+                <dt>Build variant ID</dt>
+                <dd><code th:text="${page.id}">UUID</code></dd>
+            </div>
+            <div>
+                <dt>Compatibility version</dt>
+                <dd th:text="${page.compatibilityVersion ?: 'No account evaluation selected'}">3.30</dd>
+            </div>
+            <div>
+                <dt>Revision verification</dt>
+                <dd th:text="${page.revisionStatus}">Active revision</dd>
+            </div>
+        </dl>
+
+        <p class="notice" th:if="${page.hasRequiredUniqueGroups == false}">
+            No required Uniques. Upgrade requirements, if any, remain optional for primary readiness.
+        </p>
+        <p class="notice" th:if="${page.hasRequiredUniqueGroups == null}">
+            Requirement ownership cannot be evaluated for this Build in the current selection.
+        </p>
+
+        <section th:if="${page.hasRequiredUniqueGroups != null}" class="requirements-section">
+            <h2>Unique requirements</h2>
+            <div class="requirement-group" th:each="group : ${page.groups}">
+                <div class="group-heading">
+                    <h3><span th:text="${group.importance}">CORE</span> — <span th:text="${group.logic}">ALL</span></h3>
+                    <span class="readiness-status"
+                          th:text="${group.satisfied} ? 'Group satisfied' : 'Group incomplete'">Group incomplete</span>
+                </div>
+                <p class="small-muted" th:if="${group.logic == 'ANY'}">
+                    Any one of the alternatives can satisfy this group.
+                </p>
+                <p class="small-muted" th:if="${group.importance == 'UPGRADE'}">
+                    Upgrades do not affect primary Unique readiness.
+                </p>
+                <ul class="requirement-list">
+                    <li th:each="requirement : ${group.requirements}">
+                        <div>
+                            <a th:if="${requirement.catalogKnown}" th:href="@{/uniques/{id}(id=${requirement.id})}"
+                               th:text="${requirement.displayName}">Unique C</a>
+                            <span th:unless="${requirement.catalogKnown}"
+                                  th:text="${requirement.displayName}">Unique (name unavailable)</span>
+                            <span class="small-muted" th:if="${requirement.syntheticLabel}">
+                                Synthetic development item
+                            </span>
+                            <span class="small-muted" th:unless="${requirement.syntheticLabel}"
+                                  th:text="${requirement.id}">UUID</span>
+                        </div>
+                        <span class="requirement-quantity">
+                            <span th:text="${requirement.ownedQuantity}">0</span>
+                            /
+                            <span th:text="${requirement.requiredQuantity}">1</span>
+                            <span th:text="${requirement.satisfied} ? ' · satisfied' : ' · missing copies'">
+                                · missing copies
+                            </span>
+                        </span>
+                    </li>
+                </ul>
+            </div>
+        </section>
+        <section class="upcoming-section">
+            <h2>Build references</h2>
+            <p class="small-muted">Build guide and PoB references are not available yet.</p>
+        </section>
+        <p><a th:href="@{/builds}">Back to Builds</a></p>
+    </section>
+</main>
+</body>
+</html>

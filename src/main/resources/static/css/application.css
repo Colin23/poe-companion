@@ -218,16 +218,120 @@ a:focus-visible {
     text-decoration: none;
 }
 
+
+/* Shared navigation: links to implemented browser sections */
+.brand-and-navigation {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 2rem;
+}
+
+.app-navigation {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.25rem;
+}
+
+.app-navigation a {
+    color: #b9bdc5;
+    text-decoration: none;
+}
+
+.app-navigation a.is-active {
+    color: #ffe0b4;
+    text-decoration: underline;
+    text-underline-offset: 0.35rem;
+}
+
+.session-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem 1.5rem;
+    flex-wrap: wrap;
+}
+
+/* Build Browser: grouped variants and readiness labels */
+.build-section {
+    margin-top: 1.75rem;
+}
+
+.build-list,
+.requirement-list {
+    list-style: none;
+    padding: 0;
+    border-top: 1px solid #393d44;
+}
+
+.build-list li,
+.requirement-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1.5rem;
+    padding: 0.9rem 0;
+    border-bottom: 1px solid #393d44;
+}
+
+.build-name {
+    font-weight: 700;
+}
+
+.readiness-status {
+    display: inline-block;
+    width: fit-content;
+    padding: 0.2rem 0.55rem;
+    border: 1px solid #777d86;
+    border-radius: 0.35rem;
+    color: #e8e2d7;
+    white-space: nowrap;
+}
+
+/* Build Detail: logical requirement groups and quantities */
+.requirements-section {
+    margin-top: 1.5rem;
+}
+
+.requirement-group {
+    margin-top: 1rem;
+    padding: 1rem;
+    border: 1px solid #393d44;
+    border-radius: 0.35rem;
+}
+
+.group-heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    flex-wrap: wrap;
+}
+
+.group-heading h3 {
+    margin: 0 0 0.5rem;
+}
+
+.requirement-quantity {
+    color: #b9bdc5;
+    text-align: right;
+}
+
 /* Responsive adjustments for narrow screens */
 @media (max-width: 40rem) {
     .site-header,
-    .unique-list li {
+    .unique-list li,
+    .build-list li,
+    .requirement-list li {
         align-items: flex-start;
         flex-direction: column;
     }
 
     main {
         padding: 1rem;
+    }
+
+    .site-header {
+        gap: 1rem;
     }
 
     .detail-facts > div {
