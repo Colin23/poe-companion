@@ -15,10 +15,7 @@ import java.util.UUID
 @Controller
 internal class UniqueBrowserController(private val readModel: UniqueBrowserReadModelService) {
     @GetMapping("/uniques")
-    fun list(
-        @RequestParam(defaultValue = "all") filter: String,
-        principal: Principal,
-    ): ModelAndView {
+    fun list(@RequestParam(defaultValue = "all") filter: String, principal: Principal): ModelAndView {
         val collectionFilter =
             UniqueCollectionFilter.parse(filter)
                 ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown collection filter")
