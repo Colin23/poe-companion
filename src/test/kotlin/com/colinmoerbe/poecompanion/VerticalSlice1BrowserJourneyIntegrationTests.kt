@@ -96,7 +96,9 @@ internal class VerticalSlice1BrowserJourneyIntegrationTests(
 
         val bossAfterOwnership = acquisitionDetail(sourceUrl)
         assertThat(bossAfterOwnership.savedAttempts).isEqualTo(12)
-        assertThat(bossAfterOwnership.relationships.single().probabilityWithinAttempts).isEqualTo("71.8%")
+        val dropAfterOwnership = bossAfterOwnership.relationships.single()
+        assertThat(dropAfterOwnership.chancePerAttempt).isEqualTo("10.000%")
+        assertThat(dropAfterOwnership.probabilityWithinAttempts).isEqualTo("71.8%")
         assertThat(attempts.getAvailableAttempts(ids.account, ids.source)?.count).isEqualTo(12)
     }
 
