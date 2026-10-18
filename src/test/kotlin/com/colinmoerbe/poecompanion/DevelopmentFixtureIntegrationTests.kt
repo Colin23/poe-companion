@@ -8,17 +8,21 @@ import com.colinmoerbe.poecompanion.acquisition.BossDefinition
 import com.colinmoerbe.poecompanion.acquisition.BossDefinitionCreationConflictException
 import com.colinmoerbe.poecompanion.acquisition.BossDefinitionId
 import com.colinmoerbe.poecompanion.acquisition.BossDefinitionService
+import com.colinmoerbe.poecompanion.acquisition.DevelopmentAcquisitionAccess
 import com.colinmoerbe.poecompanion.acquisition.FixedDropEstimateResolution
 import com.colinmoerbe.poecompanion.acquisition.ScopedAcquisitionKnowledge
 import com.colinmoerbe.poecompanion.build.BuildReadinessQueryResult
 import com.colinmoerbe.poecompanion.build.BuildReadinessService
+import com.colinmoerbe.poecompanion.build.DevelopmentBuildAccess
 import com.colinmoerbe.poecompanion.build.UniqueReadiness
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinition
+import com.colinmoerbe.poecompanion.catalog.DevelopmentCatalogAccess
 import com.colinmoerbe.poecompanion.catalog.persistence.UniqueDefinitionPersistenceAdapter
 import com.colinmoerbe.poecompanion.league.AccountContext
 import com.colinmoerbe.poecompanion.league.AccountContextId
 import com.colinmoerbe.poecompanion.league.AccountEvaluationService
 import com.colinmoerbe.poecompanion.league.CompatibilityVersion
+import com.colinmoerbe.poecompanion.league.DevelopmentLeagueAccess
 import com.colinmoerbe.poecompanion.league.Ruleset
 import com.colinmoerbe.poecompanion.league.persistence.AccountContextPersistenceAdapter
 import org.assertj.core.api.Assertions.assertThat
@@ -71,13 +75,13 @@ internal class DevelopmentFixtureIntegrationTests(
     fun `complete persisted scenario should go from partial Build X to unique ready after owning C`() {
         assertThat(context.containsBean("developmentFixtureRunner")).isFalse()
         assertThat(context.getBeansOfType(DevelopmentFixtureInitializer::class.java)).hasSize(1)
-        assertThat(context.getBeansOfType(com.colinmoerbe.poecompanion.catalog.DevelopmentCatalogAccess::class.java))
+        assertThat(context.getBeansOfType(DevelopmentCatalogAccess::class.java))
             .hasSize(1)
-        assertThat(context.getBeansOfType(com.colinmoerbe.poecompanion.league.DevelopmentLeagueAccess::class.java))
+        assertThat(context.getBeansOfType(DevelopmentLeagueAccess::class.java))
             .hasSize(1)
-        assertThat(context.getBeansOfType(com.colinmoerbe.poecompanion.build.DevelopmentBuildAccess::class.java))
+        assertThat(context.getBeansOfType(DevelopmentBuildAccess::class.java))
             .hasSize(1)
-        assertThat(context.getBeansOfType(com.colinmoerbe.poecompanion.acquisition.DevelopmentAcquisitionAccess::class.java))
+        assertThat(context.getBeansOfType(DevelopmentAcquisitionAccess::class.java))
             .hasSize(1)
         assertThat(uniques.findById(ids.uniqueA)).isNull()
 
