@@ -1,14 +1,16 @@
-package com.colinmoerbe.poecompanion.acquisition.persistence
+package com.colinmoerbe.poecompanion.acquisition.encounter.persistence
 
 import com.colinmoerbe.poecompanion.acquisition.AcceptedBossEncounterChangePoint
 import com.colinmoerbe.poecompanion.acquisition.AcquisitionKnowledgeScope
 import com.colinmoerbe.poecompanion.acquisition.AcquisitionSourceId
 import com.colinmoerbe.poecompanion.acquisition.BossDefinitionId
 import com.colinmoerbe.poecompanion.acquisition.BossEncounterKnowledgeConflictException
-import com.colinmoerbe.poecompanion.acquisition.BossEncounterKnowledgePersistencePort
 import com.colinmoerbe.poecompanion.acquisition.BossEncounterKnowledgeSnapshot
 import com.colinmoerbe.poecompanion.acquisition.BossParticipation
-import com.colinmoerbe.poecompanion.acquisition.CorruptBossEncounterKnowledgeException
+import com.colinmoerbe.poecompanion.acquisition.encounter.BossEncounterKnowledgePersistencePort
+import com.colinmoerbe.poecompanion.acquisition.encounter.CorruptBossEncounterKnowledgeException
+import com.colinmoerbe.poecompanion.acquisition.persistence.SpringDataAcquisitionSourceRepository
+import com.colinmoerbe.poecompanion.acquisition.persistence.SpringDataBossDefinitionRepository
 import com.colinmoerbe.poecompanion.league.GamePatch
 import org.hibernate.exception.ConstraintViolationException
 import org.springframework.dao.DataIntegrityViolationException

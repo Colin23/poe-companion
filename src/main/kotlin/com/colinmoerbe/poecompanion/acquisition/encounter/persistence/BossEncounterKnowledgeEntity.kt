@@ -1,4 +1,4 @@
-package com.colinmoerbe.poecompanion.acquisition.persistence
+package com.colinmoerbe.poecompanion.acquisition.encounter.persistence
 
 import com.colinmoerbe.poecompanion.acquisition.AcquisitionSourceAvailability
 import com.colinmoerbe.poecompanion.league.Ruleset
