@@ -54,7 +54,9 @@ internal class AcquisitionBrowserReadModelService(
             selectionLabel = result.accountEvaluation?.let(::describeSelection),
             savedAttempts = result.availableAttempts?.count,
             previewAttempts = previewAttempts,
-            effectiveAttempts = if (result.accountEvaluation == null) null else {
+            effectiveAttempts = if (result.accountEvaluation == null) {
+                null
+            } else {
                 previewAttempts ?: result.availableAttempts?.count
             },
             relationships = relationships,
