@@ -23,5 +23,7 @@ internal interface SpringDataDropRelationshipRepository : JpaRepository<DropRela
         @Param("uniqueDefinitionId") uniqueDefinitionId: UUID,
     ): Int
 
+    fun findByAcquisitionSourceId(acquisitionSourceId: UUID): List<DropRelationshipEntity>
+
     fun findByUniqueDefinitionId(uniqueDefinitionId: UUID): List<DropRelationshipEntity>
 }
