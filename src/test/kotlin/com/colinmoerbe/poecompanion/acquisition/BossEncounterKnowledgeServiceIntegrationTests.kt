@@ -1,5 +1,6 @@
 package com.colinmoerbe.poecompanion.acquisition
 
+import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.acquisition.encounter.CorruptBossEncounterKnowledgeException
 import com.colinmoerbe.poecompanion.acquisition.encounter.persistence.BossEncounterKnowledgePersistenceAdapter
 import com.colinmoerbe.poecompanion.acquisition.encounter.persistence.SpringDataBossEncounterKnowledgeRepository
@@ -14,9 +15,8 @@ import com.colinmoerbe.poecompanion.league.LeagueDefinitionId
 import com.colinmoerbe.poecompanion.league.LeagueMortality
 import com.colinmoerbe.poecompanion.league.LeagueParticipation
 import com.colinmoerbe.poecompanion.league.LeagueType
-import com.colinmoerbe.poecompanion.league.persistence.LeagueDefinitionPersistenceAdapter
 import com.colinmoerbe.poecompanion.league.Ruleset
-import com.colinmoerbe.poecompanion.TestcontainersConfiguration
+import com.colinmoerbe.poecompanion.league.persistence.LeagueDefinitionPersistenceAdapter
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
