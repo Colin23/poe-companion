@@ -18,10 +18,7 @@ internal data class BuildBrowserListEntry(
     val explanation: String,
 )
 
-internal data class BuildBrowserSection(
-    val state: BuildBrowserState,
-    val entries: List<BuildBrowserListEntry>,
-)
+internal data class BuildBrowserSection(val state: BuildBrowserState, val entries: List<BuildBrowserListEntry>)
 
 internal data class BuildBrowserListPage(
     val totalCount: Int,
