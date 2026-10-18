@@ -41,9 +41,10 @@ internal class AcquisitionBrowserReadModelService(
     fun detail(sourceId: AcquisitionSourceId, previewAttempts: Int?): AcquisitionBrowserDetailPage? {
         val result = acquisition.findForSource(sourceId, previewAttempts) ?: return null
         val knownIds = catalog.findAll().mapTo(hashSetOf()) { it.id }
+        val ordering = compareBy<AcquisitionBrowserRelationshipEntry> { it.displayName.lowercase() }.thenBy { it.uniqueId }
         val relationships = result.relationships.map { relationship ->
             toRelationship(relationship, knownIds)
-        }.sortedWith(compareBy<AcquisitionBrowserRelationshipEntry> { it.displayName.lowercase() }.thenBy { it.uniqueId })
+        }.sortedWith(ordering)
         return AcquisitionBrowserDetailPage(
             id = sourceId.value,
             displayName = AcquisitionBrowserKnowledgeLabels.sourceLabel(result.sourceKnowledge),
@@ -66,7 +67,8 @@ internal class AcquisitionBrowserReadModelService(
         val id = result.relationship.uniqueDefinitionId
         val label = UniqueDisplayLabels.forId(id)
         val assessment = result.assessment
-        val estimateResolution = (assessment?.probabilityKnowledge as? ScopedAcquisitionKnowledge.Selected<*>)?.resolution
+        val estimateResolution =
+            (assessment?.probabilityKnowledge as? ScopedAcquisitionKnowledge.Selected<*>)?.resolution
         val estimate = (estimateResolution as? FixedDropEstimateResolution.Resolved)?.snapshot
         val calculation = assessment?.calculation
         val thresholds = if (calculation == null) {
@@ -87,24 +89,30 @@ internal class AcquisitionBrowserReadModelService(
             syntheticLabel = label.synthetic,
             relationshipStatus = AcquisitionBrowserKnowledgeLabels.relationship(assessment?.relationshipKnowledge),
             probabilityStatus = AcquisitionBrowserKnowledgeLabels.estimate(assessment?.probabilityKnowledge),
-            chancePerAttempt = estimate?.let { percent(it.model.probabilityPerAttempt, 3) },
+            chancePerAttempt = estimate?.let { percent(it.model.probabilityPerAttempt, PER_ATTEMPT_DECIMALS) },
             estimateProvenance = estimate?.provenance?.name,
             evidenceReference = estimate?.evidenceReference,
             reviewedAt = estimate?.reviewedAt?.toString(),
             actionable = calculation != null,
-            probabilityWithinAttempts = calculation?.probabilityWithinAvailableAttempts?.let { percent(it, 1) },
+            probabilityWithinAttempts = calculation?.probabilityWithinAvailableAttempts?.let { percent(it, CUMULATIVE_DECIMALS) },
             expectedAttempts = calculation?.expectedAttemptsUntilSuccess?.let(::expected),
             thresholds = thresholds,
         )
     }
 
     private fun percent(fraction: Double, decimals: Int): String =
-        String.format(Locale.ROOT, "%." + decimals + "f%%", fraction * 100.0)
+        String.format(Locale.ROOT, "%." + decimals + "f%%", fraction * PERCENT_MULTIPLIER)
 
     private fun expected(value: Double): String = if (value == value.toLong().toDouble()) {
         value.toLong().toString()
     } else {
         String.format(Locale.ROOT, "%.2f", value)
+    }
+
+    private companion object {
+        const val PER_ATTEMPT_DECIMALS = 3
+        const val CUMULATIVE_DECIMALS = 1
+        const val PERCENT_MULTIPLIER = 100.0
     }
 
     private fun describeSelection(selection: AccountEvaluation): String {
