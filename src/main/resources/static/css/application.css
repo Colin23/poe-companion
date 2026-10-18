@@ -206,6 +206,29 @@ a:focus-visible {
     margin: 1.5rem 0;
 }
 
+/* Home: simple player-facing journey entry points */
+.home-journey {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+}
+
+.home-journey > div {
+    padding: 1rem;
+    border: 1px solid #393d44;
+    border-radius: 0.35rem;
+}
+
+.home-journey h2 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.home-journey p {
+    margin-bottom: 0;
+}
+
 /* Home: primary navigation link */
 .primary-link {
     display: inline-block;

@@ -31,8 +31,18 @@ internal data class UniqueCollectionPage(
     val filter: String,
 )
 
+internal data class UniqueAcquisitionCandidate(
+    val sourceId: UUID,
+    val displayName: String,
+    val availability: String,
+    val relationship: String,
+    val estimate: String,
+    val actionableChance: String?,
+)
+
 internal data class UniqueDetailPage(
     val item: UniqueBrowserEntry,
     val accountSelected: Boolean,
     val selectionLabel: String?,
+    val acquisitionSources: List<UniqueAcquisitionCandidate>,
 )

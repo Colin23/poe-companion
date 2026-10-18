@@ -70,8 +70,10 @@ class SecurityConfigurationTests(@Autowired private val mockMvc: MockMvc) {
             .andExpect(view().name("index"))
             .andExpect(content().string(containsString("PoE Companion")))
             .andExpect(content().string(containsString("test-user")))
-            .andExpect(content().string(containsString("Open Unique Collection")))
-            .andExpect(content().string(containsString("Browse Builds")))
+            .andExpect(content().string(containsString("Your Path of Exile planning companion")))
+            .andExpect(content().string(containsString("Explore Builds")))
+            .andExpect(content().string(containsString("Unique Collection")))
+            .andExpect(content().string(containsString("Acquisition Sources")))
     }
 
     @Test

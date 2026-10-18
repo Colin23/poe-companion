@@ -46,12 +46,43 @@
             </div>
         </dl>
         <section class="upcoming-section">
-            <h2>Build and acquisition information</h2>
-            <p>
-                Known Build associations, AcquisitionSources and ownership editing will be connected in
-                upcoming Milestone 5 increments.
+            <h2>Known acquisition sources</h2>
+            <p class="notice" th:if="${page.acquisitionSources.isEmpty()}">
+                No acquisition sources recorded yet. This does not mean the Unique cannot be acquired.
             </p>
+            <div class="relationship-panel" th:each="source : ${page.acquisitionSources}">
+                <h3>
+                    <a th:href="@{/acquisitions/{id}(id=${source.sourceId})} + '#unique-' + ${page.item.id}"
+                       th:text="${source.displayName}">Boss Y</a>
+                </h3>
+                <p class="small-muted" th:if="${source.displayName == 'Acquisition source (name unavailable)'}"
+                   th:text="${source.sourceId}">Source UUID</p>
+                <dl class="detail-facts">
+                    <div>
+                        <dt>Source availability</dt>
+                        <dd th:text="${source.availability}">AVAILABLE</dd>
+                    </div>
+                    <div>
+                        <dt>Drop relationship</dt>
+                        <dd th:text="${source.relationship}">CAN_DROP</dd>
+                    </div>
+                    <div>
+                        <dt>Probability knowledge</dt>
+                        <dd th:text="${source.estimate}">Accepted fixed estimate</dd>
+                    </div>
+                    <div th:if="${source.actionableChance != null}">
+                        <dt>Applicable fixed chance per attempt</dt>
+                        <dd th:text="${source.actionableChance}">10.000%</dd>
+                    </div>
+                </dl>
+                <p class="small-muted" th:if="${source.actionableChance == null}">
+                    No applicable supported fixed-probability calculation is available for this source and Unique.
+                </p>
+            </div>
         </section>
+        <p class="small-muted">
+            Ownership editing and reverse Build associations are not yet available on this page.
+        </p>
         <p><a th:href="@{/uniques}">Back to Unique Collection</a></p>
     </section>
 </main>

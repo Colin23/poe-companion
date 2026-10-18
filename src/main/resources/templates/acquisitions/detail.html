@@ -61,7 +61,8 @@
             <p class="notice" th:if="${page.relationships.isEmpty()}">
                 No Unique relationships have been recorded for this source. This does not prove none exist.
             </p>
-            <article class="relationship-panel" th:each="item : ${page.relationships}">
+            <article class="relationship-panel" th:each="item : ${page.relationships}"
+                     th:id="|unique-${item.uniqueId}|">
                 <h3>
                     <a th:if="${item.catalogKnown}" th:href="@{/uniques/{id}(id=${item.uniqueId})}"
                        th:text="${item.displayName}">Unique C</a>

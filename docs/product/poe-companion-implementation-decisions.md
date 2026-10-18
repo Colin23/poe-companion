@@ -1208,3 +1208,43 @@ HTTP integration tests cover the Boss Y fixture (12 attempts, approximately 71.8
 95-percent threshold 29), nonpersistent attempt previews including zero, missing counts, empty and relationship-free
 sources, absent account, ambiguous scope, explicit CANNOT_DROP, unknown IDs, invalid input and authentication.
 Existing Acquisition domain read-model, JPA and Spring Modulith tests remain mandatory.
+
+---
+
+## 28. Connected Read-Only Build → Unique → Acquisition Browser Journey
+
+### Context
+
+The Build, Unique, and Acquisition browsers were implemented as independent Milestone 5 pages. The Unique
+Detail page still contained an obsolete placeholder, and the homepage described technical bootstrap rather
+than the actual player journey. Stable AcquisitionSource/DropRelationship identities can be known even if no
+AccountEvaluation is currently selected, but the existing `findForUnique` query returned only a no-account
+sentinel instead of those stable candidates.
+
+### Decision
+
+- Make the central browser flow navigable as Build requirement → Unique Detail → known acquisition source →
+  its source-to-Unique relationship section. Add stable `unique-{UniqueDefinitionId UUID}` HTML anchors on
+  Acquisition Detail relationship panels. The reverse link remains independently navigable.
+- Add `AcquisitionReadModelService.findCandidatesForUnique(id)` returning account-independent candidate
+  relationship identities and optional contextual assessments. Retain the existing `findForUnique(id)` API
+  and its explicit `NoAccountEvaluationSelected` outcome by delegating to the same discovery/assessment
+  implementation. No new persistence access outside Acquisition, no invented probability, no database changes.
+- When no relationships are recorded, say **No acquisition sources recorded yet**, not that a Unique cannot
+  drop. Even with no selected account, display known candidate identities but **no contextual conclusions**.
+  Render source availability, relationship applicability, and accepted estimate status independently using
+  the Acquisition browser's existing label policy. Show a numerical chance on Unique Detail only when the
+  Acquisition domain's actionable fixed calculation is available; no assumptions about overlapping scopes.
+- Replace the root bootstrap page with concise, player-facing links to Builds, Unique Collection, and
+  Acquisition Sources. Do not describe the app homepage as exclusively SSF; the fixture's SSF game context
+  remains a valid example rather than a product limitation. Order shared navigation as
+  Home → Builds → Uniques → Acquisition. Preserve authentication, CSRF logout and link correctness.
+- Remove the obsolete Unique Detail acquisition placeholder. Keep ownership editing, reverse Build
+  associations, account dashboards, real Wiki catalog labels and broader UI layout/metadata polish
+  explicitly deferred. When touching files, consider package cohesion; do not move unrelated internals.
+
+### Verification
+
+HTTP tests cover canonical A/B no-source empty states, C → Boss Y navigation, absence of account selection
+with preserved identities, independent unavailable/CANNOT_DROP/unknown/ambiguous knowledge outcomes, and
+the shared homepage/navigation. Keep existing Acquisition service integration and Spring Modulith tests green.

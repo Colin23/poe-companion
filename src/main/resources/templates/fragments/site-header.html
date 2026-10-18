@@ -7,10 +7,10 @@
         <nav class="app-navigation" aria-label="Primary">
             <a th:href="@{/}" th:classappend="${activeSection == 'home'} ? ' is-active' : ''"
                th:attr="aria-current=${activeSection == 'home'} ? 'page' : null">Home</a>
-            <a th:href="@{/uniques}" th:classappend="${activeSection == 'uniques'} ? ' is-active' : ''"
-               th:attr="aria-current=${activeSection == 'uniques'} ? 'page' : null">Uniques</a>
             <a th:href="@{/builds}" th:classappend="${activeSection == 'builds'} ? ' is-active' : ''"
                th:attr="aria-current=${activeSection == 'builds'} ? 'page' : null">Builds</a>
+            <a th:href="@{/uniques}" th:classappend="${activeSection == 'uniques'} ? ' is-active' : ''"
+               th:attr="aria-current=${activeSection == 'uniques'} ? 'page' : null">Uniques</a>
             <a th:href="@{/acquisitions}" th:classappend="${activeSection == 'acquisitions'} ? ' is-active' : ''"
                th:attr="aria-current=${activeSection == 'acquisitions'} ? 'page' : null">Acquisition</a>
         </nav>
