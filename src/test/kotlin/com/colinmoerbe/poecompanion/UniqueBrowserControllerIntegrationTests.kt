@@ -1,9 +1,24 @@
 package com.colinmoerbe.poecompanion
 
 import com.colinmoerbe.poecompanion.account.ManualOwnershipService
+import com.colinmoerbe.poecompanion.acquisition.AcquisitionKnowledgeScope
+import com.colinmoerbe.poecompanion.acquisition.AcquisitionSource
+import com.colinmoerbe.poecompanion.acquisition.AcquisitionSourceAvailability
+import com.colinmoerbe.poecompanion.acquisition.AcquisitionSourceId
+import com.colinmoerbe.poecompanion.acquisition.BossEncounterKnowledgeService
+import com.colinmoerbe.poecompanion.acquisition.BossEncounterKnowledgeSnapshot
+import com.colinmoerbe.poecompanion.acquisition.BossParticipation
+import com.colinmoerbe.poecompanion.acquisition.DevelopmentAcquisitionAccess
+import com.colinmoerbe.poecompanion.acquisition.DropRelationship
+import com.colinmoerbe.poecompanion.acquisition.DropRelationshipId
+import com.colinmoerbe.poecompanion.acquisition.DropRelationshipKnowledgeService
+import com.colinmoerbe.poecompanion.acquisition.DropRelationshipSnapshot
+import com.colinmoerbe.poecompanion.acquisition.DropRelationshipState
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinition
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
 import com.colinmoerbe.poecompanion.catalog.persistence.UniqueDefinitionPersistenceAdapter
+import com.colinmoerbe.poecompanion.league.CompatibilityVersion
+import com.colinmoerbe.poecompanion.league.Ruleset
 import com.colinmoerbe.poecompanion.league.persistence.SpringDataAccountEvaluationSelectionRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.hamcrest.Matchers.containsString
@@ -41,6 +56,9 @@ internal class UniqueBrowserControllerIntegrationTests(
     @Autowired private val initializer: DevelopmentFixtureInitializer,
     @Autowired private val ownership: ManualOwnershipService,
     @Autowired private val catalog: UniqueDefinitionPersistenceAdapter,
+    @Autowired private val acquisition: DevelopmentAcquisitionAccess,
+    @Autowired private val encounters: BossEncounterKnowledgeService,
+    @Autowired private val drops: DropRelationshipKnowledgeService,
     @Autowired private val selectionRepository: SpringDataAccountEvaluationSelectionRepository,
     @Autowired dataSource: DataSource,
 ) {
@@ -144,6 +162,114 @@ internal class UniqueBrowserControllerIntegrationTests(
         mockMvc.perform(get("/uniques/${extra.value}").with(user("test-user")))
             .andExpect(status().isOk)
             .andExpect(content().string(containsString("Canonical display metadata has not been imported")))
+    }
+
+    @Test
+    fun `Build X to Unique C to Boss Y is a linked read-only journey`() {
+        initializer.initialize()
+
+        mockMvc.perform(get("/builds/${ids.variant.value}").with(user("test-user")))
+            .andExpect(status().isOk)
+            .andExpect(content().string(containsString("/uniques/${ids.uniqueC.value}")))
+
+        val html = mockMvc.perform(get("/uniques/${ids.uniqueC.value}").with(user("test-user")))
+            .andExpect(status().isOk)
+            .andExpect(content().string(containsString("Known acquisition sources")))
+            .andExpect(content().string(containsString("Boss Y")))
+            .andExpect(content().string(containsString("CAN_DROP")))
+            .andExpect(content().string(containsString("AVAILABLE")))
+            .andExpect(content().string(containsString("10.000%")))
+            .andReturn().response.contentAsString
+        assertThat(html).contains("/acquisitions/${ids.source.value}#unique-${ids.uniqueC.value}")
+
+        mockMvc.perform(get("/acquisitions/${ids.source.value}").with(user("test-user")))
+            .andExpect(status().isOk)
+            .andExpect(content().string(containsString("id=\"unique-${ids.uniqueC.value}\"")))
+    }
+
+    @Test
+    fun `Uniques A and B have no recorded acquisition sources not known negative sources`() {
+        initializer.initialize()
+
+        listOf(ids.uniqueA, ids.uniqueB).forEach { id ->
+            mockMvc.perform(get("/uniques/${id.value}").with(user("test-user")))
+                .andExpect(status().isOk)
+                .andExpect(content().string(containsString("No acquisition sources recorded yet")))
+                .andExpect(content().string(containsString("does not mean the Unique cannot be acquired")))
+                .andExpect(content().string(not(containsString("Boss Y"))))
+        }
+    }
+
+    @Test
+    fun `recorded relationships remain visible without selected account`() {
+        initializer.initialize()
+        selectionRepository.deleteAllInBatch()
+
+        mockMvc.perform(get("/uniques/${ids.uniqueC.value}").with(user("test-user")))
+            .andExpect(status().isOk)
+            .andExpect(content().string(containsString("/acquisitions/${ids.source.value}#unique-${ids.uniqueC.value}")))
+            .andExpect(content().string(containsString("Unknown — no account selected")))
+            .andExpect(content().string(containsString("Acquisition source (name unavailable)")))
+            .andExpect(content().string(not(containsString("10.000%"))))
+    }
+
+    @Test
+    fun `ambiguous source scope is not converted into actionable probability`() {
+        initializer.initialize()
+        val leagueScope = AcquisitionKnowledgeScope(CompatibilityVersion(3, 30), Ruleset.NORMAL, ids.league)
+        encounters.recordSnapshot(
+            ids.source,
+            leagueScope,
+            BossEncounterKnowledgeSnapshot(
+                null,
+                "Boss Y",
+                AcquisitionSourceAvailability.AVAILABLE,
+                BossParticipation.ConfigurationDependent,
+            ),
+            null,
+        )
+
+        mockMvc.perform(get("/uniques/${ids.uniqueC.value}").with(user("test-user")))
+            .andExpect(status().isOk)
+            .andExpect(content().string(containsString("Ambiguous encounter scope")))
+            .andExpect(content().string(containsString("CAN_DROP")))
+            .andExpect(content().string(containsString("No applicable supported fixed-probability calculation")))
+            .andExpect(content().string(not(containsString("10.000%"))))
+    }
+
+    @Test
+    fun `negative unavailable and unknown sources retain independent knowledge states`() {
+        initializer.initialize()
+        val general = AcquisitionKnowledgeScope(CompatibilityVersion(3, 30), Ruleset.NORMAL)
+        fun addSource(name: String?, availability: AcquisitionSourceAvailability?, state: DropRelationshipState?) {
+            val source = AcquisitionSourceId.generate()
+            val relationship = DropRelationshipId.generate()
+            acquisition.saveSource(AcquisitionSource(source))
+            acquisition.saveRelationship(DropRelationship(relationship, source, ids.uniqueC))
+            if (name != null && availability != null) {
+                encounters.recordSnapshot(
+                    source,
+                    general,
+                    BossEncounterKnowledgeSnapshot(null, name, availability, BossParticipation.ConfigurationDependent),
+                    null,
+                )
+            }
+            if (state != null) {
+                drops.recordSnapshot(relationship, general, DropRelationshipSnapshot(null, state), null)
+            }
+        }
+        addSource("Cannot Drop Encounter", AcquisitionSourceAvailability.AVAILABLE, DropRelationshipState.CANNOT_DROP)
+        addSource("Unavailable Encounter", AcquisitionSourceAvailability.UNAVAILABLE, DropRelationshipState.CAN_DROP)
+        addSource(null, null, null)
+
+        val html = mockMvc.perform(get("/uniques/${ids.uniqueC.value}").with(user("test-user")))
+            .andExpect(status().isOk)
+            .andReturn().response.contentAsString
+        assertThat(html).contains("Cannot Drop Encounter", "CANNOT_DROP")
+        assertThat(html).contains("Unavailable Encounter", "UNAVAILABLE")
+        assertThat(html).contains("Unknown — no accepted encounter knowledge")
+        assertThat(html).contains("Unknown — no accepted relationship knowledge")
+        assertThat(html).contains("No applicable supported fixed-probability calculation")
     }
 
     @Test
