@@ -40,6 +40,11 @@ internal class DropRelationshipPersistenceAdapter(
         }
     }
 
+    fun findAll(): List<DropRelationship> = springDataRepository.findAll().map(::toDomain)
+
+    fun findByAcquisitionSourceId(sourceId: AcquisitionSourceId): List<DropRelationship> =
+        springDataRepository.findByAcquisitionSourceId(sourceId.value).map(::toDomain)
+
     fun findByUniqueDefinitionId(uniqueDefinitionId: UniqueDefinitionId): List<DropRelationship> =
         springDataRepository.findByUniqueDefinitionId(uniqueDefinitionId.value).map(::toDomain)
 

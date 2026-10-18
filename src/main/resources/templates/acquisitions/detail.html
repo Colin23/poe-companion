@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${page.displayName} + ' — PoE Companion'">Acquisition Detail — PoE Companion</title>
+    <link rel="stylesheet" th:href="@{/css/application.css}">
+</head>
+<body>
+<header th:replace="~{fragments/site-header :: siteHeader('acquisitions', ${username})}"></header>
+<main>
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a th:href="@{/}">Home</a>
+        <span aria-hidden="true"> / </span>
+        <a th:href="@{/acquisitions}">Acquisition Sources</a>
+        <span aria-hidden="true"> / </span>
+        <span aria-current="page" th:text="${page.displayName}">Boss Y</span>
+    </nav>
+    <section class="panel">
+        <h1 th:text="${page.displayName}">Boss Y</h1>
+        <p class="readiness-status" th:text="${page.availability}">AVAILABLE</p>
+        <p class="muted" th:if="${page.accountSelected}" th:text="${page.selectionLabel}">Selected context</p>
+        <p class="notice" th:unless="${page.accountSelected}">
+            No account selected. Known relationships are shown, but their current eligibility and odds are unknown.
+        </p>
+        <dl class="detail-facts">
+            <div>
+                <dt>Acquisition source ID</dt>
+                <dd><code th:text="${page.id}">UUID</code></dd>
+            </div>
+            <div>
+                <dt>Recorded available attempts</dt>
+                <dd th:if="${page.savedAttempts == null}">Not recorded</dd>
+                <dd th:unless="${page.savedAttempts == null}" th:text="${page.savedAttempts}">12</dd>
+            </div>
+        </dl>
+
+        <section class="attempt-preview">
+            <h2>Probability preview</h2>
+            <p class="small-muted">
+                For supported fixed estimates, one attempt is one completed boss encounter.
+                This is a read-only calculation; it does not change recorded available attempts.
+            </p>
+            <form method="get" th:action="@{/acquisitions/{id}(id=${page.id})}" class="attempt-form">
+                <label for="preview-attempts">Number of attempts</label>
+                <input id="preview-attempts" name="attempts" type="number" min="0" max="2147483647"
+                       step="1" required
+                       th:value="${page.previewAttempts != null ? page.previewAttempts : page.savedAttempts}">
+                <button type="submit">Preview probability</button>
+            </form>
+            <p th:if="${page.previewAttempts != null}">
+                Previewing <strong th:text="${page.previewAttempts}">20</strong> attempts; saved count remains unchanged.
+            </p>
+            <p th:if="${page.previewAttempts == null and page.savedAttempts == null}" class="small-muted">
+                No available-attempt count is recorded. Fixed-model thresholds can still be shown where applicable.
+            </p>
+        </section>
+
+        <section class="acquisition-relationships">
+            <h2>Known Unique relationships</h2>
+            <p class="notice" th:if="${page.relationships.isEmpty()}">
+                No Unique relationships have been recorded for this source. This does not prove none exist.
+            </p>
+            <article class="relationship-panel" th:each="item : ${page.relationships}">
+                <h3>
+                    <a th:if="${item.catalogKnown}" th:href="@{/uniques/{id}(id=${item.uniqueId})}"
+                       th:text="${item.displayName}">Unique C</a>
+                    <span th:unless="${item.catalogKnown}" th:text="${item.displayName}">Unique name unavailable</span>
+                </h3>
+                <p class="small-muted" th:if="${item.syntheticLabel}">Synthetic development item — not a real PoE name.</p>
+                <p class="small-muted" th:unless="${item.syntheticLabel}" th:text="${item.uniqueId}">Unique UUID</p>
+                <dl class="detail-facts">
+                    <div>
+                        <dt>Current drop relationship</dt>
+                        <dd th:text="${item.relationshipStatus}">CAN_DROP</dd>
+                    </div>
+                    <div>
+                        <dt>Accepted probability knowledge</dt>
+                        <dd th:text="${item.probabilityStatus}">Accepted fixed estimate</dd>
+                    </div>
+                    <div th:if="${item.chancePerAttempt != null}">
+                        <dt>Chance per completed encounter</dt>
+                        <dd th:text="${item.chancePerAttempt}">10%</dd>
+                    </div>
+                    <div th:if="${item.estimateProvenance != null}">
+                        <dt>Estimate provenance</dt>
+                        <dd th:text="${item.estimateProvenance}">MEASURED</dd>
+                    </div>
+                    <div th:if="${item.evidenceReference != null}">
+                        <dt>Evidence reference</dt>
+                        <dd><code th:text="${item.evidenceReference}">evidence</code></dd>
+                    </div>
+                    <div th:if="${item.reviewedAt != null}">
+                        <dt>Reviewed at</dt>
+                        <dd th:text="${item.reviewedAt}">2026-10-01</dd>
+                    </div>
+                </dl>
+
+                <p class="notice" th:unless="${item.actionable}">
+                    No applicable supported fixed-probability calculation is available for this source and Unique
+                    in the selected context. Independent canonical facts are shown above.
+                </p>
+                <div th:if="${item.actionable}" class="probability-results">
+                    <h4>Supported fixed-probability outlook</h4>
+                    <p th:if="${page.effectiveAttempts != null}">
+                        Chance of at least one drop within
+                        <strong th:text="${page.effectiveAttempts}">12</strong> attempts:
+                        <strong th:text="${item.probabilityWithinAttempts}">71.8%</strong>
+                    </p>
+                    <p th:unless="${page.effectiveAttempts != null}">
+                        Chance within available attempts: Not recorded
+                    </p>
+                    <p>
+                        Expected attempts until first drop:
+                        <strong th:text="${item.expectedAttempts ?: 'Not finite'}">10</strong>
+                    </p>
+                    <table class="threshold-table">
+                        <thead><tr><th>Chance threshold</th><th>Minimum attempts</th></tr></thead>
+                        <tbody>
+                        <tr th:each="threshold : ${item.thresholds}">
+                            <td th:text="${threshold.percentage} + '%'">95%</td>
+                            <td th:text="${threshold.attempts ?: 'Exceeds supported range'}">29</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <p class="small-muted">
+                        This fixed model assumes a constant independent chance on each completed encounter.
+                        Probabilities are estimates, not guaranteed drops.
+                    </p>
+                </div>
+            </article>
+        </section>
+        <p><a th:href="@{/acquisitions}">Back to Acquisition Sources</a></p>
+    </section>
+</main>
+</body>
+</html>

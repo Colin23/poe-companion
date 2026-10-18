@@ -15,6 +15,10 @@ internal class AcquisitionSourcePersistenceAdapter(
         springDataRepository.save(AcquisitionSourceEntity(acquisitionSource.id.value))
     }
 
+    fun findAll(): List<AcquisitionSource> = springDataRepository.findAll().map { entity ->
+        AcquisitionSource(AcquisitionSourceId(entity.id))
+    }
+
     fun findById(id: AcquisitionSourceId): AcquisitionSource? = springDataRepository
         .findById(id.value)
         .map { entity -> AcquisitionSource(AcquisitionSourceId(entity.id)) }
