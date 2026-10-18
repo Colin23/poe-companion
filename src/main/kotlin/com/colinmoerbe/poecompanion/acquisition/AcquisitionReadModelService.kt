@@ -42,7 +42,8 @@ class AcquisitionReadModelService internal constructor(
     fun findCandidatesForUnique(uniqueDefinitionId: UniqueDefinitionId): AcquisitionUniqueCandidatesResult {
         val selected = accountEvaluationService.getSelected()
         val scopes = selected?.let(::scopesFor)
-        val candidates = relationshipPersistenceAdapter.findByUniqueDefinitionId(uniqueDefinitionId).map { relationship ->
+        val relationships = relationshipPersistenceAdapter.findByUniqueDefinitionId(uniqueDefinitionId)
+        val candidates = relationships.map { relationship ->
             val assessment = if (scopes == null || selected == null) {
                 null
             } else {
