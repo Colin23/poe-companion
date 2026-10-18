@@ -2,9 +2,10 @@ package com.colinmoerbe.poecompanion.acquisition
 
 import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.acquisition.persistence.AcquisitionSourcePersistenceAdapter
-import com.colinmoerbe.poecompanion.acquisition.persistence.BossEncounterKnowledgePersistenceAdapter
+import com.colinmoerbe.poecompanion.acquisition.encounter.CorruptBossEncounterKnowledgeException
+import com.colinmoerbe.poecompanion.acquisition.encounter.persistence.BossEncounterKnowledgePersistenceAdapter
 import com.colinmoerbe.poecompanion.acquisition.persistence.SpringDataBossDefinitionRepository
-import com.colinmoerbe.poecompanion.acquisition.persistence.SpringDataBossEncounterKnowledgeRepository
+import com.colinmoerbe.poecompanion.acquisition.encounter.persistence.SpringDataBossEncounterKnowledgeRepository
 import com.colinmoerbe.poecompanion.league.CompatibilityVersion
 import com.colinmoerbe.poecompanion.league.EvaluationContext
 import com.colinmoerbe.poecompanion.league.GamePatch
