@@ -1,6 +1,12 @@
-package com.colinmoerbe.poecompanion
+package com.colinmoerbe.poecompanion.browser
 
+import com.colinmoerbe.poecompanion.DevelopmentFixtureIds
+import com.colinmoerbe.poecompanion.DevelopmentFixtureInitializer
+import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.acquisition.AvailableAttemptsService
+import com.colinmoerbe.poecompanion.browser.acquisitions.AcquisitionBrowserDetailPage
+import com.colinmoerbe.poecompanion.browser.builds.BuildBrowserDetailPage
+import com.colinmoerbe.poecompanion.browser.builds.BuildBrowserState
 import org.assertj.core.api.Assertions.assertThat
 import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.AfterEach

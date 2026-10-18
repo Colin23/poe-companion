@@ -1,4 +1,4 @@
-package com.colinmoerbe.poecompanion
+package com.colinmoerbe.poecompanion.browser.uniques
 
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
 import org.springframework.http.HttpStatus

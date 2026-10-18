@@ -1,4 +1,4 @@
-package com.colinmoerbe.poecompanion
+package com.colinmoerbe.poecompanion.browser.builds
 
 import java.util.UUID
 

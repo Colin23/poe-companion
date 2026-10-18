@@ -1038,8 +1038,9 @@ These are agreed implementation conventions, not additions to the frozen V0.1 pr
   into internal subpackages. Before each move, check cross-module consumers: a type moved out of the root is not
   automatically exposed across Spring Modulith boundaries. Use named interfaces only when a real cross-module
   API merits one. Retain/update `ApplicationModulesTests`, imports, and integration tests.
-- Don't reorganize small modules just for symmetry, and don't create a separate `web` module merely to tidy files.
-  Acquisition's large root is the first candidate for a dedicated behavior-preserving package reorganization.
+- Don't reorganize small modules just for symmetry. A distinct Browser module is warranted for the established
+  incoming adapter and its enforceable dependency boundaries; see the superseding decision in §29. Acquisition's
+  large root remains a candidate for a dedicated behavior-preserving package reorganization.
 - Before adding any service, adapter, interface or access wrapper, first decide whether an **existing** service
   can and should own that behavior without blurring responsibility. Introduce a new abstraction only when it
   materially improves cohesion, module boundaries, reuse, testability or clarity. A single implementation does
@@ -1248,3 +1249,45 @@ sentinel instead of those stable candidates.
 HTTP tests cover canonical A/B no-source empty states, C → Boss Y navigation, absence of account selection
 with preserved identities, independent unavailable/CANNOT_DROP/unknown/ambiguous knowledge outcomes, and
 the shared homepage/navigation. Keep existing Acquisition service integration and Spring Modulith tests green.
+
+---
+
+## 29. Extracting the Browser Incoming Adapter as a Spring Modulith Module
+
+### Context
+
+After completing the first end-to-end Build → Unique → Acquisition → ownership-editing browser journey, the
+application root contained multiple Spring MVC controllers, cross-module read-model compositions, presentation
+DTOs, and shared label helpers. Those features had coherent responsibilities and established cross-module
+dependencies, but root-level code was not a separately verified application module. Keeping everything there
+would also hinder navigation as further browser functionality is implemented.
+
+This decision supersedes the earlier §24 guidance against introducing a separate `web` module simply for
+tidiness. The justification here is a real, already implemented incoming-adapter boundary, not directory symmetry.
+
+### Decision
+
+- Introduce `browser` as the eighth Spring Modulith module, with explicit allowed dependencies on
+  Account, Acquisition, Build, Catalog, and League. It does not depend on the Security or Goal modules.
+- Organize HTTP controllers, browser read-model orchestration, and presentation DTOs by player feature:
+  `browser.home`, `browser.builds`, `browser.uniques`, and `browser.acquisitions`. Keep reused
+  `UniqueDisplayLabels` and `AcquisitionBrowserKnowledgeLabels` under `browser.shared`, rather than
+  coupling one browser feature package to another's presentation implementation.
+- Browser consumes existing public module-root APIs; domain rules and persistence stay in their owning modules.
+  Its own subpackages are not external APIs and require no named interface. No event bus, web service interface,
+  JSON API, endpoint versioning, or new abstraction is introduced.
+- Keep the cross-module synthetic fixture initializer, IDs, and startup gating at the application root. The
+  temporary Browser presentation fallback to `DevelopmentFixtureIds.uniqueLabels` remains intentionally
+  unchanged; remove or replace it with real Catalog metadata as already tracked for Milestone 7.
+- Mirror production package moves in `src/test/kotlin` in the same PR. Feature-level browser integration
+  tests belong beside their feature package, while the cross-feature canonical journey belongs in `browser`.
+  Shared test infrastructure and fixture-specific integration tests stay in their appropriate existing packages.
+- Add `browser` to the expected Spring Modulith module inventory and keep `ApplicationModules.verify()` as
+  an architecture guard. Preserve existing server-rendered endpoints, security/CSRF behavior, transactions,
+  templates, domain objects, and database schema without functional changes.
+
+### Verification
+
+The full Gradle build, Spring Modulith verification, migrated MVC/PostgreSQL integration tests and canonical
+browser journey must remain green. This move is distinct from planned Acquisition and Build internal
+capability reorganizations and the later two-user/role-based authorization work.

@@ -1,5 +1,6 @@
-package com.colinmoerbe.poecompanion
+package com.colinmoerbe.poecompanion.browser.shared
 
+import com.colinmoerbe.poecompanion.DevelopmentFixtureIds
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
 
 /** Temporary browser-only label policy; replace with Catalog metadata in Milestone 7. */

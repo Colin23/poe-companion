@@ -1,5 +1,8 @@
-package com.colinmoerbe.poecompanion
+package com.colinmoerbe.poecompanion.browser.acquisitions
 
+import com.colinmoerbe.poecompanion.DevelopmentFixtureIds
+import com.colinmoerbe.poecompanion.DevelopmentFixtureInitializer
+import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.acquisition.AcquisitionKnowledgeScope
 import com.colinmoerbe.poecompanion.acquisition.AcquisitionSource
 import com.colinmoerbe.poecompanion.acquisition.AcquisitionSourceAvailability

@@ -1,4 +1,4 @@
-package com.colinmoerbe.poecompanion
+package com.colinmoerbe.poecompanion.browser.acquisitions
 
 import com.colinmoerbe.poecompanion.acquisition.AcquisitionSourceId
 import org.springframework.http.HttpStatus

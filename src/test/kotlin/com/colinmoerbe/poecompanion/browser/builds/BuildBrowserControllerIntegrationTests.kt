@@ -1,5 +1,8 @@
-package com.colinmoerbe.poecompanion
+package com.colinmoerbe.poecompanion.browser.builds
 
+import com.colinmoerbe.poecompanion.DevelopmentFixtureIds
+import com.colinmoerbe.poecompanion.DevelopmentFixtureInitializer
+import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.account.ManualOwnershipService
 import com.colinmoerbe.poecompanion.build.BuildArchetype
 import com.colinmoerbe.poecompanion.build.BuildArchetypeId
