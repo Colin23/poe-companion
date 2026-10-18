@@ -11,6 +11,8 @@
                th:attr="aria-current=${activeSection == 'uniques'} ? 'page' : null">Uniques</a>
             <a th:href="@{/builds}" th:classappend="${activeSection == 'builds'} ? ' is-active' : ''"
                th:attr="aria-current=${activeSection == 'builds'} ? 'page' : null">Builds</a>
+            <a th:href="@{/acquisitions}" th:classappend="${activeSection == 'acquisitions'} ? ' is-active' : ''"
+               th:attr="aria-current=${activeSection == 'acquisitions'} ? 'page' : null">Acquisition</a>
         </nav>
     </div>
     <div class="session-actions">
