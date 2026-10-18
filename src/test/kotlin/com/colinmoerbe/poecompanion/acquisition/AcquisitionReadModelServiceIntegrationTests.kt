@@ -1,5 +1,6 @@
 package com.colinmoerbe.poecompanion.acquisition
 
+import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.acquisition.encounter.persistence.SpringDataBossEncounterKnowledgeRepository
 import com.colinmoerbe.poecompanion.acquisition.persistence.AcquisitionSourcePersistenceAdapter
 import com.colinmoerbe.poecompanion.acquisition.persistence.DropRelationshipPersistenceAdapter
@@ -7,9 +8,9 @@ import com.colinmoerbe.poecompanion.acquisition.persistence.SpringDataAvailableA
 import com.colinmoerbe.poecompanion.acquisition.persistence.SpringDataDropRelationshipKnowledgeRepository
 import com.colinmoerbe.poecompanion.acquisition.persistence.SpringDataDropRelationshipRepository
 import com.colinmoerbe.poecompanion.acquisition.persistence.SpringDataFixedDropEstimateRepository
-import com.colinmoerbe.poecompanion.catalog.persistence.UniqueDefinitionPersistenceAdapter
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinition
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
+import com.colinmoerbe.poecompanion.catalog.persistence.UniqueDefinitionPersistenceAdapter
 import com.colinmoerbe.poecompanion.league.AccountContext
 import com.colinmoerbe.poecompanion.league.AccountContextId
 import com.colinmoerbe.poecompanion.league.AccountEvaluationService
@@ -21,11 +22,10 @@ import com.colinmoerbe.poecompanion.league.LeagueDefinitionId
 import com.colinmoerbe.poecompanion.league.LeagueMortality
 import com.colinmoerbe.poecompanion.league.LeagueParticipation
 import com.colinmoerbe.poecompanion.league.LeagueType
+import com.colinmoerbe.poecompanion.league.Ruleset
 import com.colinmoerbe.poecompanion.league.persistence.AccountContextPersistenceAdapter
 import com.colinmoerbe.poecompanion.league.persistence.LeagueDefinitionPersistenceAdapter
 import com.colinmoerbe.poecompanion.league.persistence.SpringDataAccountEvaluationSelectionRepository
-import com.colinmoerbe.poecompanion.league.Ruleset
-import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
