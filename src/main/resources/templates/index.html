@@ -7,23 +7,7 @@
     <link rel="stylesheet" th:href="@{/css/application.css}">
 </head>
 <body>
-<header class="site-header">
-    <div>
-        <h1 th:text="${page.title}">PoE Companion</h1>
-        <p class="session-details">
-            Signed in as <strong th:text="${page.username}">user</strong>
-        </p>
-    </div>
-
-    <form th:action="@{/logout}" method="post">
-        <input
-            type="hidden"
-            th:name="${_csrf.parameterName}"
-            th:value="${_csrf.token}"
-        >
-        <button type="submit">Log out</button>
-    </form>
-</header>
+<header th:replace="~{fragments/site-header :: siteHeader('home', ${page.username})}"></header>
 
 <main>
     <section class="panel">
@@ -36,6 +20,7 @@
             Browse known Unique identities and see which items the selected account owns.
         </p>
         <p><a class="primary-link" th:href="@{/uniques}">Open Unique Collection</a></p>
+        <p><a th:href="@{/builds}">Browse Builds</a></p>
     </section>
 </main>
 </body>

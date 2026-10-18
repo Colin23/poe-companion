@@ -7,16 +7,7 @@
     <link rel="stylesheet" th:href="@{/css/application.css}">
 </head>
 <body>
-<header class="site-header">
-    <div>
-        <a class="site-name" th:href="@{/}">PoE Companion</a>
-        <p class="session-details">Signed in as <strong th:text="${username}">user</strong></p>
-    </div>
-    <form th:action="@{/logout}" method="post">
-        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-        <button type="submit">Log out</button>
-    </form>
-</header>
+<header th:replace="~{fragments/site-header :: siteHeader('uniques', ${username})}"></header>
 <main>
     <nav class="breadcrumb" aria-label="Breadcrumb">
         <a th:href="@{/}">Home</a>

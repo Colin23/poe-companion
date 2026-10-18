@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Builds — PoE Companion</title>
+    <link rel="stylesheet" th:href="@{/css/application.css}">
+</head>
+<body>
+<header th:replace="~{fragments/site-header :: siteHeader('builds', ${username})}"></header>
+<main>
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a th:href="@{/}">Home</a>
+        <span aria-hidden="true"> / </span>
+        <span aria-current="page">Builds</span>
+    </nav>
+    <section class="panel">
+        <h1>Builds</h1>
+        <p class="muted">Browse known Build variants and their Unique readiness for the selected account.</p>
+        <p class="notice" th:unless="${page.accountSelected}">
+            No account selected. Build definitions remain browsable, but Unique readiness is unknown.
+        </p>
+        <p class="notice" th:if="${page.totalCount == 0}">
+            No Build variants are known yet. No development fixture is loaded automatically.
+        </p>
+        <div th:each="section : ${page.sections}" class="build-section">
+            <h2 th:text="${section.state.title}">Partial</h2>
+            <p class="small-muted" th:text="${section.state.explanation}">Explanation</p>
+            <ul class="build-list">
+                <li th:each="build : ${section.entries}">
+                    <div>
+                        <a class="build-name" th:href="@{/builds/{id}(id=${build.id})}"
+                           th:text="${build.displayName}">Build X</a>
+                        <span class="small-muted" th:text="${build.explanation}">Readiness explanation</span>
+                    </div>
+                    <span class="readiness-status" th:text="${build.state.title}">Partial</span>
+                </li>
+            </ul>
+        </div>
+    </section>
+</main>
+</body>
+</html>
