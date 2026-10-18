@@ -45,6 +45,22 @@
                 </dd>
             </div>
         </dl>
+        <section class="upcoming-section" aria-labelledby="ownership-edit-heading">
+            <h2 id="ownership-edit-heading">Edit owned quantity</h2>
+            <form class="ownership-form" th:if="${page.accountSelected}"
+                  th:action="@{/uniques/{id}/ownership(id=${page.item.id})}" method="post">
+                <label for="owned-quantity">Owned quantity</label>
+                <input id="owned-quantity" name="quantity" type="number" min="0" step="1" required
+                       th:value="${page.item.ownedQuantity}">
+                <button type="submit">Save ownership</button>
+            </form>
+            <p class="small-muted" th:if="${page.accountSelected}">
+                Set the quantity to 0 to mark this Unique as missing in the selected account.
+            </p>
+            <p class="notice" th:unless="${page.accountSelected}">
+                No account selected. Ownership cannot be edited until an account is selected.
+            </p>
+        </section>
         <section class="upcoming-section">
             <h2>Known acquisition sources</h2>
             <p class="notice" th:if="${page.acquisitionSources.isEmpty()}">
@@ -81,7 +97,7 @@
             </div>
         </section>
         <p class="small-muted">
-            Ownership editing and reverse Build associations are not yet available on this page.
+            Reverse Build associations are not yet available on this page.
         </p>
         <p><a th:href="@{/uniques}">Back to Unique Collection</a></p>
     </section>

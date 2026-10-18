@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Ownership not saved — PoE Companion</title>
+    <link rel="stylesheet" th:href="@{/css/application.css}">
+</head>
+<body>
+<header th:replace="~{fragments/site-header :: siteHeader('uniques', ${username})}"></header>
+<main>
+    <section class="panel">
+        <h1>Ownership could not be saved</h1>
+        <p class="notice" th:text="${message}">No changes were saved.</p>
+        <p th:if="${uniqueKnown}">
+            <a th:href="@{/uniques/{id}(id=${uniqueId})}">Return to Unique Detail</a>
+        </p>
+        <p><a th:href="@{/uniques}">Back to Unique Collection</a></p>
+    </section>
+</main>
+</body>
+</html>

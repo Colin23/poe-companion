@@ -1,6 +1,8 @@
 package com.colinmoerbe.poecompanion
 
+import com.colinmoerbe.poecompanion.account.CurrentOwnershipService
 import com.colinmoerbe.poecompanion.account.ManualOwnershipService
+import com.colinmoerbe.poecompanion.account.persistence.ManualOwnershipPersistenceAdapter
 import com.colinmoerbe.poecompanion.acquisition.AcquisitionKnowledgeScope
 import com.colinmoerbe.poecompanion.acquisition.AcquisitionSource
 import com.colinmoerbe.poecompanion.acquisition.AcquisitionSourceAvailability
@@ -17,8 +19,12 @@ import com.colinmoerbe.poecompanion.acquisition.DropRelationshipState
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinition
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
 import com.colinmoerbe.poecompanion.catalog.persistence.UniqueDefinitionPersistenceAdapter
+import com.colinmoerbe.poecompanion.league.AccountContext
+import com.colinmoerbe.poecompanion.league.AccountContextId
+import com.colinmoerbe.poecompanion.league.AccountEvaluationService
 import com.colinmoerbe.poecompanion.league.CompatibilityVersion
 import com.colinmoerbe.poecompanion.league.Ruleset
+import com.colinmoerbe.poecompanion.league.persistence.AccountContextPersistenceAdapter
 import com.colinmoerbe.poecompanion.league.persistence.SpringDataAccountEvaluationSelectionRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.hamcrest.Matchers.containsString
@@ -32,9 +38,11 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.context.annotation.Import
 import org.springframework.http.HttpHeaders
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -56,6 +64,10 @@ internal class UniqueBrowserControllerIntegrationTests(
     @Autowired private val mockMvc: MockMvc,
     @Autowired private val initializer: DevelopmentFixtureInitializer,
     @Autowired private val ownership: ManualOwnershipService,
+    @Autowired private val currentOwnership: CurrentOwnershipService,
+    @Autowired private val manualOwnershipAdapter: ManualOwnershipPersistenceAdapter,
+    @Autowired private val accountEvaluation: AccountEvaluationService,
+    @Autowired private val accountContexts: AccountContextPersistenceAdapter,
     @Autowired private val catalog: UniqueDefinitionPersistenceAdapter,
     @Autowired private val acquisition: DevelopmentAcquisitionAccess,
     @Autowired private val encounters: BossEncounterKnowledgeService,
@@ -138,6 +150,118 @@ internal class UniqueBrowserControllerIntegrationTests(
 
         mockMvc.perform(get("/uniques").param("filter", "missing").with(user("test-user")))
             .andExpect(status().isBadRequest)
+    }
+
+
+    @Test
+    fun `owner can edit a Unique quantity through authenticated browser POST`() {
+        initializer.initialize()
+        val uri = "/uniques/${ids.uniqueC.value}"
+
+        mockMvc.perform(get(uri).with(user("test-user")))
+            .andExpect(status().isOk)
+            .andExpect(content().string(containsString("Save ownership")))
+            .andExpect(content().string(containsString("name=\"_csrf\"")))
+
+        mockMvc.perform(post("$uri/ownership").param("quantity", "1").with(user("test-user")).with(csrf()))
+            .andExpect(status().is3xxRedirection)
+            .andExpect(header().string(HttpHeaders.LOCATION, uri))
+
+        mockMvc.perform(get(uri).with(user("test-user")))
+            .andExpect(status().isOk)
+            .andExpect(content().string(containsString("Owned · <span>1</span> copies")))
+        mockMvc.perform(get("/uniques").param("filter", "owned").with(user("test-user")))
+            .andExpect(content().string(containsString(">Unique C</a>")))
+        assertThat(currentOwnership.getCurrentOwnership(ids.account).quantityOf(ids.uniqueC)).isEqualTo(1)
+    }
+
+    @Test
+    fun `saving zero removes the persisted manual ownership record`() {
+        initializer.initialize()
+        val uri = "/uniques/${ids.uniqueA.value}/ownership"
+
+        mockMvc.perform(post(uri).param("quantity", "0").with(user("test-user")).with(csrf()))
+            .andExpect(status().is3xxRedirection)
+
+        assertThat(manualOwnershipAdapter.findBy(ids.account, ids.uniqueA)).isNull()
+        mockMvc.perform(get("/uniques/${ids.uniqueA.value}").with(user("test-user")))
+            .andExpect(content().string(containsString("Missing · 0 copies")))
+    }
+
+    @Test
+    fun `browser ownership edits affect only the selected account context`() {
+        initializer.initialize()
+        val uri = "/uniques/${ids.uniqueC.value}/ownership"
+        mockMvc.perform(post(uri).param("quantity", "2").with(user("test-user")).with(csrf()))
+            .andExpect(status().is3xxRedirection)
+
+        val other = AccountContext(AccountContextId.generate(), ids.league, Ruleset.NORMAL)
+        accountContexts.save(other)
+        accountEvaluation.select(other.id, CompatibilityVersion(3, 30))
+        mockMvc.perform(post(uri).param("quantity", "3").with(user("test-user")).with(csrf()))
+            .andExpect(status().is3xxRedirection)
+
+        assertThat(currentOwnership.getCurrentOwnership(ids.account).quantityOf(ids.uniqueC)).isEqualTo(2)
+        assertThat(currentOwnership.getCurrentOwnership(other.id).quantityOf(ids.uniqueC)).isEqualTo(3)
+    }
+
+    @Test
+    fun `missing account selection prevents editing and explains the conflict`() {
+        initializer.initialize()
+        selectionRepository.deleteAllInBatch()
+        val uri = "/uniques/${ids.uniqueC.value}"
+
+        mockMvc.perform(get(uri).with(user("test-user")))
+            .andExpect(status().isOk)
+            .andExpect(content().string(containsString("Ownership cannot be edited until an account is selected")))
+            .andExpect(content().string(not(containsString("Save ownership"))))
+
+        mockMvc.perform(post("$uri/ownership").param("quantity", "1").with(user("test-user")).with(csrf()))
+            .andExpect(status().isConflict)
+            .andExpect(view().name("uniques/ownership-error"))
+            .andExpect(content().string(containsString("Ownership could not be saved")))
+            .andExpect(content().string(containsString("No account is selected")))
+            .andExpect(content().string(containsString("No changes were saved")))
+        assertThat(currentOwnership.getCurrentOwnership(ids.account).quantityOf(ids.uniqueC)).isZero()
+    }
+
+    @Test
+    fun `invalid owned quantities and unknown Uniques never modify ownership`() {
+        initializer.initialize()
+        val uri = "/uniques/${ids.uniqueA.value}/ownership"
+
+        listOf("-1", "not-a-number", "", "2147483648").forEach { submitted ->
+            mockMvc.perform(post(uri).param("quantity", submitted).with(user("test-user")).with(csrf()))
+                .andExpect(status().isBadRequest)
+                .andExpect(view().name("uniques/ownership-error"))
+                .andExpect(content().string(containsString("Enter a whole owned quantity of zero or greater")))
+        }
+        mockMvc.perform(post(uri).with(user("test-user")).with(csrf()))
+            .andExpect(status().isBadRequest)
+            .andExpect(content().string(containsString("No changes were saved")))
+
+        mockMvc.perform(
+            post("/uniques/${UniqueDefinitionId.generate().value}/ownership")
+                .param("quantity", "5")
+                .with(user("test-user"))
+                .with(csrf()),
+        )
+            .andExpect(status().isNotFound)
+            .andExpect(content().string(containsString("This Unique is no longer available")))
+        assertThat(currentOwnership.getCurrentOwnership(ids.account).quantityOf(ids.uniqueA)).isEqualTo(1)
+    }
+
+    @Test
+    fun `ownership editing requires authentication and CSRF protection`() {
+        initializer.initialize()
+        val uri = "/uniques/${ids.uniqueC.value}/ownership"
+
+        mockMvc.perform(post(uri).param("quantity", "1").with(csrf()))
+            .andExpect(status().is3xxRedirection)
+            .andExpect(header().string(HttpHeaders.LOCATION, containsString("/login")))
+        mockMvc.perform(post(uri).param("quantity", "1").with(user("test-user")))
+            .andExpect(status().isForbidden)
+        assertThat(currentOwnership.getCurrentOwnership(ids.account).quantityOf(ids.uniqueC)).isZero()
     }
 
     @Test
