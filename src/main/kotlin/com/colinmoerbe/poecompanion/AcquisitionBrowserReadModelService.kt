@@ -93,7 +93,7 @@ internal class AcquisitionBrowserReadModelService(
             relationshipStatus = AcquisitionBrowserKnowledgeLabels.relationship(assessment?.relationshipKnowledge),
             probabilityStatus = AcquisitionBrowserKnowledgeLabels.estimate(assessment?.probabilityKnowledge),
             chancePerAttempt =
-                AcquisitionBrowserKnowledgeLabels.acceptedPerAttemptChance(assessment?.probabilityKnowledge),
+            AcquisitionBrowserKnowledgeLabels.acceptedPerAttemptChance(assessment?.probabilityKnowledge),
             estimateProvenance = estimate?.provenance?.name,
             evidenceReference = estimate?.evidenceReference,
             reviewedAt = estimate?.reviewedAt?.toString(),
