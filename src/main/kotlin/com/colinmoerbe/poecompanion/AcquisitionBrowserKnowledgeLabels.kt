@@ -66,9 +66,7 @@ internal object AcquisitionBrowserKnowledgeLabels {
 
         is ScopedAcquisitionKnowledge.Selected -> when (knowledge.resolution) {
             is FixedDropEstimateResolution.Resolved -> "Accepted fixed estimate"
-
             FixedDropEstimateResolution.Unknown -> "Unknown or withdrawn for selected patch"
-
             FixedDropEstimateResolution.DoesNotApply -> "Not applicable to selected context"
         }
     }
