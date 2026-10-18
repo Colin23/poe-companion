@@ -1,5 +1,8 @@
 package com.colinmoerbe.poecompanion.browser.builds
 
+import com.colinmoerbe.poecompanion.DevelopmentFixtureIds
+import com.colinmoerbe.poecompanion.DevelopmentFixtureInitializer
+import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.account.ManualOwnershipService
 import com.colinmoerbe.poecompanion.build.BuildArchetype
 import com.colinmoerbe.poecompanion.build.BuildArchetypeId
@@ -8,21 +11,18 @@ import com.colinmoerbe.poecompanion.build.BuildVariantId
 import com.colinmoerbe.poecompanion.build.BuildVariantRevision
 import com.colinmoerbe.poecompanion.build.BuildVariantRevisionId
 import com.colinmoerbe.poecompanion.build.DevelopmentBuildAccess
-import com.colinmoerbe.poecompanion.build.persistence.BuildArchetypePersistenceAdapter
-import com.colinmoerbe.poecompanion.build.persistence.BuildVariantPersistenceAdapter
-import com.colinmoerbe.poecompanion.build.persistence.BuildVariantRevisionPersistenceAdapter
 import com.colinmoerbe.poecompanion.build.Requirement
 import com.colinmoerbe.poecompanion.build.RequirementGroup
 import com.colinmoerbe.poecompanion.build.RequirementImportance
 import com.colinmoerbe.poecompanion.build.RequirementLogic
-import com.colinmoerbe.poecompanion.catalog.persistence.UniqueDefinitionPersistenceAdapter
+import com.colinmoerbe.poecompanion.build.persistence.BuildArchetypePersistenceAdapter
+import com.colinmoerbe.poecompanion.build.persistence.BuildVariantPersistenceAdapter
+import com.colinmoerbe.poecompanion.build.persistence.BuildVariantRevisionPersistenceAdapter
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinition
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
-import com.colinmoerbe.poecompanion.DevelopmentFixtureIds
-import com.colinmoerbe.poecompanion.DevelopmentFixtureInitializer
+import com.colinmoerbe.poecompanion.catalog.persistence.UniqueDefinitionPersistenceAdapter
 import com.colinmoerbe.poecompanion.league.CompatibilityVersion
 import com.colinmoerbe.poecompanion.league.persistence.SpringDataAccountEvaluationSelectionRepository
-import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import org.assertj.core.api.Assertions.assertThat
 import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.AfterEach

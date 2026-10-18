@@ -1,5 +1,8 @@
 package com.colinmoerbe.poecompanion.browser.acquisitions
 
+import com.colinmoerbe.poecompanion.DevelopmentFixtureIds
+import com.colinmoerbe.poecompanion.DevelopmentFixtureInitializer
+import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.acquisition.AcquisitionKnowledgeScope
 import com.colinmoerbe.poecompanion.acquisition.AcquisitionSource
 import com.colinmoerbe.poecompanion.acquisition.AcquisitionSourceAvailability
@@ -14,11 +17,8 @@ import com.colinmoerbe.poecompanion.acquisition.DropRelationshipId
 import com.colinmoerbe.poecompanion.acquisition.DropRelationshipKnowledgeService
 import com.colinmoerbe.poecompanion.acquisition.DropRelationshipSnapshot
 import com.colinmoerbe.poecompanion.acquisition.DropRelationshipState
-import com.colinmoerbe.poecompanion.DevelopmentFixtureIds
-import com.colinmoerbe.poecompanion.DevelopmentFixtureInitializer
-import com.colinmoerbe.poecompanion.league.persistence.SpringDataAccountEvaluationSelectionRepository
 import com.colinmoerbe.poecompanion.league.Ruleset
-import com.colinmoerbe.poecompanion.TestcontainersConfiguration
+import com.colinmoerbe.poecompanion.league.persistence.SpringDataAccountEvaluationSelectionRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.AfterEach
