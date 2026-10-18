@@ -2,6 +2,7 @@ package com.colinmoerbe.poecompanion
 
 import com.colinmoerbe.poecompanion.account.CurrentOwnership
 import com.colinmoerbe.poecompanion.account.CurrentOwnershipService
+import com.colinmoerbe.poecompanion.acquisition.AcquisitionReadModelService
 import com.colinmoerbe.poecompanion.catalog.UniqueCatalogQueryService
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
 import com.colinmoerbe.poecompanion.league.AccountEvaluation
@@ -19,6 +20,7 @@ internal class UniqueBrowserReadModelService(
     private val catalog: UniqueCatalogQueryService,
     private val accountEvaluation: AccountEvaluationService,
     private val currentOwnership: CurrentOwnershipService,
+    private val acquisition: AcquisitionReadModelService,
 ) {
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     fun list(filter: UniqueCollectionFilter): UniqueCollectionPage {
@@ -49,10 +51,27 @@ internal class UniqueBrowserReadModelService(
         val unique = catalog.findById(id) ?: return null
         val selected = accountEvaluation.getSelected()
         val ownership = selected?.let { currentOwnership.getCurrentOwnership(it.accountContextId) }
+        val candidates = acquisition.findCandidatesForUnique(id).candidates.map { candidate ->
+            val assessment = candidate.assessment
+            val rate = if (assessment?.calculation == null) {
+                null
+            } else {
+                AcquisitionBrowserKnowledgeLabels.acceptedPerAttemptChance(assessment.probabilityKnowledge)
+            }
+            UniqueAcquisitionCandidate(
+                sourceId = candidate.relationship.acquisitionSourceId.value,
+                displayName = AcquisitionBrowserKnowledgeLabels.sourceLabel(assessment?.sourceKnowledge),
+                availability = AcquisitionBrowserKnowledgeLabels.sourceAvailability(assessment?.sourceKnowledge),
+                relationship = AcquisitionBrowserKnowledgeLabels.relationship(assessment?.relationshipKnowledge),
+                estimate = AcquisitionBrowserKnowledgeLabels.estimate(assessment?.probabilityKnowledge),
+                actionableChance = rate,
+            )
+        }.sortedWith(compareBy<UniqueAcquisitionCandidate> { it.displayName.lowercase() }.thenBy { it.sourceId })
         return UniqueDetailPage(
             item = entry(unique.id, ownership),
             accountSelected = selected != null,
             selectionLabel = selected?.let(::describeSelection),
+            acquisitionSources = candidates,
         )
     }
 

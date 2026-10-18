@@ -31,3 +31,12 @@ data class AcquisitionSourceDetailResult(
     val previewAttempts: Int?,
     val relationships: List<AcquisitionSourceRelationshipResult>,
 )
+
+/**
+ * Stable relationships are discoverable without an account; contextual assessments require a selected account.
+ * Each candidate's null assessment means unevaluated, not CANNOT_DROP or an unavailable source.
+ */
+data class AcquisitionUniqueCandidatesResult(
+    val accountEvaluation: AccountEvaluation?,
+    val candidates: List<AcquisitionSourceRelationshipResult>,
+)

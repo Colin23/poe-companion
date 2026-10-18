@@ -6,6 +6,7 @@ import com.colinmoerbe.poecompanion.acquisition.DropRelationshipResolution
 import com.colinmoerbe.poecompanion.acquisition.DropRelationshipState
 import com.colinmoerbe.poecompanion.acquisition.FixedDropEstimateResolution
 import com.colinmoerbe.poecompanion.acquisition.ScopedAcquisitionKnowledge
+import java.util.Locale
 
 /** Explicit browser labels for missing, ambiguous, unknown and verified canonical facts. */
 internal object AcquisitionBrowserKnowledgeLabels {
@@ -70,4 +71,13 @@ internal object AcquisitionBrowserKnowledgeLabels {
             FixedDropEstimateResolution.DoesNotApply -> "Not applicable to selected context"
         }
     }
+    /** A recorded fixed estimate is independently meaningful, even if the source isn't actionable. */
+    fun acceptedPerAttemptChance(knowledge: ScopedAcquisitionKnowledge<FixedDropEstimateResolution>?): String? {
+        val resolution = (knowledge as? ScopedAcquisitionKnowledge.Selected<*>)?.resolution
+        val estimate = (resolution as? FixedDropEstimateResolution.Resolved)?.snapshot ?: return null
+        return String.format(Locale.ROOT, "%.3f%%", estimate.model.probabilityPerAttempt * PERCENT_MULTIPLIER)
+    }
+
+    private const val PERCENT_MULTIPLIER = 100.0
+
 }

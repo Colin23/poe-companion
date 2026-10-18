@@ -28,19 +28,34 @@ class AcquisitionReadModelService internal constructor(
 ) {
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     fun findForUnique(uniqueDefinitionId: UniqueDefinitionId): AcquisitionQueryResult {
-        val selection =
-            accountEvaluationService.getSelected() ?: return AcquisitionQueryResult.NoAccountEvaluationSelected
-        val scopes = scopesFor(selection)
-        val relationships = relationshipPersistenceAdapter.findByUniqueDefinitionId(uniqueDefinitionId)
-        val assessments = relationships.map { relationship ->
-            val sourceKnowledge = resolveSource(relationship.acquisitionSourceId, scopes)
-            val attempts = availableAttemptsService.getAvailableAttempts(
-                selection.accountContextId,
-                relationship.acquisitionSourceId,
-            )
-            assess(relationship, sourceKnowledge, attempts, scopes)
+        val candidates = findCandidatesForUnique(uniqueDefinitionId)
+        val account = candidates.accountEvaluation ?: return AcquisitionQueryResult.NoAccountEvaluationSelected
+        return AcquisitionQueryResult.Evaluated(
+            account,
+            uniqueDefinitionId,
+            candidates.candidates.map { requireNotNull(it.assessment) },
+        )
+    }
+
+    /** A relationship's identity is discoverable independently of its contextual applicability. */
+    @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
+    fun findCandidatesForUnique(uniqueDefinitionId: UniqueDefinitionId): AcquisitionUniqueCandidatesResult {
+        val selected = accountEvaluationService.getSelected()
+        val scopes = selected?.let(::scopesFor)
+        val candidates = relationshipPersistenceAdapter.findByUniqueDefinitionId(uniqueDefinitionId).map { relationship ->
+            val assessment = if (scopes == null || selected == null) {
+                null
+            } else {
+                val sourceKnowledge = resolveSource(relationship.acquisitionSourceId, scopes)
+                val attempts = availableAttemptsService.getAvailableAttempts(
+                    selected.accountContextId,
+                    relationship.acquisitionSourceId,
+                )
+                assess(relationship, sourceKnowledge, attempts, scopes)
+            }
+            AcquisitionSourceRelationshipResult(relationship, assessment)
         }
-        return AcquisitionQueryResult.Evaluated(selection, uniqueDefinitionId, assessments)
+        return AcquisitionUniqueCandidatesResult(selected, candidates)
     }
 
     /** Lists every stable source, including sources with no relationships or no selected account. */
