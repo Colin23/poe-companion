@@ -31,6 +31,7 @@ import javax.sql.DataSource
 @AutoConfigureMockMvc
 @SpringBootTest(
     properties = [
+        "poe-companion.dev-fixture.enabled=true",
         "poe-companion.security.username=test-user",
         "poe-companion.security.password=test-password",
     ],

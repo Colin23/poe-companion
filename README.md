@@ -92,9 +92,10 @@ any already-selected account. An incomplete or modified canonical fixture fails 
 There is no automatic reset. The later browser views will use the development-only A/B/C labels until real catalog
 metadata ingestion exists.
 
-Integration tests explicitly call the initializer against Testcontainers PostgreSQL; their execution does not
-require the `dev` profile or the fixture environment variable. GitHub Actions continues to run the standard
-`./gradlew build` with no global development profile.
+Integration tests that use the fixture explicitly enable `poe-companion.dev-fixture.enabled=true`, then invoke
+its initializer against Testcontainers PostgreSQL without the `dev` profile. The opt-in property registers the five
+development beans but does not automatically seed data without `dev`. Normal application startup registers none
+of those beans. GitHub Actions continues to run `./gradlew build` with no global development profile.
 
 Useful local endpoints:
 

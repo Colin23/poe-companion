@@ -7,7 +7,8 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 
 /**
- * Startup fixture loading is opt-in; tests can invoke [DevelopmentFixtureInitializer] without either switch.
+ * Automatic startup loading requires both the dev profile and the opt-in property.
+ * Tests enable the property without the dev profile to invoke [DevelopmentFixtureInitializer] explicitly.
  */
 @Configuration(proxyBeanMethods = false)
 @Profile("dev")
