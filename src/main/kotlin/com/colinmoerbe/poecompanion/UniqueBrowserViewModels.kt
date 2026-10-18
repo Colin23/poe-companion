@@ -36,4 +36,3 @@ internal data class UniqueDetailPage(
     val accountSelected: Boolean,
     val selectionLabel: String?,
 )
-
