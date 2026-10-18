@@ -11,16 +11,22 @@
 
 <main>
     <section class="panel">
-        <h2>Application bootstrap operational</h2>
-        <p>
-            Authentication, PostgreSQL, Flyway, Spring Modulith, Thymeleaf,
-            Testcontainers, formatting, and static analysis are configured.
-        </p>
-        <p>
-            Browse known Unique identities and see which items the selected account owns.
-        </p>
-        <p><a class="primary-link" th:href="@{/uniques}">Open Unique Collection</a></p>
-        <p><a th:href="@{/builds}">Browse Builds</a></p>
+        <h1>Your Path of Exile planning companion</h1>
+        <p>Explore builds, track your Unique collection, and discover where missing items can drop.</p>
+        <nav aria-label="Explore PoE Companion" class="home-journey">
+            <div>
+                <h2><a th:href="@{/builds}">Explore Builds</a></h2>
+                <p class="small-muted">Find out which Unique requirements are satisfied and which are missing.</p>
+            </div>
+            <div>
+                <h2><a th:href="@{/uniques}">Unique Collection</a></h2>
+                <p class="small-muted">Browse known Uniques and the selected account's recorded ownership.</p>
+            </div>
+            <div>
+                <h2><a th:href="@{/acquisitions}">Acquisition Sources</a></h2>
+                <p class="small-muted">Discover recorded drop relationships and supported probability estimates.</p>
+            </div>
+        </nav>
     </section>
 </main>
 </body>
