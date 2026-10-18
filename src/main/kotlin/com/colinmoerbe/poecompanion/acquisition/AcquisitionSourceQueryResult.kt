@@ -1,5 +1,8 @@
 package com.colinmoerbe.poecompanion.acquisition
 
+import com.colinmoerbe.poecompanion.acquisition.encounter.BossEncounterKnowledgeResolution
+import com.colinmoerbe.poecompanion.acquisition.knowledge.ScopedAcquisitionKnowledge
+import com.colinmoerbe.poecompanion.acquisition.sourceidentity.AcquisitionSource
 import com.colinmoerbe.poecompanion.league.AccountEvaluation
 
 /**

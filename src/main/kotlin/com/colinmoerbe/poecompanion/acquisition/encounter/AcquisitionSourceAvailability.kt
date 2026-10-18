@@ -1,4 +1,4 @@
-package com.colinmoerbe.poecompanion.acquisition
+package com.colinmoerbe.poecompanion.acquisition.encounter
 
 /**
  * Canonical authored availability state for a known acquisition source.

@@ -1,5 +1,7 @@
 package com.colinmoerbe.poecompanion.acquisition
 
+import com.colinmoerbe.poecompanion.acquisition.sourceidentity.AcquisitionSourceId
+
 /**
  * One successfully completed encounter at a particular canonical acquisition source.
  *

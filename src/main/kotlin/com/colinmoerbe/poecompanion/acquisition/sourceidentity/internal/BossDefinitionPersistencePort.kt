@@ -1,7 +1,7 @@
 package com.colinmoerbe.poecompanion.acquisition.sourceidentity.internal
 
-import com.colinmoerbe.poecompanion.acquisition.BossDefinition
-import com.colinmoerbe.poecompanion.acquisition.BossDefinitionId
+import com.colinmoerbe.poecompanion.acquisition.sourceidentity.BossDefinition
+import com.colinmoerbe.poecompanion.acquisition.sourceidentity.BossDefinitionId
 
 /**
  * Persistence boundary for stable boss identities. Human-facing names never become identity keys.

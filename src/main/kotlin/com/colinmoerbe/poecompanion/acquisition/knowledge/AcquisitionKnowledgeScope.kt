@@ -1,4 +1,4 @@
-package com.colinmoerbe.poecompanion.acquisition
+package com.colinmoerbe.poecompanion.acquisition.knowledge
 
 import com.colinmoerbe.poecompanion.league.ApplicabilityResult
 import com.colinmoerbe.poecompanion.league.CompatibilityVersion

@@ -1,4 +1,4 @@
-package com.colinmoerbe.poecompanion.acquisition
+package com.colinmoerbe.poecompanion.acquisition.encounter
 
 import com.colinmoerbe.poecompanion.league.GamePatch
 

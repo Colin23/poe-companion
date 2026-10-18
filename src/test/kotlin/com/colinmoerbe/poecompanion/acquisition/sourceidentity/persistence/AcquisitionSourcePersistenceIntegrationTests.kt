@@ -1,8 +1,8 @@
 package com.colinmoerbe.poecompanion.acquisition.sourceidentity.persistence
 
 import com.colinmoerbe.poecompanion.TestcontainersConfiguration
-import com.colinmoerbe.poecompanion.acquisition.AcquisitionSource
-import com.colinmoerbe.poecompanion.acquisition.AcquisitionSourceId
+import com.colinmoerbe.poecompanion.acquisition.sourceidentity.AcquisitionSource
+import com.colinmoerbe.poecompanion.acquisition.sourceidentity.AcquisitionSourceId
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach

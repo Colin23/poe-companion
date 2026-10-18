@@ -1,6 +1,6 @@
 package com.colinmoerbe.poecompanion.acquisition.encounter.persistence
 
-import com.colinmoerbe.poecompanion.acquisition.AcquisitionSourceAvailability
+import com.colinmoerbe.poecompanion.acquisition.encounter.AcquisitionSourceAvailability
 import com.colinmoerbe.poecompanion.league.Ruleset
 import jakarta.persistence.CollectionTable
 import jakarta.persistence.Column

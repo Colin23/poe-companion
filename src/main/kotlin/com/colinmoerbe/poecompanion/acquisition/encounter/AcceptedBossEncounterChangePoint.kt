@@ -1,4 +1,4 @@
-package com.colinmoerbe.poecompanion.acquisition
+package com.colinmoerbe.poecompanion.acquisition.encounter
 
 /**
  * The currently accepted complete encounter snapshot and its curator-edit concurrency token.

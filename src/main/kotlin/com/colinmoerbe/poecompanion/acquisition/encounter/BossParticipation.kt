@@ -1,5 +1,6 @@
-package com.colinmoerbe.poecompanion.acquisition
+package com.colinmoerbe.poecompanion.acquisition.encounter
 
+import com.colinmoerbe.poecompanion.acquisition.sourceidentity.BossDefinitionId
 import java.util.Collections
 import java.util.LinkedHashSet
 

@@ -1,6 +1,5 @@
 package com.colinmoerbe.poecompanion.acquisition.probability.persistence
 
-import com.colinmoerbe.poecompanion.acquisition.AcquisitionKnowledgeScope
 import com.colinmoerbe.poecompanion.acquisition.CompletedBossEncounterAttempt
 import com.colinmoerbe.poecompanion.acquisition.DropEstimateId
 import com.colinmoerbe.poecompanion.acquisition.DropRelationship
@@ -13,6 +12,7 @@ import com.colinmoerbe.poecompanion.acquisition.FixedProbabilityChangePoint
 import com.colinmoerbe.poecompanion.acquisition.FixedProbabilityPublicationId
 import com.colinmoerbe.poecompanion.acquisition.FixedProbabilityWithdrawal
 import com.colinmoerbe.poecompanion.acquisition.FixedProbabilityWithdrawalId
+import com.colinmoerbe.poecompanion.acquisition.knowledge.AcquisitionKnowledgeScope
 import com.colinmoerbe.poecompanion.acquisition.probability.internal.FixedDropEstimatePersistencePort
 import com.colinmoerbe.poecompanion.acquisition.relationship.persistence.DropRelationshipPersistenceAdapter
 import com.colinmoerbe.poecompanion.league.GamePatch

@@ -1340,3 +1340,41 @@ corruption exception; the original rationale and public API constraints remain v
 Validate the same eight Spring Modulith module boundaries via `ApplicationModules.verify()`, all existing
 Acquisition PostgreSQL persistence/concurrency tests, fixture and Browser integration tests, and the complete
 `./gradlew build`. This internal reorganization does not require any named interfaces yet.
+
+
+---
+
+## 31. Acquisition Capability Named Interfaces (Staged API Migration)
+
+### Context
+
+After decision §30 relocated internal Acquisition persistence contracts and adapters by capability,
+47 Kotlin files remained in Acquisition's module root. The completed Browser extraction (§29)
+provides a real cross-module consumer whose Acquisition API dependencies can now be explicitly verified.
+
+### Decision
+
+- Move existing Acquisition domain/application types to capability-owned packages and expose the
+  package-level surface through Spring Modulith named interfaces. Do not make Acquisition an open module.
+- Stage the work in separately reviewed changes: (A) `sourceidentity`, `encounter`, `knowledge`;
+  (B) `relationship`, `probability`, `attempts`; and (C) `readmodel`, including the final
+  Browser allowed-dependency cleanup and explicit visibility tests.
+- Each named interface exposes types directly in its package, **not** nested `persistence` or
+  `internal` classes. Maintain the original service methods, domain rules and rich return
+  contracts for this initial migration. Never introduce new wrappers, events, or reactive machinery
+  merely to reorganize packages.
+- Keep `DevelopmentAcquisitionAccess` in Acquisition's root as an intentionally exported, gated
+  bootstrap entry point used by the application-root fixture orchestrator. The root module
+  declaration also remains there.
+- Document that package-level named interfaces initially expose some canonical curator operations
+  beyond Browser's direct needs. Narrowing exported type/return surfaces is a separately tracked
+  review, not hidden functionality added to a mechanical package move.
+- For each migration PR, update real cross-module imports and `allowedDependencies` references,
+  move corresponding test files to mirrored packages, and preserve all persistence, transaction,
+  concurrency, fixture, HTTP and probability invariants.
+
+### Verification
+
+Preserve all eight application modules and pass `ApplicationModules.verify()`, existing PostgreSQL
+integration and concurrency tests, fixture gating and the canonical Browser journey in `./gradlew build`
+after every stage.

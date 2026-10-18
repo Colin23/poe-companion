@@ -1,5 +1,7 @@
 package com.colinmoerbe.poecompanion.acquisition
 
+import com.colinmoerbe.poecompanion.acquisition.knowledge.AcquisitionKnowledgeScope
+import com.colinmoerbe.poecompanion.acquisition.sourceidentity.AcquisitionSourceId
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
 import com.colinmoerbe.poecompanion.league.ApplicabilityResult
 import com.colinmoerbe.poecompanion.league.CompatibilityVersion

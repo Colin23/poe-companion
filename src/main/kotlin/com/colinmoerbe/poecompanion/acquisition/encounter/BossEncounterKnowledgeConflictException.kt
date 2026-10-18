@@ -1,4 +1,4 @@
-package com.colinmoerbe.poecompanion.acquisition
+package com.colinmoerbe.poecompanion.acquisition.encounter
 
 /**
  * An accepted encounter change point was inserted or modified since the curator's expected revision.

@@ -9,7 +9,16 @@ import org.springframework.modulith.PackageInfo
  */
 @ApplicationModule(
     displayName = "Browser",
-    allowedDependencies = ["account", "acquisition", "build", "catalog", "league"],
+    allowedDependencies = [
+        "account",
+        "acquisition",
+        "acquisition :: sourceidentity",
+        "acquisition :: encounter",
+        "acquisition :: knowledge",
+        "build",
+        "catalog",
+        "league",
+    ],
 )
 @PackageInfo
 internal class ModuleMetadata
