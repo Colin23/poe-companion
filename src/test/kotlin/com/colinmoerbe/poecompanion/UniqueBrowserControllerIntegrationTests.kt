@@ -155,6 +155,8 @@ internal class UniqueBrowserControllerIntegrationTests(
             .andExpect(status().isBadRequest)
         mockMvc.perform(get("/uniques").param("filter", "invalid").with(user("test-user")))
             .andExpect(status().isBadRequest)
+        mockMvc.perform(get("/uniques").param("filter", "").with(user("test-user")))
+            .andExpect(status().isBadRequest)
     }
 
     @Test
