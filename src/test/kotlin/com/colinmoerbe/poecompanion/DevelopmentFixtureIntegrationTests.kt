@@ -35,11 +35,12 @@ import org.springframework.jdbc.core.JdbcTemplate
 import javax.sql.DataSource
 
 /**
- * Runs the real fixture explicitly, without dev profile or opt-in property, against Testcontainers PostgreSQL.
+ * Runs the real fixture explicitly with opt-in property but without the dev profile, against Testcontainers PostgreSQL.
  */
 @Import(TestcontainersConfiguration::class)
 @SpringBootTest(
     properties = [
+        "poe-companion.dev-fixture.enabled=true",
         "poe-companion.security.username=test-user",
         "poe-companion.security.password=test-password",
     ],
@@ -69,6 +70,15 @@ internal class DevelopmentFixtureIntegrationTests(
     @Test
     fun `complete persisted scenario should go from partial Build X to unique ready after owning C`() {
         assertThat(context.containsBean("developmentFixtureRunner")).isFalse()
+        assertThat(context.getBeansOfType(DevelopmentFixtureInitializer::class.java)).hasSize(1)
+        assertThat(context.getBeansOfType(com.colinmoerbe.poecompanion.catalog.DevelopmentCatalogAccess::class.java))
+            .hasSize(1)
+        assertThat(context.getBeansOfType(com.colinmoerbe.poecompanion.league.DevelopmentLeagueAccess::class.java))
+            .hasSize(1)
+        assertThat(context.getBeansOfType(com.colinmoerbe.poecompanion.build.DevelopmentBuildAccess::class.java))
+            .hasSize(1)
+        assertThat(context.getBeansOfType(com.colinmoerbe.poecompanion.acquisition.DevelopmentAcquisitionAccess::class.java))
+            .hasSize(1)
         assertThat(uniques.findById(ids.uniqueA)).isNull()
 
         initializer.initialize()
