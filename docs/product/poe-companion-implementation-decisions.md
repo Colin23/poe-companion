@@ -995,3 +995,76 @@ changes, missing account selection and unknown Unique identities.
 
 No ownership-editing controller, Build/Acquisition associations or navigation, probability presentation, SPA,
 new schema, real provider import, tier filters, generic presentation mapper, or full browser automation.
+
+---
+
+## 24. Browser and Module Maintainability Conventions
+
+### Context
+
+Milestone 5 introduces HTTP controllers, server-rendered views, presentation read models and development-only
+fixture helpers. As the number of screens and domain types grows, intentional package boundaries and a tracked
+temporary-code lifecycle are more useful than speculative general-purpose abstractions.
+
+These are agreed implementation conventions, not additions to the frozen V0.1 product scope.
+
+### HTTP and presentation
+
+- Write Spring MVC + Thymeleaf HTML controllers by hand. Their routes use natural product paths (for example,
+  `/uniques`, `/builds`, `/acquisitions`), not `/api` and not a browser-URL version prefix. If a real JSON API
+  consumer emerges, decide its `/api` prefix, versioning, OpenAPI contract, and possible interface generation then.
+- Controllers own routing, typed path/query parameter interpretation, HTTP status mapping, and view dispatch.
+  Application services/read models own business rules, module composition and transaction boundaries; templates
+  only render supplied presentation data. Do not bind browser forms directly to JPA entities.
+- Define invalid/missing parameter behavior deliberately (including omitted vs explicitly blank query values).
+  Malformed requests normally yield HTTP 400; unknown resource IDs yield HTTP 404. Protect authenticated browser
+  routes with existing Spring Security. Future writes use validated commands, CSRF protection and
+  Post/Redirect/Get, not state-mutating GET requests.
+- Group small, closely related Kotlin presentation DTOs in one dedicated file (currently
+  `UniqueBrowserViewModels.kt`) instead of mixing them into orchestration code or insisting on one file per type.
+  Split further only as responsibilities genuinely diverge.
+- Keep minimal server-rendered templates. When a second product page warrants it, introduce persistent navigation
+  and a shared Thymeleaf header/logout fragment; don't create links to nonexistent screens. Group CSS by
+  shared/feature responsibilities with section comments now, and split CSS files only once reuse/complexity proves
+  where boundaries belong. No new frontend toolchain is justified by file length alone.
+
+### Module and package organization
+
+- Preserve the existing Spring Modulith modules: Catalog, League, Account, Build, Acquisition, etc. Inside
+  **large existing modules**, prefer cohesive domain-capability subpackages (for example encounter, relationship,
+  probability, attempts) over generic `model/`, `service/`, or `view/` buckets.
+- A module's root package remains the straightforward public API surface; move **internal** implementation types
+  into internal subpackages. Before each move, check cross-module consumers: a type moved out of the root is not
+  automatically exposed across Spring Modulith boundaries. Use named interfaces only when a real cross-module
+  API merits one. Retain/update `ApplicationModulesTests`, imports, and integration tests.
+- Don't reorganize small modules just for symmetry, and don't create a separate `web` module merely to tidy files.
+  Acquisition's large root is the first candidate for a dedicated behavior-preserving package reorganization.
+- Before adding any service, adapter, interface or access wrapper, first decide whether an **existing** service
+  can and should own that behavior without blurring responsibility. Introduce a new abstraction only when it
+  materially improves cohesion, module boundaries, reuse, testability or clarity. A single implementation does
+  not automatically require an interface, and duplicated forwarding methods aren't automatically justified.
+
+### Development-only fixture lifecycle
+
+- The fixture's optional startup **runner** already requires both the `dev` profile and the
+  `poe-companion.dev-fixture.enabled=true` property. In a **separate focused cleanup**, also gate
+  `DevelopmentFixtureInitializer` and `DevelopmentCatalogAccess`, `DevelopmentLeagueAccess`,
+  `DevelopmentBuildAccess`, `DevelopmentAcquisitionAccess` on the opt-in property. Tests can turn that
+  property on explicitly, invoke initialization directly without the `dev` profile, and verify normal
+  applications do not instantiate those beans. Conditional beans remain present in the compiled artifact;
+  no separate source set/module is needed for now. Do not alter existing initialization/idempotency semantics.
+- Track temporary production-facing dependencies on synthetic labels explicitly. In Milestone 7, audit and
+  remove/replace `DevelopmentFixtureIds.uniqueLabels`, browser read-model label fallback,
+  `UniqueBrowserEntry.developmentLabel`, and synthetic-label branching in `templates/uniques/list.html`
+  and `templates/uniques/detail.html`. Also check any subsequently added Build/Acquisition browser screens.
+  Replace presentation fallbacks with real Catalog metadata; do **not** imply a nameless Unique is absent
+  from the catalog. Keeping useful synthetic fixtures for automated tests and local development is a separate
+  choice from keeping those shortcuts in the normal UI.
+- Revisit the four development access wrappers when real curation/import commands make them unnecessary.
+  Never evade Spring Modulith verification by reaching into another module's persistence packages.
+
+### Execution
+
+Keep PR #70 limited to the view-model file split, CSS sections, and this documentation update (alongside its
+existing Unique browser behavior). Treat opt-in development bean gating and internal Acquisition package
+organization as separate follow-up increments, with a briefing and tests before implementation.
