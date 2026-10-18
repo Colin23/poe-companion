@@ -1,9 +1,9 @@
 package com.colinmoerbe.poecompanion.acquisition.attempts.persistence
 
-import java.io.Serializable
-import java.util.UUID
 import jakarta.persistence.Column
 import jakarta.persistence.Embeddable
+import java.io.Serializable
+import java.util.UUID
 
 /**
  * Composite JPA identity for one player's recorded attempt count at a canonical source.

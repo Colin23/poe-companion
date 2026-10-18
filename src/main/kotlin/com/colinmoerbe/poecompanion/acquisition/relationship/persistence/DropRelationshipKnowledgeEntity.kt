@@ -2,13 +2,13 @@ package com.colinmoerbe.poecompanion.acquisition.relationship.persistence
 
 import com.colinmoerbe.poecompanion.acquisition.DropRelationshipState
 import com.colinmoerbe.poecompanion.league.Ruleset
-import java.util.UUID
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import java.util.UUID
 
 /**
  * One mutable accepted change point. Only the authored state and edit revision change after insertion.
