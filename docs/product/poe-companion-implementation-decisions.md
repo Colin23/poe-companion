@@ -1154,3 +1154,57 @@ Authenticated and anonymous HTTP tests against PostgreSQL cover Build X's PARTIA
 transition to UNIQUE_READY, BLOCKED enabling groups, ANY alternatives, multi-copy requirements, UPGRADE-only and
 zero-group revisions, missing account/compatible revision, absent catalogue, malformed/unknown IDs, synthetic
 labels and navigation. Existing Build domain and Spring Modulith tests continue to apply.
+
+---
+
+## 27. Acquisition Source Browser, Contextual Knowledge and Read-Only Attempt Previews
+
+### Context
+
+Milestone 5 adds the missing source-oriented half of the authenticated Unique → Build → Acquisition browser
+journey. Acquisition already owns accepted encounter availability, source-to-Unique CAN_DROP/CANNOT_DROP knowledge,
+fixed probability histories and per-account available attempts. Stable source identity is independent of the
+relationships attached to it; a relationship identity never proves current availability or a numeric drop chance.
+
+### Decision
+
+- Add authenticated read-only `GET /acquisitions` and `GET /acquisitions/{AcquisitionSourceId UUID}`. A source
+  remains visible even with no relationships, no account selection or no accepted contextual encounter knowledge.
+  The selected account governs contextual availability, relationship applicability and accepted fixed estimates.
+  Invalid UUIDs and attempt parameters return HTTP 400; unknown stable source identity returns HTTP 404.
+- Extend the existing Acquisition-owned `AcquisitionReadModelService` with `findSources()` and
+  `findForSource(sourceId, previewAttempts?)`. Add only source enumeration and source-oriented relationship
+  queries to existing persistence adapters. Reuse the existing shared per-relationship knowledge resolution
+  and eligibility calculation, never calculate directly from a relationship identity or estimate alone.
+  Keep the source/relationship/estimate scope outcomes separate; never silently select an ambiguous scope.
+- The optional `?attempts=N` parameter is a **read-only preview** with `N` a nonnegative 32-bit integer.
+  An omitted parameter means use the saved AvailableAttempts record; explicit zero is meaningful. The domain
+  method substitutes a transient count solely for the calculation while returning the actual saved count
+  independently. It never writes or resets player-editable data.
+- Render source label and current availability from accepted encounter knowledge, relationships independently
+  with their per-Unique applicability and estimate state, and the fixed probability calculator only when
+  encounter availability, CAN_DROP and an applicable accepted estimate are all affirmative. Show per-attempt
+  probability, provenance, evidence reference, review timestamp, at-least-one cumulative probability for
+  the effective attempt count, expected attempts and the 50/75/90/95/99-percent whole-attempt thresholds.
+  Missing attempts mean not recorded, not zero; withdrawn/unknown/ambiguous scopes do not yield fabricated
+  actionability. A known estimate can be displayed as independent knowledge without asserting eligibility.
+- Compose simple Thymeleaf presentation DTOs at the application root using the existing shared Unique display
+  label helper, and add Acquisition to the shared navigation only when its pages work. No hard-coded Boss Y
+  display label or duplicate browser probability formulas.
+- Apply continuous package-location review. The touched source/relationship persistence adapters remain inside
+  Acquisition's existing internal persistence package for this increment because their responsibilities
+  are cohesive there and relocating them plus unrelated repositories would obscure the feature. Keep
+  domain-facing Acquisition read APIs in the module root and never cross another module's persistence boundary.
+
+### Exclusions
+
+No saved attempts editor, personal drop-rate overrides, Build/Unique → Acquisition navigation, ownership editor,
+provider ingestion, unsupported conditional effective-probability models or database migrations. Actual drop-rate
+claims for synthetic fixtures must remain clearly identified as development-only evidence, not real PoE data.
+
+### Verification
+
+HTTP integration tests cover the Boss Y fixture (12 attempts, approximately 71.8-percent cumulative chance,
+95-percent threshold 29), nonpersistent attempt previews including zero, missing counts, empty and relationship-free
+sources, absent account, ambiguous scope, explicit CANNOT_DROP, unknown IDs, invalid input and authentication.
+Existing Acquisition domain read-model, JPA and Spring Modulith tests remain mandatory.
