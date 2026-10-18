@@ -26,19 +26,18 @@ internal class BuildBrowserReadModelService(
         val knownBuilds = builds.findAll()
         val evaluated = readiness.evaluateAll(knownBuilds.map { it.variant.id })
         val entries = knownBuilds.map { build ->
-            val state = stateOf(evaluated.getValue(build.variant.id))
+            val result = evaluated.getValue(build.variant.id)
+            val state = stateOf(result)
+            val explanation = when {
+                result is BuildReadinessQueryResult.Evaluated && !result.readiness.hasRequiredUniqueGroups ->
+                    "No required Uniques"
+                else -> state.explanation
+            }
             BuildBrowserListEntry(
                 id = build.variant.id.value,
                 displayName = build.displayName,
                 state = state,
-                explanation = if (evaluated.getValue(build.variant.id) is BuildReadinessQueryResult.Evaluated &&
-                    !(evaluated.getValue(build.variant.id) as BuildReadinessQueryResult.Evaluated)
-                        .readiness.hasRequiredUniqueGroups
-                ) {
-                    "No required Uniques"
-                } else {
-                    state.explanation
-                },
+                explanation = explanation,
             )
         }.sortedWith(compareBy<BuildBrowserListEntry> { it.displayName.lowercase() }.thenBy { it.id })
 
