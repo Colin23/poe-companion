@@ -1,19 +1,21 @@
-package com.colinmoerbe.poecompanion
+package com.colinmoerbe.poecompanion.browser.acquisitions
 
 import com.colinmoerbe.poecompanion.acquisition.AcquisitionReadModelService
 import com.colinmoerbe.poecompanion.acquisition.AcquisitionSourceId
 import com.colinmoerbe.poecompanion.acquisition.AcquisitionSourceRelationshipResult
 import com.colinmoerbe.poecompanion.acquisition.FixedDropEstimateResolution
 import com.colinmoerbe.poecompanion.acquisition.ScopedAcquisitionKnowledge
+import com.colinmoerbe.poecompanion.browser.shared.AcquisitionBrowserKnowledgeLabels
+import com.colinmoerbe.poecompanion.browser.shared.UniqueDisplayLabels
 import com.colinmoerbe.poecompanion.catalog.UniqueCatalogQueryService
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
 import com.colinmoerbe.poecompanion.league.AccountEvaluation
+import java.util.Locale
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Transactional
-import java.util.Locale
 
-/** Application-root presentation composition; eligibility and calculation live in Acquisition. */
+/** Browser-owned presentation composition; eligibility and calculation live in Acquisition. */
 @Service
 internal class AcquisitionBrowserReadModelService(
     private val acquisition: AcquisitionReadModelService,

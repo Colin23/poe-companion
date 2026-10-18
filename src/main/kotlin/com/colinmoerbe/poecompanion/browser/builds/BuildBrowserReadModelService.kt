@@ -1,5 +1,6 @@
-package com.colinmoerbe.poecompanion
+package com.colinmoerbe.poecompanion.browser.builds
 
+import com.colinmoerbe.poecompanion.browser.shared.UniqueDisplayLabels
 import com.colinmoerbe.poecompanion.build.BuildCatalogQueryService
 import com.colinmoerbe.poecompanion.build.BuildReadinessQueryResult
 import com.colinmoerbe.poecompanion.build.BuildReadinessService

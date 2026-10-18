@@ -1,4 +1,4 @@
-package com.colinmoerbe.poecompanion
+package com.colinmoerbe.poecompanion.browser.builds
 
 import com.colinmoerbe.poecompanion.build.BuildVariantId
 import org.springframework.http.HttpStatus
