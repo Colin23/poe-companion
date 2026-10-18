@@ -27,6 +27,7 @@ class BuildReadinessService internal constructor(
      * Evaluates multiple variants against one selected context and one ownership snapshot.
      * The caller owns the wider read transaction when composing a browser page.
      */
+    @Suppress("ReturnCount")
     @Transactional(readOnly = true)
     fun evaluateAll(buildVariantIds: Collection<BuildVariantId>): Map<BuildVariantId, BuildReadinessQueryResult> {
         if (buildVariantIds.isEmpty()) return emptyMap()
