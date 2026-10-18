@@ -1,7 +1,7 @@
 package com.colinmoerbe.poecompanion.acquisition
 
-import com.colinmoerbe.poecompanion.acquisition.persistence.AcquisitionSourcePersistenceAdapter
-import com.colinmoerbe.poecompanion.acquisition.persistence.DropRelationshipPersistenceAdapter
+import com.colinmoerbe.poecompanion.acquisition.relationship.persistence.DropRelationshipPersistenceAdapter
+import com.colinmoerbe.poecompanion.acquisition.sourceidentity.persistence.AcquisitionSourcePersistenceAdapter
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 

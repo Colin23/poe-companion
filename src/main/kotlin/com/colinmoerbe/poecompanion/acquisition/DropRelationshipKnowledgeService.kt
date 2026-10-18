@@ -1,5 +1,6 @@
 package com.colinmoerbe.poecompanion.acquisition
 
+import com.colinmoerbe.poecompanion.acquisition.relationship.internal.DropRelationshipKnowledgePersistencePort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 

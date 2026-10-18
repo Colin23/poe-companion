@@ -2,6 +2,7 @@ package com.colinmoerbe.poecompanion.acquisition.encounter.persistence
 
 import com.colinmoerbe.poecompanion.acquisition.AcquisitionSourceAvailability
 import com.colinmoerbe.poecompanion.league.Ruleset
+import java.util.UUID
 import jakarta.persistence.CollectionTable
 import jakarta.persistence.Column
 import jakarta.persistence.ElementCollection
@@ -12,7 +13,6 @@ import jakarta.persistence.FetchType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.Table
-import java.util.UUID
 
 /**
  * One accepted complete encounter fact at an exact game change point.
