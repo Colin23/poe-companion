@@ -19,9 +19,13 @@ internal class UniqueOwnershipUpdateService(
         require(quantity >= 0) { "Owned quantity must not be negative" }
         if (catalog.findById(uniqueId) == null) return UniqueOwnershipUpdateResult.UNKNOWN_UNIQUE
 
-        val selected = accountEvaluation.getSelected() ?: return UniqueOwnershipUpdateResult.NO_ACCOUNT_SELECTED
-        ownership.setOwnedQuantity(selected.accountContextId, uniqueId, quantity)
-        return UniqueOwnershipUpdateResult.UPDATED
+        val selected = accountEvaluation.getSelected()
+        return if (selected == null) {
+            UniqueOwnershipUpdateResult.NO_ACCOUNT_SELECTED
+        } else {
+            ownership.setOwnedQuantity(selected.accountContextId, uniqueId, quantity)
+            UniqueOwnershipUpdateResult.UPDATED
+        }
     }
 }
 

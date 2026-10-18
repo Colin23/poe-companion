@@ -152,7 +152,6 @@ internal class UniqueBrowserControllerIntegrationTests(
             .andExpect(status().isBadRequest)
     }
 
-
     @Test
     fun `owner can edit a Unique quantity through authenticated browser POST`() {
         initializer.initialize()
