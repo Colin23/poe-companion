@@ -132,7 +132,7 @@ internal class AcquisitionBrowserControllerIntegrationTests(
         val html = mockMvc.perform(get("/acquisitions/${ids.source.value}").with(user("test-user")))
             .andExpect(content().string(containsString("Not recorded")))
             .andReturn().response.contentAsString
-        assertThat(html).containsPattern("""<input\\b[^>]*\\bid="preview-attempts"[^>]*\\brequired\\b""")
+        assertThat(html).containsPattern("""<input\b[^>]*\bid="preview-attempts"[^>]*\brequired\b""")
     }
 
     @Test
