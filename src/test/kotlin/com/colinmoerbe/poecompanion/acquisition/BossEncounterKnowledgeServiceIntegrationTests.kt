@@ -1,11 +1,10 @@
 package com.colinmoerbe.poecompanion.acquisition
 
-import com.colinmoerbe.poecompanion.TestcontainersConfiguration
-import com.colinmoerbe.poecompanion.acquisition.persistence.AcquisitionSourcePersistenceAdapter
 import com.colinmoerbe.poecompanion.acquisition.encounter.CorruptBossEncounterKnowledgeException
 import com.colinmoerbe.poecompanion.acquisition.encounter.persistence.BossEncounterKnowledgePersistenceAdapter
-import com.colinmoerbe.poecompanion.acquisition.persistence.SpringDataBossDefinitionRepository
 import com.colinmoerbe.poecompanion.acquisition.encounter.persistence.SpringDataBossEncounterKnowledgeRepository
+import com.colinmoerbe.poecompanion.acquisition.persistence.AcquisitionSourcePersistenceAdapter
+import com.colinmoerbe.poecompanion.acquisition.persistence.SpringDataBossDefinitionRepository
 import com.colinmoerbe.poecompanion.league.CompatibilityVersion
 import com.colinmoerbe.poecompanion.league.EvaluationContext
 import com.colinmoerbe.poecompanion.league.GamePatch
@@ -15,8 +14,9 @@ import com.colinmoerbe.poecompanion.league.LeagueDefinitionId
 import com.colinmoerbe.poecompanion.league.LeagueMortality
 import com.colinmoerbe.poecompanion.league.LeagueParticipation
 import com.colinmoerbe.poecompanion.league.LeagueType
-import com.colinmoerbe.poecompanion.league.Ruleset
 import com.colinmoerbe.poecompanion.league.persistence.LeagueDefinitionPersistenceAdapter
+import com.colinmoerbe.poecompanion.league.Ruleset
+import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
@@ -28,11 +28,11 @@ import org.springframework.context.annotation.Import
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.jdbc.core.JdbcTemplate
-import java.util.UUID
 import java.util.concurrent.Callable
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import java.util.UUID
 
 /**
  * Validates accepted complete encounter snapshots and atomic boss-roster correction in PostgreSQL.
