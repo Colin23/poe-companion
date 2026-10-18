@@ -71,6 +71,7 @@ internal object AcquisitionBrowserKnowledgeLabels {
             FixedDropEstimateResolution.DoesNotApply -> "Not applicable to selected context"
         }
     }
+
     /** A recorded fixed estimate is independently meaningful, even if the source isn't actionable. */
     fun acceptedPerAttemptChance(knowledge: ScopedAcquisitionKnowledge<FixedDropEstimateResolution>?): String? {
         val resolution = (knowledge as? ScopedAcquisitionKnowledge.Selected<*>)?.resolution
@@ -79,5 +80,4 @@ internal object AcquisitionBrowserKnowledgeLabels {
     }
 
     private const val PERCENT_MULTIPLIER = 100.0
-
 }
