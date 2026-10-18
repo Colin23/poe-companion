@@ -40,6 +40,7 @@ import com.colinmoerbe.poecompanion.league.LeagueMortality
 import com.colinmoerbe.poecompanion.league.LeagueParticipation
 import com.colinmoerbe.poecompanion.league.LeagueType
 import com.colinmoerbe.poecompanion.league.Ruleset
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -50,8 +51,20 @@ import java.time.Instant
  * The bean has no startup side effects of its own. Only [DevelopmentFixtureConfiguration] invokes it on startup,
  * while integration tests invoke it explicitly. Module-owned development access points keep persistence private
  * to each module; this orchestrator uses exposed root-package APIs without crossing persistence boundaries.
+ *
+ * Registration policy:
+ * - Property disabled (any profile): initializer and module-local fixture access beans are absent.
+ * - Property enabled without dev profile: beans are available for explicit integration-test initialization.
+ * - Property enabled with dev profile: the startup runner also initializes the fixture.
+ *
+ * Deliberately no @Profile("dev") here: tests opt in with the property but invoke initialization themselves.
  */
 @Component
+@ConditionalOnProperty(
+    prefix = "poe-companion.dev-fixture",
+    name = ["enabled"],
+    havingValue = "true",
+)
 @Suppress("LongParameterList")
 internal class DevelopmentFixtureInitializer(
     private val uniques: DevelopmentCatalogAccess,
