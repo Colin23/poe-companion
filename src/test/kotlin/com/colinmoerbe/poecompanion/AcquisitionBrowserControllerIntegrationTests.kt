@@ -129,8 +129,10 @@ internal class AcquisitionBrowserControllerIntegrationTests(
         assertThat(page.relationships.single().probabilityWithinAttempts).isNull()
         assertThat(page.relationships.single().thresholds.single { it.percentage == 95 }.attempts).isEqualTo(29)
 
-        mockMvc.perform(get("/acquisitions/${ids.source.value}").with(user("test-user")))
+        val html = mockMvc.perform(get("/acquisitions/${ids.source.value}").with(user("test-user")))
             .andExpect(content().string(containsString("Not recorded")))
+            .andReturn().response.contentAsString
+        assertThat(html).containsPattern("""<input\\b[^>]*\\bid="preview-attempts"[^>]*\\brequired\\b""")
     }
 
     @Test
