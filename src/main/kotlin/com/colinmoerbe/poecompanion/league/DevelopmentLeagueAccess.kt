@@ -5,7 +5,8 @@ import com.colinmoerbe.poecompanion.league.persistence.LeagueDefinitionPersisten
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 
-/** Narrow development-bootstrap entry point; keeps League's JPA adapters inside the League module.
+/**
+ * Narrow development-bootstrap entry point; keeps League's JPA adapters inside the League module.
  *
  * Property-gated without @Profile("dev") so integration tests can opt in and initialize explicitly.
  */
