@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${page.item.displayName} + ' — PoE Companion'">Unique Detail — PoE Companion</title>
+    <link rel="stylesheet" th:href="@{/css/application.css}">
+</head>
+<body>
+<header class="site-header">
+    <div>
+        <a class="site-name" th:href="@{/}">PoE Companion</a>
+        <p class="session-details">Signed in as <strong th:text="${username}">user</strong></p>
+    </div>
+    <form th:action="@{/logout}" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <button type="submit">Log out</button>
+    </form>
+</header>
+<main>
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a th:href="@{/}">Home</a>
+        <span aria-hidden="true"> / </span>
+        <a th:href="@{/uniques}">Unique Collection</a>
+        <span aria-hidden="true"> / </span>
+        <span aria-current="page" th:text="${page.item.displayName}">Unique C</span>
+    </nav>
+    <section class="panel">
+        <h1 th:text="${page.item.displayName}">Unique C</h1>
+        <p class="muted" th:if="${page.item.developmentLabel}">Synthetic development item — not a real PoE name.</p>
+        <p class="muted" th:unless="${page.item.developmentLabel}">
+            Canonical display metadata has not been imported yet.
+        </p>
+        <dl class="detail-facts">
+            <div>
+                <dt>Unique definition ID</dt>
+                <dd><code th:text="${page.item.id}">UUID</code></dd>
+            </div>
+            <div>
+                <dt>Selected account</dt>
+                <dd th:if="${page.accountSelected}" th:text="${page.selectionLabel}">
+                    Account context
+                </dd>
+                <dd th:unless="${page.accountSelected}">No account selected</dd>
+            </div>
+            <div>
+                <dt>Current ownership</dt>
+                <dd th:if="${page.item.ownedQuantity == null}">Unknown — select an account</dd>
+                <dd th:if="${page.item.ownedQuantity != null and page.item.ownedQuantity > 0}">
+                    Owned · <span th:text="${page.item.ownedQuantity}">1</span> copies
+                </dd>
+                <dd th:if="${page.item.ownedQuantity != null and page.item.ownedQuantity == 0}">
+                    Missing · 0 copies
+                </dd>
+            </div>
+        </dl>
+        <section class="upcoming-section">
+            <h2>Build and acquisition information</h2>
+            <p>
+                Known Build associations, AcquisitionSources and ownership editing will be connected in
+                upcoming Milestone 5 increments.
+            </p>
+        </section>
+        <p><a th:href="@{/uniques}">Back to Unique Collection</a></p>
+    </section>
+</main>
+</body>
+</html>
