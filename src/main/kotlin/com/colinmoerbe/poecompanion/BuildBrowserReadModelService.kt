@@ -6,8 +6,8 @@ import com.colinmoerbe.poecompanion.build.BuildReadinessService
 import com.colinmoerbe.poecompanion.build.BuildVariantId
 import com.colinmoerbe.poecompanion.build.RequirementGroupEvaluation
 import com.colinmoerbe.poecompanion.build.UniqueReadiness
-import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
 import com.colinmoerbe.poecompanion.catalog.UniqueCatalogQueryService
+import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
 import com.colinmoerbe.poecompanion.league.AccountEvaluationService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Isolation
@@ -31,6 +31,7 @@ internal class BuildBrowserReadModelService(
             val explanation = when {
                 result is BuildReadinessQueryResult.Evaluated && !result.readiness.hasRequiredUniqueGroups ->
                     "No required Uniques"
+
                 else -> state.explanation
             }
             BuildBrowserListEntry(
@@ -126,7 +127,9 @@ internal class BuildBrowserReadModelService(
 
     private fun stateOf(result: BuildReadinessQueryResult): BuildBrowserState = when (result) {
         BuildReadinessQueryResult.NoAccountEvaluationSelected -> BuildBrowserState.NO_ACCOUNT
+
         is BuildReadinessQueryResult.NoCompatibleActiveRevision -> BuildBrowserState.NO_ACTIVE_REVISION
+
         is BuildReadinessQueryResult.Evaluated -> when (result.readiness.readiness) {
             UniqueReadiness.UNIQUE_READY -> BuildBrowserState.UNIQUE_READY
             UniqueReadiness.PARTIAL -> BuildBrowserState.PARTIAL
