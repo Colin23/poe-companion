@@ -1291,3 +1291,52 @@ tidiness. The justification here is a real, already implemented incoming-adapter
 The full Gradle build, Spring Modulith verification, migrated MVC/PostgreSQL integration tests and canonical
 browser journey must remain green. This move is distinct from planned Acquisition and Build internal
 capability reorganizations and the later two-user/role-based authorization work.
+
+
+---
+
+## 30. Acquisition Internal Capability-Owned Persistence Organization
+
+### Context
+
+After the Browser module extraction, Acquisition's broad mixed `acquisition.persistence` package still contained
+JPA entities, adapters, Spring Data repositories and persistence-only enums from five different capabilities.
+Four internal persistence ports occupied the Acquisition root alongside intentionally externally consumed
+domain and application APIs. Encounter knowledge had already established a partial internal capability
+boundary under decision §25.
+
+This Milestone 5.2 change is a behavior-preserving extension of that earlier, deliberately limited refactor.
+It supersedes §25 only as to the final placement of its existing encounter persistence port and
+corruption exception; the original rationale and public API constraints remain valid.
+
+### Decision
+
+- Organize the existing storage implementations by Acquisition capability:
+  `acquisition.sourceidentity.persistence` for source/Boss identity,
+  `acquisition.relationship.persistence` for stable source-to-Unique relationships and accepted applicability
+  knowledge, `acquisition.probability.persistence` for accepted fixed estimates/publication states and
+  withdrawals, `acquisition.attempts.persistence` for account-scoped recorded available attempts, and
+  retain `acquisition.encounter.persistence` for accepted boss encounter knowledge.
+- Keep capability-owned persistence *contracts* distinct from JPA implementation classes under
+  `sourceidentity.internal`, `relationship.internal`, `probability.internal`,
+  `attempts.internal`, and `encounter.internal`. The existing two encounter-level internal types
+  move into `encounter.internal`; the established encounter JPA implementation does not move.
+- Cross-capability repository/adapter dependencies within the single Acquisition Modulith module remain
+  direct when justified: encounter persistence checks stable source/Boss identities, and probability persistence
+  resolves canonical relationships. Do not introduce forwarding services or additional application modules
+  solely for package isolation.
+- Keep external domain types, public application services, read models and knowledge timelines in the
+  Acquisition root for now. Their planned capability migration and explicit named interfaces will be a
+  separate PR and review. Kotlin `internal` remains compilation-module visibility; Spring Modulith
+  controls cross-module API exposure.
+- Move existing source/relationship persistence integration tests alongside their new production packages.
+  Update imports elsewhere while keeping existing test behavior and coverage. New packages remain descendants
+  of the Spring Boot application scan root, retaining Spring/JPA component and entity discovery.
+- Do not change JPA annotations, table names, native SQL, domain rules, transaction boundaries,
+  concurrency semantics, source fixture registration, HTTP endpoints, or Flyway migrations.
+
+### Verification
+
+Validate the same eight Spring Modulith module boundaries via `ApplicationModules.verify()`, all existing
+Acquisition PostgreSQL persistence/concurrency tests, fixture and Browser integration tests, and the complete
+`./gradlew build`. This internal reorganization does not require any named interfaces yet.

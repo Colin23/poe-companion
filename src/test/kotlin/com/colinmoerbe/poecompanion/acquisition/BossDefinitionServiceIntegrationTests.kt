@@ -1,7 +1,7 @@
 package com.colinmoerbe.poecompanion.acquisition
 
 import com.colinmoerbe.poecompanion.TestcontainersConfiguration
-import com.colinmoerbe.poecompanion.acquisition.persistence.SpringDataBossDefinitionRepository
+import com.colinmoerbe.poecompanion.acquisition.sourceidentity.persistence.SpringDataBossDefinitionRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach

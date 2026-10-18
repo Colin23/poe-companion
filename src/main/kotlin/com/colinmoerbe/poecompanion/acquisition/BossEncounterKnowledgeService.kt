@@ -1,6 +1,6 @@
 package com.colinmoerbe.poecompanion.acquisition
 
-import com.colinmoerbe.poecompanion.acquisition.encounter.BossEncounterKnowledgePersistencePort
+import com.colinmoerbe.poecompanion.acquisition.encounter.internal.BossEncounterKnowledgePersistencePort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
