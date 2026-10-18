@@ -18,6 +18,10 @@ internal class BuildArchetypePersistenceAdapter(private val springDataRepository
         )
     }
 
+    fun findAll(): List<BuildArchetype> = springDataRepository.findAll().map { entity ->
+        BuildArchetype(BuildArchetypeId(entity.id), entity.name)
+    }
+
     fun findById(id: BuildArchetypeId): BuildArchetype? = springDataRepository
         .findById(id.value)
         .map { entity ->
