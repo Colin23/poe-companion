@@ -1,13 +1,12 @@
 package com.colinmoerbe.poecompanion.browser
 
-import com.colinmoerbe.poecompanion.DevelopmentFixtureIds
-import com.colinmoerbe.poecompanion.DevelopmentFixtureInitializer
-import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.acquisition.AvailableAttemptsService
 import com.colinmoerbe.poecompanion.browser.acquisitions.AcquisitionBrowserDetailPage
 import com.colinmoerbe.poecompanion.browser.builds.BuildBrowserDetailPage
 import com.colinmoerbe.poecompanion.browser.builds.BuildBrowserState
-import javax.sql.DataSource
+import com.colinmoerbe.poecompanion.DevelopmentFixtureIds
+import com.colinmoerbe.poecompanion.DevelopmentFixtureInitializer
+import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import org.assertj.core.api.Assertions.assertThat
 import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.AfterEach
@@ -28,6 +27,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.view
+import javax.sql.DataSource
 
 /** Proves the canonical A/B/C journey across authenticated browser routes and real PostgreSQL persistence. */
 @Import(TestcontainersConfiguration::class)

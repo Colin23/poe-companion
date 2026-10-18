@@ -1,8 +1,5 @@
 package com.colinmoerbe.poecompanion.browser.acquisitions
 
-import com.colinmoerbe.poecompanion.DevelopmentFixtureIds
-import com.colinmoerbe.poecompanion.DevelopmentFixtureInitializer
-import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.acquisition.AcquisitionKnowledgeScope
 import com.colinmoerbe.poecompanion.acquisition.AcquisitionSource
 import com.colinmoerbe.poecompanion.acquisition.AcquisitionSourceAvailability
@@ -17,9 +14,11 @@ import com.colinmoerbe.poecompanion.acquisition.DropRelationshipId
 import com.colinmoerbe.poecompanion.acquisition.DropRelationshipKnowledgeService
 import com.colinmoerbe.poecompanion.acquisition.DropRelationshipSnapshot
 import com.colinmoerbe.poecompanion.acquisition.DropRelationshipState
-import com.colinmoerbe.poecompanion.league.Ruleset
+import com.colinmoerbe.poecompanion.DevelopmentFixtureIds
+import com.colinmoerbe.poecompanion.DevelopmentFixtureInitializer
 import com.colinmoerbe.poecompanion.league.persistence.SpringDataAccountEvaluationSelectionRepository
-import javax.sql.DataSource
+import com.colinmoerbe.poecompanion.league.Ruleset
+import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import org.assertj.core.api.Assertions.assertThat
 import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.AfterEach
@@ -38,6 +37,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.view
+import javax.sql.DataSource
 
 /** HTTP rendering of source discovery, independent knowledge and read-only probability previews. */
 @Import(TestcontainersConfiguration::class)
