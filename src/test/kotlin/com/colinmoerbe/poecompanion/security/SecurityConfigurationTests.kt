@@ -70,7 +70,7 @@ class SecurityConfigurationTests(@Autowired private val mockMvc: MockMvc) {
             .andExpect(view().name("index"))
             .andExpect(content().string(containsString("PoE Companion")))
             .andExpect(content().string(containsString("test-user")))
-            .andExpect(content().string(containsString("Application bootstrap operational")))
+            .andExpect(content().string(containsString("Open Unique Collection")))
     }
 
     @Test

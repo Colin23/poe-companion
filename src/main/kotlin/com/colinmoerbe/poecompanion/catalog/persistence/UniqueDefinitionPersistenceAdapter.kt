@@ -15,6 +15,9 @@ internal class UniqueDefinitionPersistenceAdapter(
         springDataRepository.save(UniqueDefinitionEntity(uniqueDefinition.id.value))
     }
 
+    fun findAll(): List<UniqueDefinition> =
+        springDataRepository.findAll().map { entity -> UniqueDefinition(UniqueDefinitionId(entity.id)) }
+
     fun findById(id: UniqueDefinitionId): UniqueDefinition? = springDataRepository
         .findById(id.value)
         .map { entity -> UniqueDefinition(UniqueDefinitionId(entity.id)) }
