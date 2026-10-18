@@ -31,7 +31,8 @@ class AcquisitionReadModelService internal constructor(
         val selection =
             accountEvaluationService.getSelected() ?: return AcquisitionQueryResult.NoAccountEvaluationSelected
         val scopes = scopesFor(selection)
-        val assessments = relationshipPersistenceAdapter.findByUniqueDefinitionId(uniqueDefinitionId).map { relationship ->
+        val relationships = relationshipPersistenceAdapter.findByUniqueDefinitionId(uniqueDefinitionId)
+        val assessments = relationships.map { relationship ->
             val sourceKnowledge = resolveSource(relationship.acquisitionSourceId, scopes)
             val attempts = availableAttemptsService.getAvailableAttempts(
                 selection.accountContextId,
