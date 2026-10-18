@@ -1067,3 +1067,37 @@ These are agreed implementation conventions, not additions to the frozen V0.1 pr
 The Unique browser cleanup was completed in PR #70. Conditional fixture-bean registration is a separate,
 behavior-preserving Milestone 5 cleanup. Acquisition's internal package organization remains a distinct
 follow-up requiring a dependency review and Spring Modulith verification.
+
+---
+
+## 25. Acquisition Encounter-Knowledge Internal Package Boundary
+
+### Context
+
+Acquisition has a broad root package containing externally consumed domain/application API types and internal
+persistence mechanics. Moving every encounter/probability-related class into nested packages would accidentally
+hide module API types behind Spring Modulith's default internal-package boundary. Leaving all implementation
+details at the root also makes the module unnecessarily difficult to navigate.
+
+### Decision
+
+Start the behavior-preserving, domain-capability-oriented reorganization with encounter-knowledge internals:
+
+- Move `BossEncounterKnowledgePersistencePort` and `CorruptBossEncounterKnowledgeException` to
+  `acquisition.encounter`.
+- Move `BossEncounterKnowledgeEntity`, `BossEncounterParticipationKind`,
+  `BossEncounterKnowledgePersistenceAdapter`, and `SpringDataBossEncounterKnowledgeRepository` to
+  `acquisition.encounter.persistence`.
+- Keep `BossEncounterKnowledgeService`, `BossEncounterKnowledgeTimeline`, snapshots/resolutions,
+  participation model, identities, and externally used conflict types in the Acquisition **root package**.
+  No new Spring Modulith application module or named interface is needed for these six internal moves.
+- The encounter persistence adapter may continue to use Acquisition's existing root-level/persistence
+  boss/source identity repositories internally; domain capabilities within one Modulith module do not require
+  artificial service wrappers to communicate.
+- Update imports in the service and existing tests without changing public APIs, business rules, transactions,
+  JPA entity/table mappings or queries, database migrations, or production behavior. Use existing PostgreSQL
+  encounter/acquisition integration tests and `ApplicationModulesTests` to validate entity/repository discovery
+  and module boundaries.
+
+Follow-up internal capability migrations (relationship, probability, attempts) are **not** implied by this
+first move and should be proposed only when their concrete dependency structure justifies them.
