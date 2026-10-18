@@ -6,7 +6,8 @@ import com.colinmoerbe.poecompanion.build.persistence.BuildVariantRevisionPersis
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 
-/** Narrow development-bootstrap entry point; build draft persistence remains owned by the Build module.
+/**
+ * Narrow development-bootstrap entry point; build draft persistence remains owned by the Build module.
  *
  * Property-gated without @Profile("dev") so integration tests can opt in and initialize explicitly.
  */
