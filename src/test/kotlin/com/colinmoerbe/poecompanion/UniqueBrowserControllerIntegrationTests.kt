@@ -51,6 +51,7 @@ import javax.sql.DataSource
         "poe-companion.security.password=test-password",
     ],
 )
+@Suppress("LongParameterList")
 internal class UniqueBrowserControllerIntegrationTests(
     @Autowired private val mockMvc: MockMvc,
     @Autowired private val initializer: DevelopmentFixtureInitializer,
