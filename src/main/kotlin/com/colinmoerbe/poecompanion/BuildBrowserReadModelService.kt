@@ -1,13 +1,14 @@
 package com.colinmoerbe.poecompanion
 
-import com.colinmoerbe.poecompanion.build.BuildCatalogEntry
 import com.colinmoerbe.poecompanion.build.BuildCatalogQueryService
 import com.colinmoerbe.poecompanion.build.BuildReadinessQueryResult
 import com.colinmoerbe.poecompanion.build.BuildReadinessService
 import com.colinmoerbe.poecompanion.build.BuildVariantId
 import com.colinmoerbe.poecompanion.build.RequirementGroupEvaluation
 import com.colinmoerbe.poecompanion.build.UniqueReadiness
+import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
 import com.colinmoerbe.poecompanion.catalog.UniqueCatalogQueryService
+import com.colinmoerbe.poecompanion.league.AccountEvaluationService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Transactional
@@ -18,6 +19,7 @@ internal class BuildBrowserReadModelService(
     private val builds: BuildCatalogQueryService,
     private val readiness: BuildReadinessService,
     private val catalog: UniqueCatalogQueryService,
+    private val accountEvaluation: AccountEvaluationService,
 ) {
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     fun list(): BuildBrowserListPage {
@@ -29,7 +31,14 @@ internal class BuildBrowserReadModelService(
                 id = build.variant.id.value,
                 displayName = build.displayName,
                 state = state,
-                explanation = state.explanation,
+                explanation = if (evaluated.getValue(build.variant.id) is BuildReadinessQueryResult.Evaluated &&
+                    !(evaluated.getValue(build.variant.id) as BuildReadinessQueryResult.Evaluated)
+                        .readiness.hasRequiredUniqueGroups
+                ) {
+                    "No required Uniques"
+                } else {
+                    state.explanation
+                },
             )
         }.sortedWith(compareBy<BuildBrowserListEntry> { it.displayName.lowercase() }.thenBy { it.id })
 
@@ -39,7 +48,7 @@ internal class BuildBrowserReadModelService(
                 val matching = entries.filter { it.state == state }
                 if (matching.isEmpty()) null else BuildBrowserSection(state, matching)
             },
-            accountSelected = entries.none { it.state == BuildBrowserState.NO_ACCOUNT },
+            accountSelected = accountEvaluation.getSelected() != null,
         )
     }
 
@@ -96,7 +105,7 @@ internal class BuildBrowserReadModelService(
 
     private fun groupToView(
         evaluated: RequirementGroupEvaluation,
-        catalogIds: Set<com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId>,
+        catalogIds: Set<UniqueDefinitionId>,
     ): BuildBrowserGroup = BuildBrowserGroup(
         importance = evaluated.group.importance.name,
         logic = evaluated.group.logic.name,

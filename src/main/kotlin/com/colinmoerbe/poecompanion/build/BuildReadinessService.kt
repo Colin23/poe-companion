@@ -2,6 +2,7 @@ package com.colinmoerbe.poecompanion.build
 
 import com.colinmoerbe.poecompanion.account.CurrentOwnership
 import com.colinmoerbe.poecompanion.account.CurrentOwnershipService
+import com.colinmoerbe.poecompanion.league.AccountEvaluation
 import com.colinmoerbe.poecompanion.league.AccountEvaluationService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -28,8 +29,11 @@ class BuildReadinessService internal constructor(
      */
     @Transactional(readOnly = true)
     fun evaluateAll(buildVariantIds: Collection<BuildVariantId>): Map<BuildVariantId, BuildReadinessQueryResult> {
-        val accountEvaluation = accountEvaluationService.getSelected()
-            ?: return buildVariantIds.associateWith { BuildReadinessQueryResult.NoAccountEvaluationSelected }
+        if (buildVariantIds.isEmpty()) return emptyMap()
+
+        val accountEvaluation =
+            accountEvaluationService.getSelected()
+                ?: return buildVariantIds.associateWith { BuildReadinessQueryResult.NoAccountEvaluationSelected }
 
         val ownership = currentOwnershipService.getCurrentOwnership(accountEvaluation.accountContextId)
         return buildVariantIds.associateWith { variantId ->
@@ -39,7 +43,7 @@ class BuildReadinessService internal constructor(
 
     private fun evaluateFor(
         variantId: BuildVariantId,
-        selected: com.colinmoerbe.poecompanion.league.AccountEvaluation,
+        selected: AccountEvaluation,
         ownership: CurrentOwnership,
     ): BuildReadinessQueryResult {
         val revision = revisionPersistencePort.findActiveBy(
