@@ -5,7 +5,8 @@ import com.colinmoerbe.poecompanion.acquisition.persistence.DropRelationshipPers
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 
-/** Narrow development-bootstrap entry point; stable acquisition identity persistence stays module-internal.
+/**
+ * Narrow development-bootstrap entry point; stable acquisition identity persistence stays module-internal.
  *
  * Property-gated without @Profile("dev") so integration tests can opt in and initialize explicitly.
  */
