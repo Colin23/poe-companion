@@ -44,7 +44,8 @@
             <form method="get" th:action="@{/acquisitions/{id}(id=${page.id})}" class="attempt-form">
                 <label for="preview-attempts">Number of attempts</label>
                 <input id="preview-attempts" name="attempts" type="number" min="0" max="2147483647"
-                       step="1" th:value="${page.previewAttempts != null ? page.previewAttempts : page.savedAttempts}">
+                       step="1" required
+                       th:value="${page.previewAttempts != null ? page.previewAttempts : page.savedAttempts}">
                 <button type="submit">Preview probability</button>
             </form>
             <p th:if="${page.previewAttempts != null}">
