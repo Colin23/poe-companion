@@ -934,12 +934,13 @@ operations inside each owning module, preserving Spring Modulith's public API bo
 the application root, and no production feature depends on development access points. We do not add parallel fixture
 domain types, provider identities, general-purpose curation APIs, or database migrations.
 
-The application initializer is a callable transactional Spring bean without autonomous startup behavior.
-Automatic loading is restricted to an ApplicationRunner enabled by **both** the `dev` Spring profile and the
-explicit `poe-companion.dev-fixture.enabled=true` flag. Production/default startup performs no synthetic inserts.
-Tests invoke the initializer directly without these switches, using Testcontainers PostgreSQL; a separate startup
-test verifies the enabled runner, and lightweight gating tests verify disabled conditions. Standard CI needs no
-extra environment variables or workflow changes.
+The application initializer remains a callable transactional Spring bean without autonomous startup behavior.
+Automatic loading remains restricted to an ApplicationRunner enabled by **both** the `dev` Spring profile and
+`poe-companion.dev-fixture.enabled=true`. The initializer and all four module-owned `Development*Access` components
+are registered only when the opt-in property is `true`; no profile restriction is placed on these five beans
+so integration tests can set the property without `dev` and invoke initialization explicitly. Default startup
+registers none of these beans and performs no synthetic inserts. Tests cover all four configuration combinations;
+standard CI needs no globally enabled development profile or environment variables.
 
 The first initialization is atomic. A subsequent run verifies the existing canonical scaffold rather than
 creating duplicate identities or silently repairing changes. Player-editable ownership, AvailableAttempts, and an
@@ -1046,13 +1047,11 @@ These are agreed implementation conventions, not additions to the frozen V0.1 pr
 
 ### Development-only fixture lifecycle
 
-- The fixture's optional startup **runner** already requires both the `dev` profile and the
-  `poe-companion.dev-fixture.enabled=true` property. In a **separate focused cleanup**, also gate
-  `DevelopmentFixtureInitializer` and `DevelopmentCatalogAccess`, `DevelopmentLeagueAccess`,
-  `DevelopmentBuildAccess`, `DevelopmentAcquisitionAccess` on the opt-in property. Tests can turn that
-  property on explicitly, invoke initialization directly without the `dev` profile, and verify normal
-  applications do not instantiate those beans. Conditional beans remain present in the compiled artifact;
-  no separate source set/module is needed for now. Do not alter existing initialization/idempotency semantics.
+- The fixture startup **runner** requires both the `dev` profile and the opt-in property. The initializer
+  and all four module-owned `Development*Access` beans are **conditionally registered by property alone**.
+  This intentionally excludes `@Profile("dev")` from those five beans so integration tests can instantiate them
+  and call the initializer directly without automatic startup initialization. Disabled beans remain compiled in the
+  artifact; no separate source set/module is needed. Existing initialization and idempotency semantics are unchanged.
 - Track temporary production-facing dependencies on synthetic labels explicitly. In Milestone 7, audit and
   remove/replace `DevelopmentFixtureIds.uniqueLabels`, browser read-model label fallback,
   `UniqueBrowserEntry.developmentLabel`, and synthetic-label branching in `templates/uniques/list.html`
@@ -1065,6 +1064,6 @@ These are agreed implementation conventions, not additions to the frozen V0.1 pr
 
 ### Execution
 
-Keep PR #70 limited to the view-model file split, CSS sections, and this documentation update (alongside its
-existing Unique browser behavior). Treat opt-in development bean gating and internal Acquisition package
-organization as separate follow-up increments, with a briefing and tests before implementation.
+The Unique browser cleanup was completed in PR #70. Conditional fixture-bean registration is a separate,
+behavior-preserving Milestone 5 cleanup. Acquisition's internal package organization remains a distinct
+follow-up requiring a dependency review and Spring Modulith verification.
