@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Unique Collection — PoE Companion</title>
+    <link rel="stylesheet" th:href="@{/css/application.css}">
+</head>
+<body>
+<header class="site-header">
+    <div>
+        <a class="site-name" th:href="@{/}">PoE Companion</a>
+        <p class="session-details">Signed in as <strong th:text="${username}">user</strong></p>
+    </div>
+    <form th:action="@{/logout}" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <button type="submit">Log out</button>
+    </form>
+</header>
+<main>
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a th:href="@{/}">Home</a>
+        <span aria-hidden="true"> / </span>
+        <span aria-current="page">Unique Collection</span>
+    </nav>
+    <section class="panel">
+        <h1>Unique Collection</h1>
+        <p class="muted" th:if="${page.accountSelected}" th:text="${page.selectionLabel}">
+            Selected account and compatibility version
+        </p>
+        <p class="notice" th:unless="${page.accountSelected}">
+            No account selected. Catalog identities are available, but ownership is unknown.
+            Select an account before using Owned or Missing filters.
+        </p>
+
+        <div class="collection-totals" aria-label="Collection counts">
+            <span><strong th:text="${page.totalCount}">3</strong> catalog entries</span>
+            <span th:if="${page.accountSelected}">
+                <strong th:text="${page.ownedCount}">2</strong> owned
+            </span>
+            <span th:if="${page.accountSelected}">
+                <strong th:text="${page.missingCount}">1</strong> missing
+            </span>
+        </div>
+
+        <nav class="collection-filters" aria-label="Ownership filter">
+            <a th:href="@{/uniques(filter='all')}"
+               th:classappend="${page.filter == 'all'} ? ' is-active' : ''"
+               th:attr="aria-current=${page.filter == 'all'} ? 'page' : null">All</a>
+            <a th:if="${page.accountSelected}" th:href="@{/uniques(filter='owned')}"
+               th:classappend="${page.filter == 'owned'} ? ' is-active' : ''"
+               th:attr="aria-current=${page.filter == 'owned'} ? 'page' : null">Owned</a>
+            <a th:if="${page.accountSelected}" th:href="@{/uniques(filter='missing')}"
+               th:classappend="${page.filter == 'missing'} ? ' is-active' : ''"
+               th:attr="aria-current=${page.filter == 'missing'} ? 'page' : null">Missing</a>
+            <span th:unless="${page.accountSelected}" class="filter-disabled">Owned</span>
+            <span th:unless="${page.accountSelected}" class="filter-disabled">Missing</span>
+        </nav>
+
+        <p class="notice" th:if="${page.totalCount == 0}">
+            The catalog is empty. No development data is loaded automatically.
+        </p>
+        <p class="notice" th:if="${page.totalCount > 0 and page.items.isEmpty()}">
+            No Uniques match this ownership filter.
+        </p>
+
+        <ul class="unique-list" th:if="${!page.items.isEmpty()}">
+            <li th:each="item : ${page.items}">
+                <div>
+                    <a class="unique-name" th:href="@{/uniques/{id}(id=${item.id})}"
+                       th:text="${item.displayName}">Unique C</a>
+                    <span class="small-muted" th:if="${item.developmentLabel}">Synthetic development item</span>
+                    <span class="small-muted" th:unless="${item.developmentLabel}" th:text="${item.id}">
+                        UUID
+                    </span>
+                </div>
+                <span class="ownership-status" th:if="${item.ownedQuantity == null}">Ownership unknown</span>
+                <span class="ownership-status owned" th:if="${item.ownedQuantity != null and item.ownedQuantity > 0}">
+                    Owned · <span th:text="${item.ownedQuantity}">1</span>
+                </span>
+                <span class="ownership-status missing" th:if="${item.ownedQuantity != null and item.ownedQuantity == 0}">
+                    Missing · 0
+                </span>
+            </li>
+        </ul>
+        <p class="small-muted">
+            Missing means zero owned copies in the selected account, not that an item is obtainable in this league.
+        </p>
+    </section>
+</main>
+</body>
+</html>
