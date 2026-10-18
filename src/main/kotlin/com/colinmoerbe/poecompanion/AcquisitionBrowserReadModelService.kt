@@ -41,7 +41,8 @@ internal class AcquisitionBrowserReadModelService(
     fun detail(sourceId: AcquisitionSourceId, previewAttempts: Int?): AcquisitionBrowserDetailPage? {
         val result = acquisition.findForSource(sourceId, previewAttempts) ?: return null
         val knownIds = catalog.findAll().mapTo(hashSetOf()) { it.id }
-        val ordering = compareBy<AcquisitionBrowserRelationshipEntry> { it.displayName.lowercase() }.thenBy { it.uniqueId }
+        val ordering =
+            compareBy<AcquisitionBrowserRelationshipEntry> { it.displayName.lowercase() }.thenBy { it.uniqueId }
         val relationships = result.relationships.map { relationship ->
             toRelationship(relationship, knownIds)
         }.sortedWith(ordering)
@@ -94,7 +95,9 @@ internal class AcquisitionBrowserReadModelService(
             evidenceReference = estimate?.evidenceReference,
             reviewedAt = estimate?.reviewedAt?.toString(),
             actionable = calculation != null,
-            probabilityWithinAttempts = calculation?.probabilityWithinAvailableAttempts?.let { percent(it, CUMULATIVE_DECIMALS) },
+            probabilityWithinAttempts = calculation?.probabilityWithinAvailableAttempts?.let {
+                percent(it, CUMULATIVE_DECIMALS)
+            },
             expectedAttempts = calculation?.expectedAttemptsUntilSuccess?.let(::expected),
             thresholds = thresholds,
         )
