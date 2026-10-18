@@ -17,6 +17,7 @@ class ApplicationModulesTests {
         assertThat(discoveredModuleIdentifiers)
             .containsExactlyInAnyOrder(
                 "account",
+                "browser",
                 "acquisition",
                 "build",
                 "catalog",

@@ -1,5 +1,8 @@
-package com.colinmoerbe.poecompanion
+package com.colinmoerbe.poecompanion.browser.uniques
 
+import com.colinmoerbe.poecompanion.DevelopmentFixtureIds
+import com.colinmoerbe.poecompanion.DevelopmentFixtureInitializer
+import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.account.CurrentOwnershipService
 import com.colinmoerbe.poecompanion.account.ManualOwnershipService
 import com.colinmoerbe.poecompanion.account.persistence.ManualOwnershipPersistenceAdapter
@@ -26,6 +29,7 @@ import com.colinmoerbe.poecompanion.league.CompatibilityVersion
 import com.colinmoerbe.poecompanion.league.Ruleset
 import com.colinmoerbe.poecompanion.league.persistence.AccountContextPersistenceAdapter
 import com.colinmoerbe.poecompanion.league.persistence.SpringDataAccountEvaluationSelectionRepository
+import javax.sql.DataSource
 import org.assertj.core.api.Assertions.assertThat
 import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.not
@@ -47,7 +51,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.view
-import javax.sql.DataSource
 
 /** Full HTTP rendering against the real Catalog and Account services and PostgreSQL fixture records. */
 @Import(TestcontainersConfiguration::class)
