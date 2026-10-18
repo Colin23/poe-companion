@@ -4,7 +4,8 @@ import com.colinmoerbe.poecompanion.catalog.persistence.UniqueDefinitionPersiste
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 
-/** Narrow development-bootstrap entry point; keeps Catalog persistence internal to Catalog.
+/**
+ * Narrow development-bootstrap entry point; keeps Catalog persistence internal to Catalog.
  *
  * Property-gated without @Profile("dev") so integration tests can opt in and initialize explicitly.
  */
