@@ -39,37 +39,37 @@ internal object AcquisitionBrowserKnowledgeLabels {
         }
 
     fun relationship(knowledge: ScopedAcquisitionKnowledge<DropRelationshipResolution>?): String = when (knowledge) {
-            null -> "Unknown — no account selected"
+        null -> "Unknown — no account selected"
 
-            ScopedAcquisitionKnowledge.Missing -> "Unknown — no accepted relationship knowledge"
+        ScopedAcquisitionKnowledge.Missing -> "Unknown — no accepted relationship knowledge"
 
-            ScopedAcquisitionKnowledge.Ambiguous -> "Ambiguous relationship scope"
+        ScopedAcquisitionKnowledge.Ambiguous -> "Ambiguous relationship scope"
 
-            is ScopedAcquisitionKnowledge.Selected -> when (val resolution = knowledge.resolution) {
-                is DropRelationshipResolution.Resolved -> when (resolution.snapshot.state) {
-                    DropRelationshipState.CAN_DROP -> "CAN_DROP"
-                    DropRelationshipState.CANNOT_DROP -> "CANNOT_DROP"
-                }
-
-                DropRelationshipResolution.Unknown -> "Unknown for selected patch"
-
-                DropRelationshipResolution.DoesNotApply -> "Not applicable to selected context"
+        is ScopedAcquisitionKnowledge.Selected -> when (val resolution = knowledge.resolution) {
+            is DropRelationshipResolution.Resolved -> when (resolution.snapshot.state) {
+                DropRelationshipState.CAN_DROP -> "CAN_DROP"
+                DropRelationshipState.CANNOT_DROP -> "CANNOT_DROP"
             }
+
+            DropRelationshipResolution.Unknown -> "Unknown for selected patch"
+
+            DropRelationshipResolution.DoesNotApply -> "Not applicable to selected context"
         }
+    }
 
     fun estimate(knowledge: ScopedAcquisitionKnowledge<FixedDropEstimateResolution>?): String = when (knowledge) {
-            null -> "Unknown — no account selected"
+        null -> "Unknown — no account selected"
 
-            ScopedAcquisitionKnowledge.Missing -> "No accepted fixed estimate"
+        ScopedAcquisitionKnowledge.Missing -> "No accepted fixed estimate"
 
-            ScopedAcquisitionKnowledge.Ambiguous -> "Ambiguous estimate scope"
+        ScopedAcquisitionKnowledge.Ambiguous -> "Ambiguous estimate scope"
 
-            is ScopedAcquisitionKnowledge.Selected -> when (knowledge.resolution) {
-                is FixedDropEstimateResolution.Resolved -> "Accepted fixed estimate"
+        is ScopedAcquisitionKnowledge.Selected -> when (knowledge.resolution) {
+            is FixedDropEstimateResolution.Resolved -> "Accepted fixed estimate"
 
-                FixedDropEstimateResolution.Unknown -> "Unknown or withdrawn for selected patch"
+            FixedDropEstimateResolution.Unknown -> "Unknown or withdrawn for selected patch"
 
-                FixedDropEstimateResolution.DoesNotApply -> "Not applicable to selected context"
-            }
+            FixedDropEstimateResolution.DoesNotApply -> "Not applicable to selected context"
         }
+    }
 }
