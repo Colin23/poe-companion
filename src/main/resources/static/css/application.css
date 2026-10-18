@@ -68,3 +68,161 @@ button:focus-visible {
     outline: 0.2rem solid #d9a441;
     outline-offset: 0.2rem;
 }
+
+a {
+    color: #e2b77d;
+    text-underline-offset: 0.2rem;
+}
+
+a:hover {
+    color: #ffd3a1;
+}
+
+a:focus-visible {
+    outline: 0.2rem solid #d9a441;
+    outline-offset: 0.2rem;
+}
+
+.site-name {
+    color: #ece8df;
+    font-size: 1.35rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.breadcrumb {
+    margin-bottom: 1.25rem;
+    color: #b9bdc5;
+}
+
+.breadcrumb span {
+    margin: 0 0.3rem;
+}
+
+.muted,
+.small-muted {
+    color: #b9bdc5;
+}
+
+.small-muted {
+    display: block;
+    font-size: 0.86rem;
+}
+
+.notice {
+    padding: 1rem;
+    border: 1px solid #565b65;
+    border-radius: 0.35rem;
+    background: #292d34;
+}
+
+.collection-totals,
+.collection-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.25rem;
+    margin: 1.25rem 0;
+}
+
+.collection-filters a,
+.filter-disabled {
+    padding: 0.4rem 0.75rem;
+    border: 1px solid #555b63;
+    border-radius: 0.35rem;
+    text-decoration: none;
+}
+
+.collection-filters a.is-active {
+    border-color: #e2b77d;
+    background: #383024;
+    color: #ffe0b4;
+}
+
+.filter-disabled {
+    color: #9296a0;
+    cursor: not-allowed;
+}
+
+.unique-list {
+    list-style: none;
+    margin: 0 0 1.5rem;
+    padding: 0;
+    border-top: 1px solid #393d44;
+}
+
+.unique-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1.5rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid #393d44;
+}
+
+.unique-name {
+    font-weight: 700;
+}
+
+.ownership-status {
+    white-space: nowrap;
+    color: #b9bdc5;
+}
+
+.ownership-status.owned {
+    color: #9bd3b3;
+}
+
+.ownership-status.missing {
+    color: #e7ad9e;
+}
+
+.detail-facts > div {
+    display: grid;
+    grid-template-columns: minmax(8rem, 13rem) minmax(0, 1fr);
+    gap: 0.75rem;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid #393d44;
+}
+
+.detail-facts dt {
+    color: #b9bdc5;
+}
+
+.detail-facts dd {
+    min-width: 0;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.upcoming-section {
+    margin: 1.5rem 0;
+}
+
+.primary-link {
+    display: inline-block;
+    padding: 0.65rem 1rem;
+    border: 1px solid #ad5a4b;
+    border-radius: 0.35rem;
+    background: #8a3f32;
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+@media (max-width: 40rem) {
+    .site-header,
+    .unique-list li {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    main {
+        padding: 1rem;
+    }
+
+    .detail-facts > div {
+        grid-template-columns: 1fr;
+        gap: 0.25rem;
+    }
+}
