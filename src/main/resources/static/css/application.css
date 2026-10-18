@@ -1,3 +1,4 @@
+/* Base: document defaults and box sizing */
 :root {
     color-scheme: dark;
     font-family: system-ui, sans-serif;
@@ -14,6 +15,7 @@ body {
     margin: 0;
 }
 
+/* Shared application shell: header, content width, and panels */
 .site-header {
     display: flex;
     align-items: center;
@@ -51,6 +53,7 @@ main {
     border-radius: 0.5rem;
 }
 
+/* Global interactive elements */
 button {
     padding: 0.6rem 1rem;
     color: #ece8df;
@@ -83,6 +86,7 @@ a:focus-visible {
     outline-offset: 0.2rem;
 }
 
+/* Shared navigation and text helpers */
 .site-name {
     color: #ece8df;
     font-size: 1.35rem;
@@ -109,6 +113,7 @@ a:focus-visible {
     font-size: 0.86rem;
 }
 
+/* Shared information and empty-state messages */
 .notice {
     padding: 1rem;
     border: 1px solid #565b65;
@@ -116,6 +121,7 @@ a:focus-visible {
     background: #292d34;
 }
 
+/* Unique Collection: totals, filters, and item rows */
 .collection-totals,
 .collection-filters {
     display: flex;
@@ -177,6 +183,7 @@ a:focus-visible {
     color: #e7ad9e;
 }
 
+/* Unique Detail: identity and ownership facts */
 .detail-facts > div {
     display: grid;
     grid-template-columns: minmax(8rem, 13rem) minmax(0, 1fr);
@@ -199,6 +206,7 @@ a:focus-visible {
     margin: 1.5rem 0;
 }
 
+/* Home: primary navigation link */
 .primary-link {
     display: inline-block;
     padding: 0.65rem 1rem;
@@ -210,6 +218,7 @@ a:focus-visible {
     text-decoration: none;
 }
 
+/* Responsive adjustments for narrow screens */
 @media (max-width: 40rem) {
     .site-header,
     .unique-list li {
