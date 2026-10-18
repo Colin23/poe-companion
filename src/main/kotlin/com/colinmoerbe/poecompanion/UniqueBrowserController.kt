@@ -63,12 +63,14 @@ internal class UniqueBrowserController(
 
         return when (ownershipUpdates.update(UniqueDefinitionId(id), ownedQuantity)) {
             UniqueOwnershipUpdateResult.UPDATED -> ModelAndView("redirect:/uniques/$id")
+
             UniqueOwnershipUpdateResult.NO_ACCOUNT_SELECTED -> ownershipError(
                 id,
                 principal,
                 HttpStatus.CONFLICT,
                 "No account is selected. Select an account before editing ownership. No changes were saved.",
             )
+
             UniqueOwnershipUpdateResult.UNKNOWN_UNIQUE -> ownershipError(
                 id,
                 principal,
