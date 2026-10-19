@@ -13,9 +13,6 @@ import com.colinmoerbe.poecompanion.catalog.UniqueDefinition
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
 import com.colinmoerbe.poecompanion.catalog.persistence.UniqueDefinitionPersistenceAdapter
 import com.colinmoerbe.poecompanion.league.CompatibilityVersion
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
@@ -27,6 +24,9 @@ import org.springframework.context.annotation.Import
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.support.TransactionTemplate
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 @Import(TestcontainersConfiguration::class)
 @SpringBootTest(
