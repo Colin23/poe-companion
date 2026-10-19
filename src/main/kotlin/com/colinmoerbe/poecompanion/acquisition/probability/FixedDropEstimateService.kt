@@ -2,6 +2,7 @@ package com.colinmoerbe.poecompanion.acquisition.probability
 
 import com.colinmoerbe.poecompanion.acquisition.attempts.CompletedBossEncounterAttempt
 import com.colinmoerbe.poecompanion.acquisition.knowledge.AcquisitionKnowledgeScope
+import com.colinmoerbe.poecompanion.acquisition.probability.internal.FixedDropEstimatePersistencePort
 import com.colinmoerbe.poecompanion.acquisition.relationship.DropRelationshipId
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

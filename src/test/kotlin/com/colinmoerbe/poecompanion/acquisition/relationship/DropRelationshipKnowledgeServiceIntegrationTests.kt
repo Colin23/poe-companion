@@ -2,6 +2,9 @@ package com.colinmoerbe.poecompanion.acquisition.relationship
 
 import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.acquisition.knowledge.AcquisitionKnowledgeScope
+import com.colinmoerbe.poecompanion.acquisition.relationship.persistence.DropRelationshipPersistenceAdapter
+import com.colinmoerbe.poecompanion.acquisition.relationship.persistence.SpringDataDropRelationshipKnowledgeRepository
+import com.colinmoerbe.poecompanion.acquisition.relationship.persistence.SpringDataDropRelationshipRepository
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.AcquisitionSource
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.AcquisitionSourceId
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.persistence.AcquisitionSourcePersistenceAdapter

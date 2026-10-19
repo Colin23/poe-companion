@@ -3,6 +3,7 @@ package com.colinmoerbe.poecompanion.acquisition.probability
 import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.acquisition.attempts.CompletedBossEncounterAttempt
 import com.colinmoerbe.poecompanion.acquisition.knowledge.AcquisitionKnowledgeScope
+import com.colinmoerbe.poecompanion.acquisition.probability.persistence.SpringDataFixedDropEstimateRepository
 import com.colinmoerbe.poecompanion.acquisition.relationship.DropRelationship
 import com.colinmoerbe.poecompanion.acquisition.relationship.DropRelationshipId
 import com.colinmoerbe.poecompanion.acquisition.relationship.persistence.DropRelationshipPersistenceAdapter
