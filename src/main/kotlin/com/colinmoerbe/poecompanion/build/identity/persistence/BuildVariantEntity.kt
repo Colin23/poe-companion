@@ -1,4 +1,4 @@
-package com.colinmoerbe.poecompanion.build.persistence
+package com.colinmoerbe.poecompanion.build.identity.persistence
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity

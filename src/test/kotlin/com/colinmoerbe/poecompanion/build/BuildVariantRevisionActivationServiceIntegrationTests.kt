@@ -1,18 +1,21 @@
 package com.colinmoerbe.poecompanion.build
 
 import com.colinmoerbe.poecompanion.TestcontainersConfiguration
-import com.colinmoerbe.poecompanion.build.persistence.BuildArchetypePersistenceAdapter
-import com.colinmoerbe.poecompanion.build.persistence.BuildVariantPersistenceAdapter
-import com.colinmoerbe.poecompanion.build.persistence.BuildVariantRevisionPersistenceAdapter
-import com.colinmoerbe.poecompanion.build.persistence.SpringDataBuildArchetypeRepository
-import com.colinmoerbe.poecompanion.build.persistence.SpringDataBuildVariantRepository
-import com.colinmoerbe.poecompanion.build.persistence.SpringDataBuildVariantRevisionRepository
-import com.colinmoerbe.poecompanion.build.persistence.SpringDataRequirementGroupRepository
-import com.colinmoerbe.poecompanion.build.persistence.SpringDataRequirementRepository
+import com.colinmoerbe.poecompanion.build.identity.persistence.BuildArchetypePersistenceAdapter
+import com.colinmoerbe.poecompanion.build.identity.persistence.BuildVariantPersistenceAdapter
+import com.colinmoerbe.poecompanion.build.identity.persistence.SpringDataBuildArchetypeRepository
+import com.colinmoerbe.poecompanion.build.identity.persistence.SpringDataBuildVariantRepository
+import com.colinmoerbe.poecompanion.build.revision.persistence.BuildVariantRevisionPersistenceAdapter
+import com.colinmoerbe.poecompanion.build.revision.persistence.SpringDataBuildVariantRevisionRepository
+import com.colinmoerbe.poecompanion.build.revision.persistence.SpringDataRequirementGroupRepository
+import com.colinmoerbe.poecompanion.build.revision.persistence.SpringDataRequirementRepository
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinition
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
 import com.colinmoerbe.poecompanion.catalog.persistence.UniqueDefinitionPersistenceAdapter
 import com.colinmoerbe.poecompanion.league.CompatibilityVersion
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
@@ -24,9 +27,6 @@ import org.springframework.context.annotation.Import
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.support.TransactionTemplate
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 @Import(TestcontainersConfiguration::class)
 @SpringBootTest(

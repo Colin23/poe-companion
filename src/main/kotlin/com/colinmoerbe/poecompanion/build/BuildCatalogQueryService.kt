@@ -1,7 +1,7 @@
 package com.colinmoerbe.poecompanion.build
 
-import com.colinmoerbe.poecompanion.build.persistence.BuildArchetypePersistenceAdapter
-import com.colinmoerbe.poecompanion.build.persistence.BuildVariantPersistenceAdapter
+import com.colinmoerbe.poecompanion.build.identity.persistence.BuildArchetypePersistenceAdapter
+import com.colinmoerbe.poecompanion.build.identity.persistence.BuildVariantPersistenceAdapter
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 

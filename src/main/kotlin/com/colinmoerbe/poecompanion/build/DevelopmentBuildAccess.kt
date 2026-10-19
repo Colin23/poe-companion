@@ -1,8 +1,8 @@
 package com.colinmoerbe.poecompanion.build
 
-import com.colinmoerbe.poecompanion.build.persistence.BuildArchetypePersistenceAdapter
-import com.colinmoerbe.poecompanion.build.persistence.BuildVariantPersistenceAdapter
-import com.colinmoerbe.poecompanion.build.persistence.BuildVariantRevisionPersistenceAdapter
+import com.colinmoerbe.poecompanion.build.identity.persistence.BuildArchetypePersistenceAdapter
+import com.colinmoerbe.poecompanion.build.identity.persistence.BuildVariantPersistenceAdapter
+import com.colinmoerbe.poecompanion.build.revision.persistence.BuildVariantRevisionPersistenceAdapter
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 

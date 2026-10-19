@@ -1,4 +1,4 @@
-package com.colinmoerbe.poecompanion.build.persistence
+package com.colinmoerbe.poecompanion.build.identity.persistence
 
 import com.colinmoerbe.poecompanion.build.BuildArchetype
 import com.colinmoerbe.poecompanion.build.BuildArchetypeId

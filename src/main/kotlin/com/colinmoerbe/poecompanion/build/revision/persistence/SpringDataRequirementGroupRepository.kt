@@ -1,4 +1,4 @@
-package com.colinmoerbe.poecompanion.build.persistence
+package com.colinmoerbe.poecompanion.build.revision.persistence
 
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying

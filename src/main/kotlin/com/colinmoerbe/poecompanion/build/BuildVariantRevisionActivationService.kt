@@ -1,5 +1,6 @@
 package com.colinmoerbe.poecompanion.build
 
+import com.colinmoerbe.poecompanion.build.revision.internal.BuildVariantRevisionPersistencePort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
