@@ -11,10 +11,10 @@ import com.colinmoerbe.poecompanion.acquisition.sourceidentity.BossDefinition
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.BossDefinitionCreationConflictException
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.BossDefinitionId
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.BossDefinitionService
-import com.colinmoerbe.poecompanion.build.BuildReadinessQueryResult
-import com.colinmoerbe.poecompanion.build.BuildReadinessService
 import com.colinmoerbe.poecompanion.build.DevelopmentBuildAccess
-import com.colinmoerbe.poecompanion.build.UniqueReadiness
+import com.colinmoerbe.poecompanion.build.readiness.UniqueReadiness
+import com.colinmoerbe.poecompanion.build.readmodel.BuildReadinessQueryResult
+import com.colinmoerbe.poecompanion.build.readmodel.BuildReadinessService
 import com.colinmoerbe.poecompanion.catalog.DevelopmentCatalogAccess
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinition
 import com.colinmoerbe.poecompanion.catalog.persistence.UniqueDefinitionPersistenceAdapter

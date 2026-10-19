@@ -1477,3 +1477,60 @@ retain the existing assertions excluding nested persistence/internal types. Veri
 modules, existing revision lifecycle/concurrency and persistence tests, fixture and Browser
 integration journeys, and the full `./gradlew build`. No JPA/SQL/schema, transaction,
 HTTP, or product behavior changes belong in this PR.
+
+---
+
+## 34. Build Readiness and Read-Model Named Interfaces (Milestone 5.2 PR C)
+
+### Context
+
+After decisions §32–33, the Build root retains only five pure Unique-readiness
+evaluation files, three application query files, the Build Modulith metadata, and
+the property-gated development fixture access. Browser still temporarily allows
+the broad Build root dependency to consume its catalog/readiness query services.
+The earlier capability named interfaces have already separated identity, revision
+lifecycle, authored requirements, and private snapshot persistence.
+
+### Decision
+
+- Move the five existing pure evaluation files (`RequirementEvaluation`,
+  `RequirementGroupEvaluation`, `UniqueReadiness`, `UniqueReadinessEvaluator`,
+  `UniqueReadinessResult`) to `build.readiness`. Preserve the evaluator's
+  non-consuming, per-group `ALL`/`ANY` semantics, ENABLING/CORE precedence,
+  independent UPGRADE evaluation, zero-group behavior and explainable results.
+- Move `BuildCatalogQueryService`, `BuildReadinessService`, and
+  `BuildReadinessQueryResult` to `build.readmodel`. Keep the `BuildCatalogEntry`
+  result type declared in its existing service file. Retain the sealed result
+  outcomes for missing account selection, missing compatible active revision,
+  and successful evaluation; do not flatten them into an ambiguous readiness flag.
+- Publish `readiness` and `readmodel` as package-level Spring Modulith named
+  interfaces. Browser uses only `build :: identity`, `build :: revision`,
+  `build :: requirements`, `build :: readiness`, and `build :: readmodel`
+  for Build dependencies, with no broad `build` allowance. Keep other module
+  dependencies unchanged.
+- Move the corresponding pure evaluator and PostgreSQL-backed service integration
+  test classes to mirrored `readiness` and `readmodel` test packages. Preserve
+  test assertions and all existing other domain, persistence, fixture and Browser tests.
+- Keep `ModuleMetadata` and the property-gated `DevelopmentBuildAccess` as the
+  only two Build root production files. Do not expose nested revision/internal or
+  persistence packages. Existing Build named interfaces remain intact.
+- Do not change the globally selected evaluation context, per-account ownership,
+  batched service evaluation/ownership snapshot behavior, `@Transactional(readOnly = true)`
+  on the application query service, or Browser's enclosing `REPEATABLE_READ`
+  transaction. Those boundaries belong to subsequent two-user authorization work,
+  not the staged structural migration.
+- Do not change domain rules, readiness calculations, constructors/return contracts,
+  JPA/SQL/schema, revision lifecycle/concurrency guarantees, fixtures, HTTP routes,
+  templates, or introduce wrappers, events or new product functionality solely
+  for package organization.
+
+### Verification
+
+Verify exactly eight Spring Modulith modules and `ApplicationModules.verify()`;
+assert all five named Build capability APIs, the public query/result types,
+the intentionally exported fixture access, and representative unexposed internal
+persistence types. Assert Browser's exact allowed dependencies without the broad
+`build` root. Preserve the pure readiness tests, PostgreSQL lifecycle and
+read-model integration tests, Browser navigation/Build X journey, fixture gating
+and the full `./gradlew build`. The separate structure-refactor checkpoint
+in issue #22 follows this PR and is not a reason for extra refactoring here.

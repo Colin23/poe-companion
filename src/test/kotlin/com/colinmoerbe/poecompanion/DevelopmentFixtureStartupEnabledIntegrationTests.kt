@@ -1,8 +1,8 @@
 package com.colinmoerbe.poecompanion
 
-import com.colinmoerbe.poecompanion.build.BuildReadinessQueryResult
-import com.colinmoerbe.poecompanion.build.BuildReadinessService
-import com.colinmoerbe.poecompanion.build.UniqueReadiness
+import com.colinmoerbe.poecompanion.build.readiness.UniqueReadiness
+import com.colinmoerbe.poecompanion.build.readmodel.BuildReadinessQueryResult
+import com.colinmoerbe.poecompanion.build.readmodel.BuildReadinessService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test

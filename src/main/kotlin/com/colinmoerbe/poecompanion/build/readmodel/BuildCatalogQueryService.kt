@@ -1,4 +1,4 @@
-package com.colinmoerbe.poecompanion.build
+package com.colinmoerbe.poecompanion.build.readmodel
 
 import com.colinmoerbe.poecompanion.build.identity.BuildArchetype
 import com.colinmoerbe.poecompanion.build.identity.BuildVariant
