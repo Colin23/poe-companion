@@ -1,8 +1,8 @@
 package com.colinmoerbe.poecompanion.acquisition.relationship.persistence
 
 import com.colinmoerbe.poecompanion.TestcontainersConfiguration
-import com.colinmoerbe.poecompanion.acquisition.DropRelationship
-import com.colinmoerbe.poecompanion.acquisition.DropRelationshipId
+import com.colinmoerbe.poecompanion.acquisition.relationship.DropRelationship
+import com.colinmoerbe.poecompanion.acquisition.relationship.DropRelationshipId
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.AcquisitionSource
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.AcquisitionSourceId
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.persistence.AcquisitionSourcePersistenceAdapter

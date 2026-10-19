@@ -2,8 +2,8 @@ package com.colinmoerbe.poecompanion.browser.acquisitions
 
 import com.colinmoerbe.poecompanion.acquisition.AcquisitionReadModelService
 import com.colinmoerbe.poecompanion.acquisition.AcquisitionSourceRelationshipResult
-import com.colinmoerbe.poecompanion.acquisition.FixedDropEstimateResolution
 import com.colinmoerbe.poecompanion.acquisition.knowledge.ScopedAcquisitionKnowledge
+import com.colinmoerbe.poecompanion.acquisition.probability.FixedDropEstimateResolution
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.AcquisitionSourceId
 import com.colinmoerbe.poecompanion.browser.shared.AcquisitionBrowserKnowledgeLabels
 import com.colinmoerbe.poecompanion.browser.shared.UniqueDisplayLabels

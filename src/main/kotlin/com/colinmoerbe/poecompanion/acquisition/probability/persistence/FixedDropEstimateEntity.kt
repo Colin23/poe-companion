@@ -1,6 +1,6 @@
 package com.colinmoerbe.poecompanion.acquisition.probability.persistence
 
-import com.colinmoerbe.poecompanion.acquisition.DropEstimateProvenance
+import com.colinmoerbe.poecompanion.acquisition.probability.DropEstimateProvenance
 import com.colinmoerbe.poecompanion.league.Ruleset
 import jakarta.persistence.Column
 import jakarta.persistence.Entity

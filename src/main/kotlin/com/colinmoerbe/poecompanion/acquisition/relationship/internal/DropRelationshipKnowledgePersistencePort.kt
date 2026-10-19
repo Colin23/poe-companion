@@ -1,10 +1,10 @@
 package com.colinmoerbe.poecompanion.acquisition.relationship.internal
 
-import com.colinmoerbe.poecompanion.acquisition.AcceptedDropRelationshipChangePoint
-import com.colinmoerbe.poecompanion.acquisition.DropRelationshipId
-import com.colinmoerbe.poecompanion.acquisition.DropRelationshipKnowledgeConflictException
-import com.colinmoerbe.poecompanion.acquisition.DropRelationshipSnapshot
 import com.colinmoerbe.poecompanion.acquisition.knowledge.AcquisitionKnowledgeScope
+import com.colinmoerbe.poecompanion.acquisition.relationship.AcceptedDropRelationshipChangePoint
+import com.colinmoerbe.poecompanion.acquisition.relationship.DropRelationshipId
+import com.colinmoerbe.poecompanion.acquisition.relationship.DropRelationshipKnowledgeConflictException
+import com.colinmoerbe.poecompanion.acquisition.relationship.DropRelationshipSnapshot
 
 /**
  * Persists accepted source-to-Unique applicability change points independently of relationship identity.
