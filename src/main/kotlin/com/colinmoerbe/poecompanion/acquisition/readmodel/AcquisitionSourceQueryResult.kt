@@ -1,4 +1,4 @@
-package com.colinmoerbe.poecompanion.acquisition
+package com.colinmoerbe.poecompanion.acquisition.readmodel
 
 import com.colinmoerbe.poecompanion.acquisition.attempts.AvailableAttempts
 import com.colinmoerbe.poecompanion.acquisition.encounter.BossEncounterKnowledgeResolution

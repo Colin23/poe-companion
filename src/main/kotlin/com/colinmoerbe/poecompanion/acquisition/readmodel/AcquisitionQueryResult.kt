@@ -1,4 +1,4 @@
-package com.colinmoerbe.poecompanion.acquisition
+package com.colinmoerbe.poecompanion.acquisition.readmodel
 
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
 import com.colinmoerbe.poecompanion.league.AccountEvaluation

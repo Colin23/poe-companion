@@ -11,7 +11,7 @@ import org.springframework.modulith.PackageInfo
     displayName = "Browser",
     allowedDependencies = [
         "account",
-        "acquisition",
+        "acquisition :: readmodel",
         "acquisition :: sourceidentity",
         "acquisition :: encounter",
         "acquisition :: knowledge",
