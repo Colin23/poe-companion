@@ -1,6 +1,6 @@
 package com.colinmoerbe.poecompanion.browser.builds
 
-import com.colinmoerbe.poecompanion.build.BuildVariantId
+import com.colinmoerbe.poecompanion.build.identity.BuildVariantId
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping

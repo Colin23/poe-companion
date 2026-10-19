@@ -1,5 +1,10 @@
-package com.colinmoerbe.poecompanion.build
+package com.colinmoerbe.poecompanion.build.revision
 
+import com.colinmoerbe.poecompanion.build.identity.BuildVariantId
+import com.colinmoerbe.poecompanion.build.requirements.Requirement
+import com.colinmoerbe.poecompanion.build.requirements.RequirementGroup
+import com.colinmoerbe.poecompanion.build.requirements.RequirementImportance
+import com.colinmoerbe.poecompanion.build.requirements.RequirementLogic
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
 import com.colinmoerbe.poecompanion.league.CompatibilityVersion
 import org.assertj.core.api.Assertions.assertThat

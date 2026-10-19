@@ -1,4 +1,4 @@
-package com.colinmoerbe.poecompanion.build
+package com.colinmoerbe.poecompanion.build.revision
 
 /**
  * Signals that a build revision activation lost a race with another lifecycle change.

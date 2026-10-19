@@ -1,6 +1,10 @@
 package com.colinmoerbe.poecompanion.build
 
 import com.colinmoerbe.poecompanion.account.CurrentOwnership
+import com.colinmoerbe.poecompanion.build.requirements.RequirementGroup
+import com.colinmoerbe.poecompanion.build.requirements.RequirementImportance
+import com.colinmoerbe.poecompanion.build.revision.BuildVariantRevision
+import com.colinmoerbe.poecompanion.build.revision.BuildVariantRevisionStatus
 
 /**
  * Pure evaluator for Unique readiness of an active build revision.

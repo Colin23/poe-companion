@@ -1,4 +1,4 @@
-package com.colinmoerbe.poecompanion.build
+package com.colinmoerbe.poecompanion.build.revision
 
 /**
  * Signals that an existing build revision ID was reconstructed with a different immutable scope.

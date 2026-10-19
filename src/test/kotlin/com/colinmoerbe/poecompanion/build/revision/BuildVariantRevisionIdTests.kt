@@ -1,4 +1,4 @@
-package com.colinmoerbe.poecompanion.build
+package com.colinmoerbe.poecompanion.build.revision
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

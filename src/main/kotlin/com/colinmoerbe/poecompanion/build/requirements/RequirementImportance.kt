@@ -1,4 +1,4 @@
-package com.colinmoerbe.poecompanion.build
+package com.colinmoerbe.poecompanion.build.requirements
 
 /**
  * Role a requirement group plays in a build's Unique readiness.

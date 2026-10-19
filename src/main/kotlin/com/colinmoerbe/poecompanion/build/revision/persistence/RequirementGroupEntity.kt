@@ -1,7 +1,7 @@
 package com.colinmoerbe.poecompanion.build.revision.persistence
 
-import com.colinmoerbe.poecompanion.build.RequirementImportance
-import com.colinmoerbe.poecompanion.build.RequirementLogic
+import com.colinmoerbe.poecompanion.build.requirements.RequirementImportance
+import com.colinmoerbe.poecompanion.build.requirements.RequirementLogic
 import jakarta.persistence.Column
 import jakarta.persistence.EmbeddedId
 import jakarta.persistence.Entity

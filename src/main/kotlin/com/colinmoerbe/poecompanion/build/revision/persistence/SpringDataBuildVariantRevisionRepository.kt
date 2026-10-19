@@ -1,6 +1,6 @@
 package com.colinmoerbe.poecompanion.build.revision.persistence
 
-import com.colinmoerbe.poecompanion.build.BuildVariantRevisionStatus
+import com.colinmoerbe.poecompanion.build.revision.BuildVariantRevisionStatus
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query

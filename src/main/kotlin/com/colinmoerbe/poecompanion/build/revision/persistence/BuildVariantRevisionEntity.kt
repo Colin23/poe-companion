@@ -1,6 +1,6 @@
 package com.colinmoerbe.poecompanion.build.revision.persistence
 
-import com.colinmoerbe.poecompanion.build.BuildVariantRevisionStatus
+import com.colinmoerbe.poecompanion.build.revision.BuildVariantRevisionStatus
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType

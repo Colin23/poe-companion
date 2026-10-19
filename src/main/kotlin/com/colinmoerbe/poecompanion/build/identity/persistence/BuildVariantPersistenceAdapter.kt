@@ -1,8 +1,8 @@
 package com.colinmoerbe.poecompanion.build.identity.persistence
 
-import com.colinmoerbe.poecompanion.build.BuildArchetypeId
-import com.colinmoerbe.poecompanion.build.BuildVariant
-import com.colinmoerbe.poecompanion.build.BuildVariantId
+import com.colinmoerbe.poecompanion.build.identity.BuildArchetypeId
+import com.colinmoerbe.poecompanion.build.identity.BuildVariant
+import com.colinmoerbe.poecompanion.build.identity.BuildVariantId
 import org.springframework.stereotype.Repository
 
 /**

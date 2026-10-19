@@ -1,5 +1,7 @@
 package com.colinmoerbe.poecompanion.build
 
+import com.colinmoerbe.poecompanion.build.requirements.Requirement
+
 /**
  * Evaluation of one requirement against current ownership.
  */
