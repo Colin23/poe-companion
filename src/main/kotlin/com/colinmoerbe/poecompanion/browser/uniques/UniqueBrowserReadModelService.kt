@@ -2,7 +2,7 @@ package com.colinmoerbe.poecompanion.browser.uniques
 
 import com.colinmoerbe.poecompanion.account.CurrentOwnership
 import com.colinmoerbe.poecompanion.account.CurrentOwnershipService
-import com.colinmoerbe.poecompanion.acquisition.AcquisitionReadModelService
+import com.colinmoerbe.poecompanion.acquisition.readmodel.AcquisitionReadModelService
 import com.colinmoerbe.poecompanion.browser.shared.AcquisitionBrowserKnowledgeLabels
 import com.colinmoerbe.poecompanion.browser.shared.UniqueDisplayLabels
 import com.colinmoerbe.poecompanion.catalog.UniqueCatalogQueryService
