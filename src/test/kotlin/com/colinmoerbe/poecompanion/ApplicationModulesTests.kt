@@ -12,10 +12,10 @@ import com.colinmoerbe.poecompanion.acquisition.readmodel.AcquisitionSourceSumma
 import com.colinmoerbe.poecompanion.acquisition.readmodel.AcquisitionUniqueCandidatesResult
 import com.colinmoerbe.poecompanion.acquisition.relationship.persistence.DropRelationshipPersistenceAdapter
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.persistence.AcquisitionSourcePersistenceAdapter
-import com.colinmoerbe.poecompanion.browser.ModuleMetadata as BrowserModuleMetadata
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.modulith.core.ApplicationModules
+import com.colinmoerbe.poecompanion.browser.ModuleMetadata as BrowserModuleMetadata
 
 class ApplicationModulesTests {
 
