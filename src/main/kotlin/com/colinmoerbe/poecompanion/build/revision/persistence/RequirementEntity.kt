@@ -1,4 +1,4 @@
-package com.colinmoerbe.poecompanion.build.persistence
+package com.colinmoerbe.poecompanion.build.revision.persistence
 
 import jakarta.persistence.Column
 import jakarta.persistence.EmbeddedId

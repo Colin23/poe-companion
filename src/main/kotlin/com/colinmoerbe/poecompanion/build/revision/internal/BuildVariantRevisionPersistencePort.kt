@@ -1,5 +1,10 @@
-package com.colinmoerbe.poecompanion.build
+package com.colinmoerbe.poecompanion.build.revision.internal
 
+import com.colinmoerbe.poecompanion.build.BuildRevisionActivationConflictException
+import com.colinmoerbe.poecompanion.build.BuildVariantId
+import com.colinmoerbe.poecompanion.build.BuildVariantRevision
+import com.colinmoerbe.poecompanion.build.BuildVariantRevisionId
+import com.colinmoerbe.poecompanion.build.BuildVariantRevisionStatus
 import com.colinmoerbe.poecompanion.league.CompatibilityVersion
 
 /**

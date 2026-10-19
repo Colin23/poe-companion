@@ -15,9 +15,9 @@ import com.colinmoerbe.poecompanion.build.Requirement
 import com.colinmoerbe.poecompanion.build.RequirementGroup
 import com.colinmoerbe.poecompanion.build.RequirementImportance
 import com.colinmoerbe.poecompanion.build.RequirementLogic
-import com.colinmoerbe.poecompanion.build.persistence.BuildArchetypePersistenceAdapter
-import com.colinmoerbe.poecompanion.build.persistence.BuildVariantPersistenceAdapter
-import com.colinmoerbe.poecompanion.build.persistence.BuildVariantRevisionPersistenceAdapter
+import com.colinmoerbe.poecompanion.build.identity.persistence.BuildArchetypePersistenceAdapter
+import com.colinmoerbe.poecompanion.build.identity.persistence.BuildVariantPersistenceAdapter
+import com.colinmoerbe.poecompanion.build.revision.persistence.BuildVariantRevisionPersistenceAdapter
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinition
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
 import com.colinmoerbe.poecompanion.catalog.persistence.UniqueDefinitionPersistenceAdapter

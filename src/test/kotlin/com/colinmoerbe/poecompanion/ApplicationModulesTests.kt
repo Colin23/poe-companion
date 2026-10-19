@@ -12,6 +12,12 @@ import com.colinmoerbe.poecompanion.acquisition.readmodel.AcquisitionSourceSumma
 import com.colinmoerbe.poecompanion.acquisition.readmodel.AcquisitionUniqueCandidatesResult
 import com.colinmoerbe.poecompanion.acquisition.relationship.persistence.DropRelationshipPersistenceAdapter
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.persistence.AcquisitionSourcePersistenceAdapter
+import com.colinmoerbe.poecompanion.build.BuildReadinessService
+import com.colinmoerbe.poecompanion.build.DevelopmentBuildAccess
+import com.colinmoerbe.poecompanion.build.identity.persistence.BuildArchetypePersistenceAdapter
+import com.colinmoerbe.poecompanion.build.revision.internal.BuildVariantRevisionPersistencePort
+import com.colinmoerbe.poecompanion.build.revision.persistence.BuildVariantRevisionPersistenceAdapter
+import com.colinmoerbe.poecompanion.build.revision.persistence.RequirementEntity
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.modulith.core.ApplicationModules
@@ -91,5 +97,17 @@ class ApplicationModulesTests {
             "catalog",
             "league",
         )
+    }
+
+    @Test
+    fun `build exposes root application APIs but keeps capability persistence internal`() {
+        val build = applicationModules.getModuleByName("build").orElseThrow()
+
+        assertThat(build.isExposed(BuildReadinessService::class.java)).isTrue()
+        assertThat(build.isExposed(DevelopmentBuildAccess::class.java)).isTrue()
+        assertThat(build.isExposed(BuildVariantRevisionPersistencePort::class.java)).isFalse()
+        assertThat(build.isExposed(BuildArchetypePersistenceAdapter::class.java)).isFalse()
+        assertThat(build.isExposed(BuildVariantRevisionPersistenceAdapter::class.java)).isFalse()
+        assertThat(build.isExposed(RequirementEntity::class.java)).isFalse()
     }
 }

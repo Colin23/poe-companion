@@ -1378,3 +1378,56 @@ provides a real cross-module consumer whose Acquisition API dependencies can now
 Preserve all eight application modules and pass `ApplicationModules.verify()`, existing PostgreSQL
 integration and concurrency tests, fixture gating and the canonical Browser journey in `./gradlew build`
 after every stage.
+
+---
+
+## 32. Build Capability-Owned Persistence Organization (Milestone 5.2 PR A)
+
+### Context
+
+Following the Acquisition named-interface migration, Build remains a single Spring Modulith module.
+Its root contains stable archetype/variant identities, versioned revision lifecycles, curated
+requirements, pure readiness evaluation, browser-facing query services, and a property-gated
+development fixture entry point. The original `build.persistence` package mixes identity
+persistence with revision snapshots, their ordered requirement groups, and concurrency-sensitive
+revision lifecycle updates.
+
+The responsibility split is real, but revision, group, and requirement storage must remain
+a single cohesive persistence concern: the revision owns its entire ordered semantic snapshot.
+
+### Decision
+
+- Start the Build capability migration with internal persistence organization only; the root
+  domain/application APIs and Browser's existing `build` dependency remain unchanged in PR A.
+  Follow-up moves and named interfaces for Build identity, revisions, requirements, readiness,
+  and read models receive their own reviews and approvals.
+- Move archetype/variant JPA entities, adapters, and Spring Data repositories into
+  `build.identity.persistence`; move revision, group, and requirement JPA entities, adapters,
+  and repositories together into `build.revision.persistence`.
+- Move the existing `BuildVariantRevisionPersistencePort` into `build.revision.internal`.
+  This port is a Build-internal lifecycle/read contract, not an externally published API.
+- Retain one `BuildVariantRevisionPersistenceAdapter` that owns the complete ordered draft
+  snapshot and the lifecycle transitions. Do not split requirement snapshot persistence across
+  capability abstractions solely for package symmetry.
+- Preserve revision identity invariants, conditional lifecycle transitions, the PostgreSQL
+  partial unique active-revision constraint, exact constraint-name conflict translation,
+  targeted JPA entity refresh after bulk updates, and the no-silent-retry policy from §6.
+- Keep `DevelopmentBuildAccess` at the Build root as the existing property-gated fixture
+  access point. Its direct use of Build-owned persistence adapters does not make those
+  adapters public cross-module APIs.
+- Mirror the existing `BuildPersistenceIntegrationTests` into
+  `build.revision.persistence`. The suite exercises cohesive revision snapshot/schema
+  invariants and uses identity persistence as test setup; retain its existing assertions.
+  Tests of unchanged root-level services and Browser controllers remain at their owning
+  package locations, with imports updated.
+- Do not change JPA mappings, SQL, database schema, transaction boundaries, domain behavior,
+  HTTP routes, fixture behavior, or readiness semantics.
+
+### Verification
+
+Keep all eight Spring Modulith modules and `ApplicationModules.verify()`; explicitly verify
+that representative identity/revision persistence adapters and the revision port are not
+exposed to other modules. Preserve the existing PostgreSQL integration tests for ordered
+snapshot round trips, empty revisions, immutable activated semantics, stale draft conflicts,
+active-revision uniqueness and competing activations, as well as fixture and Browser tests.
+Require the full `./gradlew build` and green CI.
