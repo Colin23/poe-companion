@@ -1,5 +1,8 @@
 package com.colinmoerbe.poecompanion.acquisition
 
+import com.colinmoerbe.poecompanion.acquisition.encounter.BossEncounterKnowledgeResolution
+import com.colinmoerbe.poecompanion.acquisition.knowledge.ScopedAcquisitionKnowledge
+
 /**
  * Independent source-availability and source-to-Unique assessments for one canonical relationship.
  *

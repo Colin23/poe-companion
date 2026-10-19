@@ -1,11 +1,11 @@
 package com.colinmoerbe.poecompanion.acquisition.probability.internal
 
-import com.colinmoerbe.poecompanion.acquisition.AcquisitionKnowledgeScope
 import com.colinmoerbe.poecompanion.acquisition.DropRelationship
 import com.colinmoerbe.poecompanion.acquisition.DropRelationshipId
 import com.colinmoerbe.poecompanion.acquisition.FixedDropEstimateTimeline
 import com.colinmoerbe.poecompanion.acquisition.FixedProbabilityChangePoint
 import com.colinmoerbe.poecompanion.acquisition.FixedProbabilityPublicationId
+import com.colinmoerbe.poecompanion.acquisition.knowledge.AcquisitionKnowledgeScope
 
 /**
  * Boundary for publishing immutable accepted probability knowledge and rebuilding exact-scope game timelines.

@@ -1,6 +1,13 @@
 package com.colinmoerbe.poecompanion.acquisition
 
+import com.colinmoerbe.poecompanion.acquisition.encounter.AcquisitionSourceAvailability
+import com.colinmoerbe.poecompanion.acquisition.encounter.BossEncounterKnowledgeResolution
+import com.colinmoerbe.poecompanion.acquisition.encounter.BossEncounterKnowledgeService
+import com.colinmoerbe.poecompanion.acquisition.knowledge.AcquisitionKnowledgeScope
+import com.colinmoerbe.poecompanion.acquisition.knowledge.ScopedAcquisitionKnowledge
+import com.colinmoerbe.poecompanion.acquisition.knowledge.resolveScopedAcquisitionKnowledge
 import com.colinmoerbe.poecompanion.acquisition.relationship.persistence.DropRelationshipPersistenceAdapter
+import com.colinmoerbe.poecompanion.acquisition.sourceidentity.AcquisitionSourceId
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.persistence.AcquisitionSourcePersistenceAdapter
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
 import com.colinmoerbe.poecompanion.league.AccountEvaluation

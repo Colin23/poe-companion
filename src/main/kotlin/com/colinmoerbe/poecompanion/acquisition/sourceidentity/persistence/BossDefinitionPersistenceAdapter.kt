@@ -1,7 +1,7 @@
 package com.colinmoerbe.poecompanion.acquisition.sourceidentity.persistence
 
-import com.colinmoerbe.poecompanion.acquisition.BossDefinition
-import com.colinmoerbe.poecompanion.acquisition.BossDefinitionId
+import com.colinmoerbe.poecompanion.acquisition.sourceidentity.BossDefinition
+import com.colinmoerbe.poecompanion.acquisition.sourceidentity.BossDefinitionId
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.internal.BossDefinitionPersistencePort
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional

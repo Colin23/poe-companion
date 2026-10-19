@@ -1,15 +1,7 @@
 package com.colinmoerbe.poecompanion
 
 import com.colinmoerbe.poecompanion.account.ManualOwnershipService
-import com.colinmoerbe.poecompanion.acquisition.AcquisitionKnowledgeScope
-import com.colinmoerbe.poecompanion.acquisition.AcquisitionSource
-import com.colinmoerbe.poecompanion.acquisition.AcquisitionSourceAvailability
 import com.colinmoerbe.poecompanion.acquisition.AvailableAttemptsService
-import com.colinmoerbe.poecompanion.acquisition.BossDefinition
-import com.colinmoerbe.poecompanion.acquisition.BossDefinitionService
-import com.colinmoerbe.poecompanion.acquisition.BossEncounterKnowledgeService
-import com.colinmoerbe.poecompanion.acquisition.BossEncounterKnowledgeSnapshot
-import com.colinmoerbe.poecompanion.acquisition.BossParticipation
 import com.colinmoerbe.poecompanion.acquisition.DevelopmentAcquisitionAccess
 import com.colinmoerbe.poecompanion.acquisition.DropEstimateProvenance
 import com.colinmoerbe.poecompanion.acquisition.DropRelationship
@@ -19,6 +11,14 @@ import com.colinmoerbe.poecompanion.acquisition.DropRelationshipState
 import com.colinmoerbe.poecompanion.acquisition.FixedBernoulliModel
 import com.colinmoerbe.poecompanion.acquisition.FixedDropEstimateService
 import com.colinmoerbe.poecompanion.acquisition.FixedDropEstimateSnapshot
+import com.colinmoerbe.poecompanion.acquisition.encounter.AcquisitionSourceAvailability
+import com.colinmoerbe.poecompanion.acquisition.encounter.BossEncounterKnowledgeService
+import com.colinmoerbe.poecompanion.acquisition.encounter.BossEncounterKnowledgeSnapshot
+import com.colinmoerbe.poecompanion.acquisition.encounter.BossParticipation
+import com.colinmoerbe.poecompanion.acquisition.knowledge.AcquisitionKnowledgeScope
+import com.colinmoerbe.poecompanion.acquisition.sourceidentity.AcquisitionSource
+import com.colinmoerbe.poecompanion.acquisition.sourceidentity.BossDefinition
+import com.colinmoerbe.poecompanion.acquisition.sourceidentity.BossDefinitionService
 import com.colinmoerbe.poecompanion.build.BuildArchetype
 import com.colinmoerbe.poecompanion.build.BuildVariant
 import com.colinmoerbe.poecompanion.build.BuildVariantRevision

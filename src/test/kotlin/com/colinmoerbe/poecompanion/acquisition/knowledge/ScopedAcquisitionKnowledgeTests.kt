@@ -1,4 +1,4 @@
-package com.colinmoerbe.poecompanion.acquisition
+package com.colinmoerbe.poecompanion.acquisition.knowledge
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

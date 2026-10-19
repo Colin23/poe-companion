@@ -1,5 +1,6 @@
 package com.colinmoerbe.poecompanion.acquisition
 
+import com.colinmoerbe.poecompanion.acquisition.knowledge.AcquisitionKnowledgeScope
 import com.colinmoerbe.poecompanion.league.ApplicabilityResult
 import com.colinmoerbe.poecompanion.league.EvaluationContext
 import com.colinmoerbe.poecompanion.league.GamePatch

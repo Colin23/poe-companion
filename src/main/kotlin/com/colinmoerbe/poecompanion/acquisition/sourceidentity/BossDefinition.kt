@@ -1,4 +1,4 @@
-package com.colinmoerbe.poecompanion.acquisition
+package com.colinmoerbe.poecompanion.acquisition.sourceidentity
 
 /**
  * Represents one canonical boss/game entity known to the Companion.

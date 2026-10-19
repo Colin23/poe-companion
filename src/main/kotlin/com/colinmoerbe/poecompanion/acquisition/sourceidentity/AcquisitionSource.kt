@@ -1,4 +1,4 @@
-package com.colinmoerbe.poecompanion.acquisition
+package com.colinmoerbe.poecompanion.acquisition.sourceidentity
 
 /**
  * Stable identity of one independently meaningful acquisition opportunity.

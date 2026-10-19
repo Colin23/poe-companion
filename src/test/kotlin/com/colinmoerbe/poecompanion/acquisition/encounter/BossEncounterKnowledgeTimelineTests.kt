@@ -1,5 +1,8 @@
-package com.colinmoerbe.poecompanion.acquisition
+package com.colinmoerbe.poecompanion.acquisition.encounter
 
+import com.colinmoerbe.poecompanion.acquisition.knowledge.AcquisitionKnowledgeScope
+import com.colinmoerbe.poecompanion.acquisition.sourceidentity.AcquisitionSourceId
+import com.colinmoerbe.poecompanion.acquisition.sourceidentity.BossDefinitionId
 import com.colinmoerbe.poecompanion.league.CompatibilityVersion
 import com.colinmoerbe.poecompanion.league.EvaluationContext
 import com.colinmoerbe.poecompanion.league.GamePatch

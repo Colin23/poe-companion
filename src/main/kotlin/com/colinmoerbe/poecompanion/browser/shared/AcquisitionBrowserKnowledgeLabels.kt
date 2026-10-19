@@ -1,11 +1,11 @@
 package com.colinmoerbe.poecompanion.browser.shared
 
-import com.colinmoerbe.poecompanion.acquisition.AcquisitionSourceAvailability
-import com.colinmoerbe.poecompanion.acquisition.BossEncounterKnowledgeResolution
 import com.colinmoerbe.poecompanion.acquisition.DropRelationshipResolution
 import com.colinmoerbe.poecompanion.acquisition.DropRelationshipState
 import com.colinmoerbe.poecompanion.acquisition.FixedDropEstimateResolution
-import com.colinmoerbe.poecompanion.acquisition.ScopedAcquisitionKnowledge
+import com.colinmoerbe.poecompanion.acquisition.encounter.AcquisitionSourceAvailability
+import com.colinmoerbe.poecompanion.acquisition.encounter.BossEncounterKnowledgeResolution
+import com.colinmoerbe.poecompanion.acquisition.knowledge.ScopedAcquisitionKnowledge
 import java.util.Locale
 
 /** Explicit browser labels for missing, ambiguous, unknown and verified canonical facts. */

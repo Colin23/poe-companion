@@ -1,8 +1,8 @@
 package com.colinmoerbe.poecompanion.acquisition.attempts.persistence
 
-import com.colinmoerbe.poecompanion.acquisition.AcquisitionSourceId
 import com.colinmoerbe.poecompanion.acquisition.AvailableAttempts
 import com.colinmoerbe.poecompanion.acquisition.attempts.internal.AvailableAttemptsPersistencePort
+import com.colinmoerbe.poecompanion.acquisition.sourceidentity.AcquisitionSourceId
 import com.colinmoerbe.poecompanion.league.AccountContextId
 import org.springframework.stereotype.Repository
 

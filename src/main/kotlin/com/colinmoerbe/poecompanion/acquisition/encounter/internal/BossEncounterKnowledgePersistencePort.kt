@@ -1,10 +1,10 @@
 package com.colinmoerbe.poecompanion.acquisition.encounter.internal
 
-import com.colinmoerbe.poecompanion.acquisition.AcceptedBossEncounterChangePoint
-import com.colinmoerbe.poecompanion.acquisition.AcquisitionKnowledgeScope
-import com.colinmoerbe.poecompanion.acquisition.AcquisitionSourceId
-import com.colinmoerbe.poecompanion.acquisition.BossDefinitionId
-import com.colinmoerbe.poecompanion.acquisition.BossEncounterKnowledgeSnapshot
+import com.colinmoerbe.poecompanion.acquisition.encounter.AcceptedBossEncounterChangePoint
+import com.colinmoerbe.poecompanion.acquisition.encounter.BossEncounterKnowledgeSnapshot
+import com.colinmoerbe.poecompanion.acquisition.knowledge.AcquisitionKnowledgeScope
+import com.colinmoerbe.poecompanion.acquisition.sourceidentity.AcquisitionSourceId
+import com.colinmoerbe.poecompanion.acquisition.sourceidentity.BossDefinitionId
 
 /**
  * Persists full accepted snapshots at exact source, scope and effective-patch change points.

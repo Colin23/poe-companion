@@ -1,6 +1,7 @@
 package com.colinmoerbe.poecompanion.acquisition
 
 import com.colinmoerbe.poecompanion.acquisition.attempts.internal.AvailableAttemptsPersistencePort
+import com.colinmoerbe.poecompanion.acquisition.sourceidentity.AcquisitionSourceId
 import com.colinmoerbe.poecompanion.league.AccountContextId
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

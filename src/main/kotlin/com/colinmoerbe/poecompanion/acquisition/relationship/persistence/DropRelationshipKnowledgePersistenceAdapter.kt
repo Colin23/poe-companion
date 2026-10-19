@@ -1,10 +1,10 @@
 package com.colinmoerbe.poecompanion.acquisition.relationship.persistence
 
 import com.colinmoerbe.poecompanion.acquisition.AcceptedDropRelationshipChangePoint
-import com.colinmoerbe.poecompanion.acquisition.AcquisitionKnowledgeScope
 import com.colinmoerbe.poecompanion.acquisition.DropRelationshipId
 import com.colinmoerbe.poecompanion.acquisition.DropRelationshipKnowledgeConflictException
 import com.colinmoerbe.poecompanion.acquisition.DropRelationshipSnapshot
+import com.colinmoerbe.poecompanion.acquisition.knowledge.AcquisitionKnowledgeScope
 import com.colinmoerbe.poecompanion.acquisition.relationship.internal.DropRelationshipKnowledgePersistencePort
 import com.colinmoerbe.poecompanion.league.GamePatch
 import org.hibernate.exception.ConstraintViolationException

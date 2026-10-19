@@ -1,4 +1,4 @@
-package com.colinmoerbe.poecompanion.acquisition
+package com.colinmoerbe.poecompanion.acquisition.sourceidentity
 
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.internal.BossDefinitionPersistencePort
 import org.springframework.stereotype.Service

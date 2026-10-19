@@ -1,4 +1,4 @@
-package com.colinmoerbe.poecompanion.acquisition
+package com.colinmoerbe.poecompanion.acquisition.knowledge
 
 /**
  * Outcome of selecting one accepted knowledge scope for a selected account's league.
