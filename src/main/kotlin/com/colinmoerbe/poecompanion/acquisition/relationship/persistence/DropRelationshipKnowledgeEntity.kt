@@ -1,6 +1,6 @@
 package com.colinmoerbe.poecompanion.acquisition.relationship.persistence
 
-import com.colinmoerbe.poecompanion.acquisition.DropRelationshipState
+import com.colinmoerbe.poecompanion.acquisition.relationship.DropRelationshipState
 import com.colinmoerbe.poecompanion.league.Ruleset
 import jakarta.persistence.Column
 import jakarta.persistence.Entity

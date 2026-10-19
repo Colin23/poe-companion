@@ -1,7 +1,12 @@
 package com.colinmoerbe.poecompanion.acquisition
 
+import com.colinmoerbe.poecompanion.acquisition.attempts.AvailableAttempts
 import com.colinmoerbe.poecompanion.acquisition.encounter.BossEncounterKnowledgeResolution
 import com.colinmoerbe.poecompanion.acquisition.knowledge.ScopedAcquisitionKnowledge
+import com.colinmoerbe.poecompanion.acquisition.probability.FixedDropEstimateResolution
+import com.colinmoerbe.poecompanion.acquisition.probability.FixedProbabilityCalculation
+import com.colinmoerbe.poecompanion.acquisition.relationship.DropRelationship
+import com.colinmoerbe.poecompanion.acquisition.relationship.DropRelationshipResolution
 
 /**
  * Independent source-availability and source-to-Unique assessments for one canonical relationship.

@@ -1,6 +1,6 @@
 package com.colinmoerbe.poecompanion.acquisition.attempts.internal
 
-import com.colinmoerbe.poecompanion.acquisition.AvailableAttempts
+import com.colinmoerbe.poecompanion.acquisition.attempts.AvailableAttempts
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.AcquisitionSourceId
 import com.colinmoerbe.poecompanion.league.AccountContextId
 
