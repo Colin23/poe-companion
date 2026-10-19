@@ -1,10 +1,18 @@
-package com.colinmoerbe.poecompanion.build
+package com.colinmoerbe.poecompanion.build.revision
 
 import com.colinmoerbe.poecompanion.TestcontainersConfiguration
+import com.colinmoerbe.poecompanion.build.identity.BuildArchetype
+import com.colinmoerbe.poecompanion.build.identity.BuildArchetypeId
+import com.colinmoerbe.poecompanion.build.identity.BuildVariant
+import com.colinmoerbe.poecompanion.build.identity.BuildVariantId
 import com.colinmoerbe.poecompanion.build.identity.persistence.BuildArchetypePersistenceAdapter
 import com.colinmoerbe.poecompanion.build.identity.persistence.BuildVariantPersistenceAdapter
 import com.colinmoerbe.poecompanion.build.identity.persistence.SpringDataBuildArchetypeRepository
 import com.colinmoerbe.poecompanion.build.identity.persistence.SpringDataBuildVariantRepository
+import com.colinmoerbe.poecompanion.build.requirements.Requirement
+import com.colinmoerbe.poecompanion.build.requirements.RequirementGroup
+import com.colinmoerbe.poecompanion.build.requirements.RequirementImportance
+import com.colinmoerbe.poecompanion.build.requirements.RequirementLogic
 import com.colinmoerbe.poecompanion.build.revision.persistence.BuildVariantRevisionPersistenceAdapter
 import com.colinmoerbe.poecompanion.build.revision.persistence.SpringDataBuildVariantRevisionRepository
 import com.colinmoerbe.poecompanion.build.revision.persistence.SpringDataRequirementGroupRepository

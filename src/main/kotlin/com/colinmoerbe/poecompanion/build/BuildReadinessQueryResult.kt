@@ -1,5 +1,6 @@
 package com.colinmoerbe.poecompanion.build
 
+import com.colinmoerbe.poecompanion.build.revision.BuildVariantRevision
 import com.colinmoerbe.poecompanion.league.AccountEvaluation
 
 /**

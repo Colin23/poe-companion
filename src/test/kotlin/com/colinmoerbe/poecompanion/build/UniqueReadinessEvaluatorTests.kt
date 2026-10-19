@@ -1,6 +1,13 @@
 package com.colinmoerbe.poecompanion.build
 
 import com.colinmoerbe.poecompanion.account.CurrentOwnership
+import com.colinmoerbe.poecompanion.build.identity.BuildVariantId
+import com.colinmoerbe.poecompanion.build.requirements.Requirement
+import com.colinmoerbe.poecompanion.build.requirements.RequirementGroup
+import com.colinmoerbe.poecompanion.build.requirements.RequirementImportance
+import com.colinmoerbe.poecompanion.build.requirements.RequirementLogic
+import com.colinmoerbe.poecompanion.build.revision.BuildVariantRevision
+import com.colinmoerbe.poecompanion.build.revision.BuildVariantRevisionId
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
 import com.colinmoerbe.poecompanion.league.AccountContextId
 import com.colinmoerbe.poecompanion.league.CompatibilityVersion

@@ -1,4 +1,4 @@
-package com.colinmoerbe.poecompanion.build
+package com.colinmoerbe.poecompanion.build.revision
 
 import com.colinmoerbe.poecompanion.build.revision.internal.BuildVariantRevisionPersistencePort
 import org.springframework.stereotype.Service

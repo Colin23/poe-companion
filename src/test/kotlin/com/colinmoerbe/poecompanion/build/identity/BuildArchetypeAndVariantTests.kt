@@ -1,4 +1,4 @@
-package com.colinmoerbe.poecompanion.build
+package com.colinmoerbe.poecompanion.build.identity
 
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy

@@ -1,5 +1,8 @@
 package com.colinmoerbe.poecompanion.build
 
+import com.colinmoerbe.poecompanion.build.identity.BuildArchetype
+import com.colinmoerbe.poecompanion.build.identity.BuildVariant
+import com.colinmoerbe.poecompanion.build.identity.BuildVariantId
 import com.colinmoerbe.poecompanion.build.identity.persistence.BuildArchetypePersistenceAdapter
 import com.colinmoerbe.poecompanion.build.identity.persistence.BuildVariantPersistenceAdapter
 import org.springframework.stereotype.Service

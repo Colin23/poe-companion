@@ -4,9 +4,9 @@ import com.colinmoerbe.poecompanion.acquisition.probability.DropEstimateId
 import com.colinmoerbe.poecompanion.acquisition.relationship.DropRelationshipId
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.AcquisitionSourceId
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.BossDefinitionId
-import com.colinmoerbe.poecompanion.build.BuildArchetypeId
-import com.colinmoerbe.poecompanion.build.BuildVariantId
-import com.colinmoerbe.poecompanion.build.BuildVariantRevisionId
+import com.colinmoerbe.poecompanion.build.identity.BuildArchetypeId
+import com.colinmoerbe.poecompanion.build.identity.BuildVariantId
+import com.colinmoerbe.poecompanion.build.revision.BuildVariantRevisionId
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
 import com.colinmoerbe.poecompanion.league.AccountContextId
 import com.colinmoerbe.poecompanion.league.LeagueDefinitionId

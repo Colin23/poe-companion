@@ -1431,3 +1431,49 @@ exposed to other modules. Preserve the existing PostgreSQL integration tests for
 snapshot round trips, empty revisions, immutable activated semantics, stale draft conflicts,
 active-revision uniqueness and competing activations, as well as fixture and Browser tests.
 Require the full `./gradlew build` and green CI.
+
+---
+
+## 33. Build Identity, Revision and Requirement Named Interfaces (Milestone 5.2 PR B)
+
+### Context
+
+Build persistence is now capability-owned after §32. Stable archetype/variant identities,
+versioned build revision lifecycle and curated Unique requirement expressions still share
+the broad `build` module root alongside readiness evaluation and browser-facing queries.
+Browser and the development fixture already consume this stable domain surface.
+
+### Decision
+
+- Keep Build as one Spring Modulith module, and move the existing domain/application files
+  into `build.identity` (four stable identity types), `build.revision` (six revision and
+  lifecycle types), and `build.requirements` (four authored requirement types).
+  Add one package-level named interface for each capability.
+- Preserve all constructors, services, return shapes and domain invariants; these are
+  package/import moves, not domain or lifecycle redesigns. Requirement group definitions
+  become a reusable API but remain owned and persisted as part of a revision snapshot
+  under `build.revision.persistence`, with its existing internal revision port.
+- Move seven existing corresponding tests into mirrored `identity`, `revision` and
+  `requirements` test packages without changing their assertions. Keep the cohesive
+  PostgreSQL persistence suite under `revision.persistence`; readiness tests remain in
+  the root until their production owner moves in the separately reviewed PR C.
+- Update Build, Browser, fixture and test consumers directly. Browser must list
+  `build :: identity`, `build :: revision` and `build :: requirements` as allowed
+  dependencies but retain the root `build` dependency temporarily for readiness and
+  read-model services still in the module root. PR C will finalize the dependency list.
+- Keep `DevelopmentBuildAccess` in the Build root as the property-gated development
+  fixture entry point. Do not introduce authoring endpoints, migration shims,
+  extra adapters, events, or DTO conversions merely for the relocation.
+- Preserve the draft/active/superseded lifecycle, unique active revision per
+  `(BuildVariantId, CompatibilityVersion)`, immutable activated requirements, ordered
+  revision snapshots, explicit activation conflict behavior and no-silent-retry policy
+  established in §6. Empty revisions remain valid; individual requirement groups do
+  not become empty. Readiness and shared ownership semantics remain unchanged.
+
+### Verification
+
+Add Modulith named-interface exposure assertions for the three new capability APIs and
+retain the existing assertions excluding nested persistence/internal types. Verify all eight
+modules, existing revision lifecycle/concurrency and persistence tests, fixture and Browser
+integration journeys, and the full `./gradlew build`. No JPA/SQL/schema, transaction,
+HTTP, or product behavior changes belong in this PR.

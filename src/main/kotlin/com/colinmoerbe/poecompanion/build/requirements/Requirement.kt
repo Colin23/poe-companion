@@ -1,4 +1,4 @@
-package com.colinmoerbe.poecompanion.build
+package com.colinmoerbe.poecompanion.build.requirements
 
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
 

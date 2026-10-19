@@ -1,4 +1,4 @@
-package com.colinmoerbe.poecompanion.build
+package com.colinmoerbe.poecompanion.build.identity
 
 /**
  * Human-level build family whose identity remains stable across game-version revisions.

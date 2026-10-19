@@ -14,7 +14,13 @@ import com.colinmoerbe.poecompanion.acquisition.relationship.persistence.DropRel
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.persistence.AcquisitionSourcePersistenceAdapter
 import com.colinmoerbe.poecompanion.build.BuildReadinessService
 import com.colinmoerbe.poecompanion.build.DevelopmentBuildAccess
+import com.colinmoerbe.poecompanion.build.identity.BuildArchetype
+import com.colinmoerbe.poecompanion.build.identity.BuildVariantId
 import com.colinmoerbe.poecompanion.build.identity.persistence.BuildArchetypePersistenceAdapter
+import com.colinmoerbe.poecompanion.build.requirements.Requirement
+import com.colinmoerbe.poecompanion.build.requirements.RequirementGroup
+import com.colinmoerbe.poecompanion.build.revision.BuildVariantRevision
+import com.colinmoerbe.poecompanion.build.revision.BuildVariantRevisionActivationService
 import com.colinmoerbe.poecompanion.build.revision.internal.BuildVariantRevisionPersistencePort
 import com.colinmoerbe.poecompanion.build.revision.persistence.BuildVariantRevisionPersistenceAdapter
 import com.colinmoerbe.poecompanion.build.revision.persistence.RequirementEntity
@@ -94,6 +100,9 @@ class ApplicationModulesTests {
             "acquisition :: attempts",
             "acquisition :: readmodel",
             "build",
+            "build :: identity",
+            "build :: revision",
+            "build :: requirements",
             "catalog",
             "league",
         )
@@ -102,6 +111,25 @@ class ApplicationModulesTests {
     @Test
     fun `build exposes root application APIs but keeps capability persistence internal`() {
         val build = applicationModules.getModuleByName("build").orElseThrow()
+
+        listOf("identity", "revision", "requirements").forEach { namedInterface ->
+            assertThat(build.namedInterfaces.getByName(namedInterface))
+                .describedAs("Build named interface %s should be available", namedInterface)
+                .isPresent
+        }
+
+        listOf(
+            BuildArchetype::class.java,
+            BuildVariantId::class.java,
+            BuildVariantRevision::class.java,
+            BuildVariantRevisionActivationService::class.java,
+            Requirement::class.java,
+            RequirementGroup::class.java,
+        ).forEach { type ->
+            assertThat(build.isExposed(type))
+                .describedAs("${type.simpleName} should be exposed by Build")
+                .isTrue()
+        }
 
         assertThat(build.isExposed(BuildReadinessService::class.java)).isTrue()
         assertThat(build.isExposed(DevelopmentBuildAccess::class.java)).isTrue()

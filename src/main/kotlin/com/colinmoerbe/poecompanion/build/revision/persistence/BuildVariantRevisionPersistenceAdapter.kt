@@ -1,13 +1,13 @@
 package com.colinmoerbe.poecompanion.build.revision.persistence
 
-import com.colinmoerbe.poecompanion.build.BuildRevisionActivationConflictException
-import com.colinmoerbe.poecompanion.build.BuildRevisionIdentityMismatchException
-import com.colinmoerbe.poecompanion.build.BuildVariantId
-import com.colinmoerbe.poecompanion.build.BuildVariantRevision
-import com.colinmoerbe.poecompanion.build.BuildVariantRevisionId
-import com.colinmoerbe.poecompanion.build.BuildVariantRevisionStatus
-import com.colinmoerbe.poecompanion.build.Requirement
-import com.colinmoerbe.poecompanion.build.RequirementGroup
+import com.colinmoerbe.poecompanion.build.identity.BuildVariantId
+import com.colinmoerbe.poecompanion.build.requirements.Requirement
+import com.colinmoerbe.poecompanion.build.requirements.RequirementGroup
+import com.colinmoerbe.poecompanion.build.revision.BuildRevisionActivationConflictException
+import com.colinmoerbe.poecompanion.build.revision.BuildRevisionIdentityMismatchException
+import com.colinmoerbe.poecompanion.build.revision.BuildVariantRevision
+import com.colinmoerbe.poecompanion.build.revision.BuildVariantRevisionId
+import com.colinmoerbe.poecompanion.build.revision.BuildVariantRevisionStatus
 import com.colinmoerbe.poecompanion.build.revision.internal.BuildVariantRevisionPersistencePort
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
 import com.colinmoerbe.poecompanion.league.CompatibilityVersion

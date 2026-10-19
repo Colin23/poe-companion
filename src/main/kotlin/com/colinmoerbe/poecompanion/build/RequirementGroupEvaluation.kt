@@ -1,5 +1,7 @@
 package com.colinmoerbe.poecompanion.build
 
+import com.colinmoerbe.poecompanion.build.requirements.RequirementGroup
+import com.colinmoerbe.poecompanion.build.requirements.RequirementLogic
 import java.util.Collections
 
 /**

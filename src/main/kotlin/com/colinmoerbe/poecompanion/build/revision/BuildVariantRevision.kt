@@ -1,5 +1,7 @@
-package com.colinmoerbe.poecompanion.build
+package com.colinmoerbe.poecompanion.build.revision
 
+import com.colinmoerbe.poecompanion.build.identity.BuildVariantId
+import com.colinmoerbe.poecompanion.build.requirements.RequirementGroup
 import com.colinmoerbe.poecompanion.league.CompatibilityVersion
 import java.util.Collections
 

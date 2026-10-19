@@ -4,9 +4,9 @@ import com.colinmoerbe.poecompanion.browser.shared.UniqueDisplayLabels
 import com.colinmoerbe.poecompanion.build.BuildCatalogQueryService
 import com.colinmoerbe.poecompanion.build.BuildReadinessQueryResult
 import com.colinmoerbe.poecompanion.build.BuildReadinessService
-import com.colinmoerbe.poecompanion.build.BuildVariantId
 import com.colinmoerbe.poecompanion.build.RequirementGroupEvaluation
 import com.colinmoerbe.poecompanion.build.UniqueReadiness
+import com.colinmoerbe.poecompanion.build.identity.BuildVariantId
 import com.colinmoerbe.poecompanion.catalog.UniqueCatalogQueryService
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
 import com.colinmoerbe.poecompanion.league.AccountEvaluationService

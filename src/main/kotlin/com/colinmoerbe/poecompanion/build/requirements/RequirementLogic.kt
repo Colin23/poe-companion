@@ -1,4 +1,4 @@
-package com.colinmoerbe.poecompanion.build
+package com.colinmoerbe.poecompanion.build.requirements
 
 /**
  * How requirements inside one group are combined.

@@ -1,4 +1,4 @@
-package com.colinmoerbe.poecompanion.build
+package com.colinmoerbe.poecompanion.build.identity
 
 /**
  * Materially different form of a build archetype from the Companion's tracked-requirement perspective.
