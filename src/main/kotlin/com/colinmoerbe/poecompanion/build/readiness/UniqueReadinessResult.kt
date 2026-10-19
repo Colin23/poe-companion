@@ -1,4 +1,4 @@
-package com.colinmoerbe.poecompanion.build
+package com.colinmoerbe.poecompanion.build.readiness
 
 import com.colinmoerbe.poecompanion.build.requirements.RequirementImportance
 import java.util.Collections

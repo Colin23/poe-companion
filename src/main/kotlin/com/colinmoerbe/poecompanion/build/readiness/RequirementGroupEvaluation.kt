@@ -1,4 +1,4 @@
-package com.colinmoerbe.poecompanion.build
+package com.colinmoerbe.poecompanion.build.readiness
 
 import com.colinmoerbe.poecompanion.build.requirements.RequirementGroup
 import com.colinmoerbe.poecompanion.build.requirements.RequirementLogic

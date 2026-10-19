@@ -1,5 +1,6 @@
-package com.colinmoerbe.poecompanion.build
+package com.colinmoerbe.poecompanion.build.readmodel
 
+import com.colinmoerbe.poecompanion.build.readiness.UniqueReadinessResult
 import com.colinmoerbe.poecompanion.build.revision.BuildVariantRevision
 import com.colinmoerbe.poecompanion.league.AccountEvaluation
 

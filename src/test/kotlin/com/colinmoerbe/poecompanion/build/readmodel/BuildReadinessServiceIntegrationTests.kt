@@ -1,4 +1,4 @@
-package com.colinmoerbe.poecompanion.build
+package com.colinmoerbe.poecompanion.build.readmodel
 
 import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.account.ManualOwnershipService
@@ -11,6 +11,7 @@ import com.colinmoerbe.poecompanion.build.identity.persistence.BuildArchetypePer
 import com.colinmoerbe.poecompanion.build.identity.persistence.BuildVariantPersistenceAdapter
 import com.colinmoerbe.poecompanion.build.identity.persistence.SpringDataBuildArchetypeRepository
 import com.colinmoerbe.poecompanion.build.identity.persistence.SpringDataBuildVariantRepository
+import com.colinmoerbe.poecompanion.build.readiness.UniqueReadiness
 import com.colinmoerbe.poecompanion.build.requirements.Requirement
 import com.colinmoerbe.poecompanion.build.requirements.RequirementGroup
 import com.colinmoerbe.poecompanion.build.requirements.RequirementImportance

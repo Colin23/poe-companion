@@ -1,4 +1,4 @@
-package com.colinmoerbe.poecompanion.build
+package com.colinmoerbe.poecompanion.build.readiness
 
 /**
  * Primary Unique readiness of a build revision.
