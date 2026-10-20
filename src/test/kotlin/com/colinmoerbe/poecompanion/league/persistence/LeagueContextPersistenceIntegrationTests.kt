@@ -95,6 +95,7 @@ internal class LeagueContextPersistenceIntegrationTests(
         assertThat(persisted?.id).isEqualTo(original.id)
         assertThat(persisted?.leagueDefinitionId).isEqualTo(leagueDefinition.id)
         assertThat(persisted?.ruleset).isEqualTo(Ruleset.NORMAL)
+        assertThat(persisted?.ownerApplicationUserId).isEqualTo(ConfiguredApplicationUsers.USER)
     }
 
     @Test
@@ -225,12 +226,14 @@ internal class LeagueContextPersistenceIntegrationTests(
         assertThatThrownBy {
             jdbcTemplate.update(
                 """
-                INSERT INTO poe_companion.account_context (id, league_definition_id, ruleset)
-                VALUES (?, ?, ?)
+                INSERT INTO poe_companion.account_context
+                    (id, league_definition_id, ruleset, owner_application_user_id)
+                VALUES (?, ?, ?, ?)
                 """.trimIndent(),
                 AccountContextId.generate().value,
                 LeagueDefinitionId.generate().value,
                 Ruleset.NORMAL.name,
+                ConfiguredApplicationUsers.USER.value,
             )
         }.isInstanceOf(DataIntegrityViolationException::class.java)
     }
