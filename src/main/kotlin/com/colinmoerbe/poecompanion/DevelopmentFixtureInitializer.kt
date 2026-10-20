@@ -118,7 +118,9 @@ internal class DevelopmentFixtureInitializer(
                 realm = GameRealm.PC,
             ),
         )
-        leagueAccess.saveAccount(AccountContext(ids.account, ids.league, Ruleset.NORMAL, ConfiguredApplicationUsers.USER))
+        leagueAccess.saveAccount(
+            AccountContext(ids.account, ids.league, Ruleset.NORMAL, ConfiguredApplicationUsers.USER),
+        )
         ownership.setOwnedQuantity(ids.account, ids.uniqueA, 1)
         ownership.setOwnedQuantity(ids.account, ids.uniqueB, 1)
         // C=0 is represented by an absent ownership row.

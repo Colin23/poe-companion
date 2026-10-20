@@ -1,12 +1,13 @@
 package com.colinmoerbe.poecompanion.league
 
-import com.colinmoerbe.poecompanion.security.identity.ConfiguredApplicationUsers
 import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.league.persistence.AccountContextPersistenceAdapter
 import com.colinmoerbe.poecompanion.league.persistence.LeagueDefinitionPersistenceAdapter
 import com.colinmoerbe.poecompanion.league.persistence.SpringDataAccountContextRepository
 import com.colinmoerbe.poecompanion.league.persistence.SpringDataAccountEvaluationSelectionRepository
 import com.colinmoerbe.poecompanion.league.persistence.SpringDataLeagueDefinitionRepository
+import com.colinmoerbe.poecompanion.security.identity.ApplicationUserId
+import com.colinmoerbe.poecompanion.security.identity.ConfiguredApplicationUsers
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
@@ -145,6 +146,21 @@ internal class AccountEvaluationServiceIntegrationTests(
     }
 
     @Test
+    fun `cannot select a foreign context and must retain the previous selection`() {
+        val mine = createPersistedAccountContext()
+        val foreign = createPersistedAccountContext(ConfiguredApplicationUsers.ADMIN)
+
+        accountEvaluationService.select(mine.id, CompatibilityVersion(3, 30))
+
+        assertThatThrownBy {
+            accountEvaluationService.select(foreign.id, CompatibilityVersion(3, 31))
+        }.isInstanceOf(IllegalArgumentException::class.java)
+            .hasMessage("Account context unavailable")
+
+        assertThat(accountEvaluationService.getSelected()?.accountContextId).isEqualTo(mine.id)
+    }
+
+    @Test
     fun `game patch from another compatibility version should be rejected`() {
         val accountContext = createPersistedAccountContext()
 
@@ -157,7 +173,9 @@ internal class AccountEvaluationServiceIntegrationTests(
         }.isInstanceOf(IllegalArgumentException::class.java)
     }
 
-    private fun createPersistedAccountContext(): AccountContext {
+    private fun createPersistedAccountContext(
+        owner: ApplicationUserId = ConfiguredApplicationUsers.USER,
+    ): AccountContext {
         val leagueDefinition =
             LeagueDefinition(
                 id = LeagueDefinitionId.generate(),
@@ -171,7 +189,7 @@ internal class AccountEvaluationServiceIntegrationTests(
             id = AccountContextId.generate(),
             leagueDefinitionId = leagueDefinition.id,
             ruleset = Ruleset.NORMAL,
-            ownerApplicationUserId = ConfiguredApplicationUsers.USER,
+            ownerApplicationUserId = owner,
         ).also(accountContextPersistenceAdapter::save)
     }
 

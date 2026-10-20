@@ -1,6 +1,5 @@
 package com.colinmoerbe.poecompanion.build.readmodel
 
-import com.colinmoerbe.poecompanion.security.identity.ConfiguredApplicationUsers
 import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.account.ManualOwnershipService
 import com.colinmoerbe.poecompanion.account.persistence.SpringDataManualOwnershipRepository
@@ -44,6 +43,7 @@ import com.colinmoerbe.poecompanion.league.persistence.LeagueDefinitionPersisten
 import com.colinmoerbe.poecompanion.league.persistence.SpringDataAccountContextRepository
 import com.colinmoerbe.poecompanion.league.persistence.SpringDataAccountEvaluationSelectionRepository
 import com.colinmoerbe.poecompanion.league.persistence.SpringDataLeagueDefinitionRepository
+import com.colinmoerbe.poecompanion.security.identity.ConfiguredApplicationUsers
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach

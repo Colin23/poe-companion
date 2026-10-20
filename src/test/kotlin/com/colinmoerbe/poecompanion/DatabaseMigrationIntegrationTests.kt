@@ -65,6 +65,20 @@ class DatabaseMigrationIntegrationTests(
     }
 
     @Test
+    fun createsStableApplicationIdentitiesAndPerUserSelectionSchema() {
+        val migrationApplied = jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM poe_companion.flyway_schema_history WHERE version = '018' AND success",
+            Long::class.java,
+        )
+        val identityCount = jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM poe_companion.application_identity",
+            Long::class.java,
+        )
+        assertThat(migrationApplied).isEqualTo(1L)
+        assertThat(identityCount).isEqualTo(2L)
+    }
+
+    @Test
     fun configuresHibernateForSchemaValidationOnly() {
         assertThat(environment.getProperty("spring.jpa.hibernate.ddl-auto"))
             .isEqualTo("validate")

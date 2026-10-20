@@ -1,6 +1,5 @@
 package com.colinmoerbe.poecompanion
 
-import com.colinmoerbe.poecompanion.security.identity.ConfiguredApplicationUsers
 import com.colinmoerbe.poecompanion.account.ManualOwnershipService
 import com.colinmoerbe.poecompanion.acquisition.DevelopmentAcquisitionAccess
 import com.colinmoerbe.poecompanion.acquisition.attempts.AvailableAttemptsService
@@ -26,6 +25,7 @@ import com.colinmoerbe.poecompanion.league.CompatibilityVersion
 import com.colinmoerbe.poecompanion.league.DevelopmentLeagueAccess
 import com.colinmoerbe.poecompanion.league.Ruleset
 import com.colinmoerbe.poecompanion.league.persistence.AccountContextPersistenceAdapter
+import com.colinmoerbe.poecompanion.security.identity.ConfiguredApplicationUsers
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.assertj.core.data.Offset.offset
@@ -36,8 +36,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Import
-import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.security.test.context.support.WithMockUser
 import javax.sql.DataSource
 
 /**
@@ -121,7 +121,12 @@ internal class DevelopmentFixtureIntegrationTests(
         attempts.setAvailableAttempts(ids.account, ids.source, 4)
 
         // A separately selected account must remain selected after another initializer run.
-        val otherAccount = AccountContext(AccountContextId.generate(), ids.league, Ruleset.NORMAL, ownerApplicationUserId = ConfiguredApplicationUsers.USER)
+        val otherAccount = AccountContext(
+            AccountContextId.generate(),
+            ids.league,
+            Ruleset.NORMAL,
+            ConfiguredApplicationUsers.USER,
+        )
         accounts.save(otherAccount)
         accountEvaluation.select(otherAccount.id, CompatibilityVersion(3, 30))
         initializer.initialize()

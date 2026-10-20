@@ -40,7 +40,11 @@ internal class AccountEvaluationSelectionPersistenceAdapter(
                 accountContextId = AccountContextId(entity.accountContextId),
                 compatibilityVersion = compatibilityVersion,
                 gamePatch = entity.gamePatch?.let { patch ->
-                    GamePatch(compatibilityVersion = compatibilityVersion, patch = patch, suffix = entity.gamePatchSuffix)
+                    GamePatch(
+                        compatibilityVersion = compatibilityVersion,
+                        patch = patch,
+                        suffix = entity.gamePatchSuffix,
+                    )
                 },
             )
         }.orElse(null)

@@ -32,6 +32,9 @@ import com.colinmoerbe.poecompanion.build.revision.BuildVariantRevisionActivatio
 import com.colinmoerbe.poecompanion.build.revision.internal.BuildVariantRevisionPersistencePort
 import com.colinmoerbe.poecompanion.build.revision.persistence.BuildVariantRevisionPersistenceAdapter
 import com.colinmoerbe.poecompanion.build.revision.persistence.RequirementEntity
+import com.colinmoerbe.poecompanion.league.AccountContextAccessService
+import com.colinmoerbe.poecompanion.security.identity.ApplicationUserId
+import com.colinmoerbe.poecompanion.security.identity.CurrentApplicationUser
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.modulith.core.ApplicationModules
@@ -63,6 +66,17 @@ class ApplicationModulesTests {
     @Test
     fun verifiesModuleStructure() {
         applicationModules.verify()
+    }
+
+    @Test
+    fun `security exposes the stable user identity contract and League only depends on that capability`() {
+        val security = applicationModules.getModuleByName("security").orElseThrow()
+        assertThat(security.namedInterfaces.getByName("identity")).isPresent
+        assertThat(security.isExposed(ApplicationUserId::class.java)).isTrue()
+        assertThat(security.isExposed(CurrentApplicationUser::class.java)).isTrue()
+
+        val league = applicationModules.getModuleByName("league").orElseThrow()
+        assertThat(league.isExposed(AccountContextAccessService::class.java)).isTrue()
     }
 
     @Test

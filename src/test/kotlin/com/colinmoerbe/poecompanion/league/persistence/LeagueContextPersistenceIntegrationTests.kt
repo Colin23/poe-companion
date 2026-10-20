@@ -1,6 +1,5 @@
 package com.colinmoerbe.poecompanion.league.persistence
 
-import com.colinmoerbe.poecompanion.security.identity.ConfiguredApplicationUsers
 import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.league.AccountContext
 import com.colinmoerbe.poecompanion.league.AccountContextId
@@ -11,6 +10,7 @@ import com.colinmoerbe.poecompanion.league.LeagueMortality
 import com.colinmoerbe.poecompanion.league.LeagueParticipation
 import com.colinmoerbe.poecompanion.league.LeagueType
 import com.colinmoerbe.poecompanion.league.Ruleset
+import com.colinmoerbe.poecompanion.security.identity.ConfiguredApplicationUsers
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
@@ -159,6 +159,62 @@ internal class LeagueContextPersistenceIntegrationTests(
             .hasCauseInstanceOf(IllegalArgumentException::class.java)
 
         assertThat(accountContextPersistenceAdapter.findById(id)?.ruleset).isEqualTo(Ruleset.NORMAL)
+    }
+
+    @Test
+    fun `persisted AccountContext ownership cannot be reassigned`() {
+        val league = LeagueDefinition(
+            id = LeagueDefinitionId.generate(),
+            name = "Identity test",
+            type = LeagueType.CHALLENGE,
+            participation = LeagueParticipation.SSF,
+            mortality = LeagueMortality.SOFTCORE,
+            realm = GameRealm.PC,
+        )
+        leagueDefinitionPersistenceAdapter.save(league)
+        val id = AccountContextId.generate()
+        accountContextPersistenceAdapter.save(
+            AccountContext(id, league.id, Ruleset.NORMAL, ConfiguredApplicationUsers.USER),
+        )
+
+        assertThatThrownBy {
+            accountContextPersistenceAdapter.save(
+                AccountContext(id, league.id, Ruleset.NORMAL, ConfiguredApplicationUsers.ADMIN),
+            )
+        }.isInstanceOf(InvalidDataAccessApiUsageException::class.java)
+            .hasCauseInstanceOf(IllegalArgumentException::class.java)
+
+        assertThat(accountContextPersistenceAdapter.findById(id)?.ownerApplicationUserId)
+            .isEqualTo(ConfiguredApplicationUsers.USER)
+    }
+
+    @Test
+    fun `database rejects a selection referencing somebody else's context`() {
+        val league = LeagueDefinition(
+            id = LeagueDefinitionId.generate(),
+            name = "Ownership FK test",
+            type = LeagueType.CHALLENGE,
+            participation = LeagueParticipation.SSF,
+            mortality = LeagueMortality.SOFTCORE,
+            realm = GameRealm.PC,
+        )
+        leagueDefinitionPersistenceAdapter.save(league)
+        val id = AccountContextId.generate()
+        accountContextPersistenceAdapter.save(
+            AccountContext(id, league.id, Ruleset.NORMAL, ConfiguredApplicationUsers.USER),
+        )
+
+        assertThatThrownBy {
+            jdbcTemplate.update(
+                """
+                INSERT INTO poe_companion.account_evaluation_selection
+                    (application_user_id, account_context_id,
+                     compatibility_version_major, compatibility_version_minor)
+                VALUES (?, ?, ?, ?)
+                """.trimIndent(),
+                ConfiguredApplicationUsers.ADMIN.value, id.value, 3, 30,
+            )
+        }.isInstanceOf(DataIntegrityViolationException::class.java)
     }
 
     @Test

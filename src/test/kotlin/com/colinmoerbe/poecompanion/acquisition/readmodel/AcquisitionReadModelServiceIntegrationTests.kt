@@ -1,6 +1,5 @@
 package com.colinmoerbe.poecompanion.acquisition.readmodel
 
-import com.colinmoerbe.poecompanion.security.identity.ConfiguredApplicationUsers
 import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.acquisition.attempts.AvailableAttempts
 import com.colinmoerbe.poecompanion.acquisition.attempts.AvailableAttemptsService
@@ -53,6 +52,7 @@ import com.colinmoerbe.poecompanion.league.Ruleset
 import com.colinmoerbe.poecompanion.league.persistence.AccountContextPersistenceAdapter
 import com.colinmoerbe.poecompanion.league.persistence.LeagueDefinitionPersistenceAdapter
 import com.colinmoerbe.poecompanion.league.persistence.SpringDataAccountEvaluationSelectionRepository
+import com.colinmoerbe.poecompanion.security.identity.ConfiguredApplicationUsers
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -495,7 +495,12 @@ internal class AcquisitionReadModelServiceIntegrationTests(
     }
 
     private fun selectLeague(league: LeagueDefinitionId = league()): LeagueDefinitionId {
-        val account = AccountContext(AccountContextId.generate(), league, Ruleset.NORMAL, ownerApplicationUserId = ConfiguredApplicationUsers.USER)
+        val account = AccountContext(
+            AccountContextId.generate(),
+            league,
+            Ruleset.NORMAL,
+            ConfiguredApplicationUsers.USER,
+        )
         accountContextAdapter.save(account)
         accountEvaluationService.select(account.id, version)
         return league
