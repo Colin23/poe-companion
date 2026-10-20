@@ -52,6 +52,7 @@ import com.colinmoerbe.poecompanion.league.Ruleset
 import com.colinmoerbe.poecompanion.league.persistence.AccountContextPersistenceAdapter
 import com.colinmoerbe.poecompanion.league.persistence.LeagueDefinitionPersistenceAdapter
 import com.colinmoerbe.poecompanion.league.persistence.SpringDataAccountEvaluationSelectionRepository
+import com.colinmoerbe.poecompanion.security.identity.ConfiguredApplicationUsers
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -59,6 +60,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
+import org.springframework.security.test.context.support.WithMockUser
 import java.time.Instant
 
 /**
@@ -71,6 +73,7 @@ import java.time.Instant
         "poe-companion.security.password=test-password",
     ],
 )
+@WithMockUser(username = "test-user")
 internal class AcquisitionReadModelServiceIntegrationTests(
     @Autowired private val readModel: AcquisitionReadModelService,
     @Autowired private val accountEvaluationService: AccountEvaluationService,
@@ -492,7 +495,12 @@ internal class AcquisitionReadModelServiceIntegrationTests(
     }
 
     private fun selectLeague(league: LeagueDefinitionId = league()): LeagueDefinitionId {
-        val account = AccountContext(AccountContextId.generate(), league, Ruleset.NORMAL)
+        val account = AccountContext(
+            AccountContextId.generate(),
+            league,
+            Ruleset.NORMAL,
+            ConfiguredApplicationUsers.USER,
+        )
         accountContextAdapter.save(account)
         accountEvaluationService.select(account.id, version)
         return league

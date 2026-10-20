@@ -17,13 +17,17 @@ import com.colinmoerbe.poecompanion.league.LeagueType
 import com.colinmoerbe.poecompanion.league.Ruleset
 import com.colinmoerbe.poecompanion.league.persistence.AccountContextPersistenceAdapter
 import com.colinmoerbe.poecompanion.league.persistence.LeagueDefinitionPersistenceAdapter
+import com.colinmoerbe.poecompanion.security.identity.ApplicationUserId
+import com.colinmoerbe.poecompanion.security.identity.ConfiguredApplicationUsers
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
+import org.springframework.security.test.context.support.WithMockUser
 
 /**
  * Verifies that persisted manual ownership is projected into normalized current ownership.
@@ -35,6 +39,7 @@ import org.springframework.context.annotation.Import
         "poe-companion.security.password=test-password",
     ],
 )
+@WithMockUser(username = "test-user")
 internal class CurrentOwnershipServiceIntegrationTests(
     @Autowired private val currentOwnershipService: CurrentOwnershipService,
     @Autowired private val manualOwnershipPersistenceAdapter: ManualOwnershipPersistenceAdapter,
@@ -82,12 +87,14 @@ internal class CurrentOwnershipServiceIntegrationTests(
                 id = AccountContextId.generate(),
                 leagueDefinitionId = leagueDefinition.id,
                 ruleset = Ruleset.NORMAL,
+                ownerApplicationUserId = ConfiguredApplicationUsers.USER,
             ).also(accountContextPersistenceAdapter::save)
         val contextB =
             AccountContext(
                 id = AccountContextId.generate(),
                 leagueDefinitionId = leagueDefinition.id,
                 ruleset = Ruleset.NORMAL,
+                ownerApplicationUserId = ConfiguredApplicationUsers.USER,
             ).also(accountContextPersistenceAdapter::save)
         val sharedUnique = createPersistedUniqueDefinition()
         val contextBOnlyUnique = createPersistedUniqueDefinition()
@@ -138,13 +145,25 @@ internal class CurrentOwnershipServiceIntegrationTests(
         realm = GameRealm.PC,
     ).also(leagueDefinitionPersistenceAdapter::save)
 
-    private fun createPersistedAccountContext(): AccountContext {
+    @Test
+    fun `another user's context cannot be read as CurrentOwnership`() {
+        val foreign = createPersistedAccountContext(owner = ConfiguredApplicationUsers.ADMIN)
+
+        assertThatThrownBy { currentOwnershipService.getCurrentOwnership(foreign.id) }
+            .isInstanceOf(IllegalArgumentException::class.java)
+            .hasMessage("Account context unavailable")
+    }
+
+    private fun createPersistedAccountContext(
+        owner: ApplicationUserId = ConfiguredApplicationUsers.USER,
+    ): AccountContext {
         val leagueDefinition = createPersistedLeagueDefinition()
         val accountContext =
             AccountContext(
                 id = AccountContextId.generate(),
                 leagueDefinitionId = leagueDefinition.id,
                 ruleset = Ruleset.NORMAL,
+                ownerApplicationUserId = owner,
             )
 
         accountContextPersistenceAdapter.save(accountContext)

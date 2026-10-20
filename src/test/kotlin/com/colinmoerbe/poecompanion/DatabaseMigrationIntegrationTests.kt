@@ -24,7 +24,7 @@ class DatabaseMigrationIntegrationTests(
     private val jdbcTemplate = JdbcTemplate(dataSource)
 
     @Test
-    fun usesPostgresql() {
+    fun `uses PostgreSQL`() {
         val databaseProductName =
             jdbcTemplate.dataSource
                 ?.connection
@@ -34,7 +34,7 @@ class DatabaseMigrationIntegrationTests(
     }
 
     @Test
-    fun createsApplicationSchema() {
+    fun `creates application schema`() {
         val schemaExists =
             jdbcTemplate.queryForObject<Boolean>(
                 """
@@ -50,7 +50,7 @@ class DatabaseMigrationIntegrationTests(
     }
 
     @Test
-    fun appliesInitialMigrationSuccessfully() {
+    fun `applies initial migration successfully`() {
         val successfulMigrationCount =
             jdbcTemplate.queryForObject<Long>(
                 """
@@ -65,7 +65,21 @@ class DatabaseMigrationIntegrationTests(
     }
 
     @Test
-    fun configuresHibernateForSchemaValidationOnly() {
+    fun `creates stable application identities and per-user selection schema`() {
+        val migrationApplied = jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM poe_companion.flyway_schema_history WHERE version = '018' AND success",
+            Long::class.java,
+        )
+        val identityCount = jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM poe_companion.application_identity",
+            Long::class.java,
+        )
+        assertThat(migrationApplied).isEqualTo(1L)
+        assertThat(identityCount).isEqualTo(2L)
+    }
+
+    @Test
+    fun `configures Hibernate for schema validation only`() {
         assertThat(environment.getProperty("spring.jpa.hibernate.ddl-auto"))
             .isEqualTo("validate")
         assertThat(environment.getProperty("spring.jpa.properties.hibernate.default_schema"))

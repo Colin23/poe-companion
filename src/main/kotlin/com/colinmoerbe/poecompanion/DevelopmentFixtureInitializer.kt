@@ -40,6 +40,8 @@ import com.colinmoerbe.poecompanion.league.LeagueMortality
 import com.colinmoerbe.poecompanion.league.LeagueParticipation
 import com.colinmoerbe.poecompanion.league.LeagueType
 import com.colinmoerbe.poecompanion.league.Ruleset
+import com.colinmoerbe.poecompanion.security.identity.ConfiguredApplicationUsers
+import com.colinmoerbe.poecompanion.security.identity.DevelopmentFixtureActor
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -78,6 +80,7 @@ internal class DevelopmentFixtureInitializer(
     private val drops: DropRelationshipKnowledgeService,
     private val estimates: FixedDropEstimateService,
     private val attempts: AvailableAttemptsService,
+    private val fixtureActor: DevelopmentFixtureActor,
 ) {
     private val ids = DevelopmentFixtureIds
     private val compatibilityVersion = CompatibilityVersion(COMPATIBILITY_MAJOR, COMPATIBILITY_MINOR)
@@ -85,7 +88,7 @@ internal class DevelopmentFixtureInitializer(
 
     /** Creates an atomic fixture or verifies an existing fixture without resetting player-editable state. */
     @Transactional
-    fun initialize() {
+    fun initialize() = fixtureActor.asLegacyUser {
         if (uniques.findById(ids.uniqueA) != null) {
             verifyExistingFixture()
         } else {
@@ -115,7 +118,9 @@ internal class DevelopmentFixtureInitializer(
                 realm = GameRealm.PC,
             ),
         )
-        leagueAccess.saveAccount(AccountContext(ids.account, ids.league, Ruleset.NORMAL))
+        leagueAccess.saveAccount(
+            AccountContext(ids.account, ids.league, Ruleset.NORMAL, ConfiguredApplicationUsers.USER),
+        )
         ownership.setOwnedQuantity(ids.account, ids.uniqueA, 1)
         ownership.setOwnedQuantity(ids.account, ids.uniqueB, 1)
         // C=0 is represented by an absent ownership row.
@@ -158,7 +163,10 @@ internal class DevelopmentFixtureInitializer(
         ) { "Development fixture league definition was modified or removed" }
 
         val account = leagueAccess.findAccountById(ids.account)
-        check(account?.leagueDefinitionId == ids.league && account.ruleset == Ruleset.NORMAL) {
+        check(
+            account?.leagueDefinitionId == ids.league && account.ruleset == Ruleset.NORMAL &&
+                account.ownerApplicationUserId == ConfiguredApplicationUsers.USER,
+        ) {
             "Development fixture AccountContext was modified or removed"
         }
         check(buildAccess.findArchetypeById(ids.archetype)?.name == "Build X") {

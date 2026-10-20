@@ -29,6 +29,8 @@ import com.colinmoerbe.poecompanion.league.CompatibilityVersion
 import com.colinmoerbe.poecompanion.league.Ruleset
 import com.colinmoerbe.poecompanion.league.persistence.AccountContextPersistenceAdapter
 import com.colinmoerbe.poecompanion.league.persistence.SpringDataAccountEvaluationSelectionRepository
+import com.colinmoerbe.poecompanion.security.identity.ConfiguredApplicationUsers
+import com.colinmoerbe.poecompanion.security.identity.DevelopmentFixtureActor
 import org.assertj.core.api.Assertions.assertThat
 import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.not
@@ -68,6 +70,7 @@ internal class UniqueBrowserControllerIntegrationTests(
     @Autowired private val initializer: DevelopmentFixtureInitializer,
     @Autowired private val ownership: ManualOwnershipService,
     @Autowired private val currentOwnership: CurrentOwnershipService,
+    @Autowired private val fixtureActor: DevelopmentFixtureActor,
     @Autowired private val manualOwnershipAdapter: ManualOwnershipPersistenceAdapter,
     @Autowired private val accountEvaluation: AccountEvaluationService,
     @Autowired private val accountContexts: AccountContextPersistenceAdapter,
@@ -129,7 +132,7 @@ internal class UniqueBrowserControllerIntegrationTests(
             .andExpect(view().name("uniques/detail"))
             .andExpect(content().string(containsString("Missing · 0 copies")))
 
-        ownership.setOwnedQuantity(ids.account, ids.uniqueC, 1)
+        fixtureActor.asLegacyUser { ownership.setOwnedQuantity(ids.account, ids.uniqueC, 1) }
 
         mockMvc.perform(get(uri).with(user("test-user")))
             .andExpect(status().isOk)
@@ -174,7 +177,9 @@ internal class UniqueBrowserControllerIntegrationTests(
             .andExpect(content().string(containsString("Owned · <span>1</span> copies")))
         mockMvc.perform(get("/uniques").param("filter", "owned").with(user("test-user")))
             .andExpect(content().string(containsString(">Unique C</a>")))
-        assertThat(currentOwnership.getCurrentOwnership(ids.account).quantityOf(ids.uniqueC)).isEqualTo(1)
+        assertThat(
+            fixtureActor.asLegacyUser { currentOwnership.getCurrentOwnership(ids.account) }.quantityOf(ids.uniqueC),
+        ).isEqualTo(1)
     }
 
     @Test
@@ -197,14 +202,25 @@ internal class UniqueBrowserControllerIntegrationTests(
         mockMvc.perform(post(uri).param("quantity", "2").with(user("test-user")).with(csrf()))
             .andExpect(status().is3xxRedirection)
 
-        val other = AccountContext(AccountContextId.generate(), ids.league, Ruleset.NORMAL)
+        val other = AccountContext(
+            AccountContextId.generate(),
+            ids.league,
+            Ruleset.NORMAL,
+            ConfiguredApplicationUsers.USER,
+        )
         accountContexts.save(other)
-        accountEvaluation.select(other.id, CompatibilityVersion(3, 30))
+        fixtureActor.asLegacyUser { accountEvaluation.select(other.id, CompatibilityVersion(3, 30)) }
         mockMvc.perform(post(uri).param("quantity", "3").with(user("test-user")).with(csrf()))
             .andExpect(status().is3xxRedirection)
 
-        assertThat(currentOwnership.getCurrentOwnership(ids.account).quantityOf(ids.uniqueC)).isEqualTo(2)
-        assertThat(currentOwnership.getCurrentOwnership(other.id).quantityOf(ids.uniqueC)).isEqualTo(3)
+        assertThat(
+
+            fixtureActor.asLegacyUser { currentOwnership.getCurrentOwnership(ids.account) }.quantityOf(ids.uniqueC),
+
+        ).isEqualTo(2)
+        assertThat(
+            fixtureActor.asLegacyUser { currentOwnership.getCurrentOwnership(other.id) }.quantityOf(ids.uniqueC),
+        ).isEqualTo(3)
     }
 
     @Test
@@ -224,7 +240,9 @@ internal class UniqueBrowserControllerIntegrationTests(
             .andExpect(content().string(containsString("Ownership could not be saved")))
             .andExpect(content().string(containsString("No account is selected")))
             .andExpect(content().string(containsString("No changes were saved")))
-        assertThat(currentOwnership.getCurrentOwnership(ids.account).quantityOf(ids.uniqueC)).isZero()
+        assertThat(
+            fixtureActor.asLegacyUser { currentOwnership.getCurrentOwnership(ids.account) }.quantityOf(ids.uniqueC),
+        ).isZero()
     }
 
     @Test
@@ -250,7 +268,9 @@ internal class UniqueBrowserControllerIntegrationTests(
         )
             .andExpect(status().isNotFound)
             .andExpect(content().string(containsString("This Unique is no longer available")))
-        assertThat(currentOwnership.getCurrentOwnership(ids.account).quantityOf(ids.uniqueA)).isEqualTo(1)
+        assertThat(
+            fixtureActor.asLegacyUser { currentOwnership.getCurrentOwnership(ids.account) }.quantityOf(ids.uniqueA),
+        ).isEqualTo(1)
     }
 
     @Test
@@ -263,7 +283,9 @@ internal class UniqueBrowserControllerIntegrationTests(
             .andExpect(header().string(HttpHeaders.LOCATION, containsString("/login")))
         mockMvc.perform(post(uri).param("quantity", "1").with(user("test-user")))
             .andExpect(status().isForbidden)
-        assertThat(currentOwnership.getCurrentOwnership(ids.account).quantityOf(ids.uniqueC)).isZero()
+        assertThat(
+            fixtureActor.asLegacyUser { currentOwnership.getCurrentOwnership(ids.account) }.quantityOf(ids.uniqueC),
+        ).isZero()
     }
 
     @Test

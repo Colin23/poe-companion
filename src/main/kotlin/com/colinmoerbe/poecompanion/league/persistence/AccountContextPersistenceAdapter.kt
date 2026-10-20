@@ -3,14 +3,11 @@ package com.colinmoerbe.poecompanion.league.persistence
 import com.colinmoerbe.poecompanion.league.AccountContext
 import com.colinmoerbe.poecompanion.league.AccountContextId
 import com.colinmoerbe.poecompanion.league.LeagueDefinitionId
+import com.colinmoerbe.poecompanion.security.identity.ApplicationUserId
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 
-/**
- * Persists account-context identity/configuration without exposing JPA representations to the domain.
- *
- * Once an identity exists, its league and ruleset cannot be redefined.
- */
+/** Immutable account-context identity and ownership persistence. */
 @Repository
 internal class AccountContextPersistenceAdapter(private val springDataRepository: SpringDataAccountContextRepository) {
     @Transactional
@@ -20,11 +17,10 @@ internal class AccountContextPersistenceAdapter(private val springDataRepository
                 id = accountContext.id.value,
                 leagueDefinitionId = accountContext.leagueDefinitionId.value,
                 ruleset = accountContext.ruleset.name,
+                ownerApplicationUserId = accountContext.ownerApplicationUserId.value,
             )
 
-        if (insertedRows == 1) {
-            return
-        }
+        if (insertedRows == 1) return
 
         val existing =
             springDataRepository.findById(accountContext.id.value).orElseThrow {
@@ -33,9 +29,10 @@ internal class AccountContextPersistenceAdapter(private val springDataRepository
 
         require(
             existing.leagueDefinitionId == accountContext.leagueDefinitionId.value &&
-                existing.ruleset == accountContext.ruleset,
+                existing.ruleset == accountContext.ruleset &&
+                existing.ownerApplicationUserId == accountContext.ownerApplicationUserId.value,
         ) {
-            "Existing account context identity cannot be redefined"
+            "Existing account context identity and owner cannot be redefined"
         }
     }
 
@@ -46,6 +43,7 @@ internal class AccountContextPersistenceAdapter(private val springDataRepository
                 id = AccountContextId(entity.id),
                 leagueDefinitionId = LeagueDefinitionId(entity.leagueDefinitionId),
                 ruleset = entity.ruleset,
+                ownerApplicationUserId = ApplicationUserId(entity.ownerApplicationUserId),
             )
         }.orElse(null)
 }

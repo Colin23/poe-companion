@@ -43,6 +43,7 @@ import com.colinmoerbe.poecompanion.league.persistence.LeagueDefinitionPersisten
 import com.colinmoerbe.poecompanion.league.persistence.SpringDataAccountContextRepository
 import com.colinmoerbe.poecompanion.league.persistence.SpringDataAccountEvaluationSelectionRepository
 import com.colinmoerbe.poecompanion.league.persistence.SpringDataLeagueDefinitionRepository
+import com.colinmoerbe.poecompanion.security.identity.ConfiguredApplicationUsers
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -50,6 +51,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
+import org.springframework.security.test.context.support.WithMockUser
 
 /**
  * Verifies composition of selected account context, current ownership, active revisions, and pure readiness evaluation.
@@ -61,6 +63,7 @@ import org.springframework.context.annotation.Import
         "poe-companion.security.password=test-password",
     ],
 )
+@WithMockUser(username = "test-user")
 internal class BuildReadinessServiceIntegrationTests(
     @Autowired private val buildReadinessService: BuildReadinessService,
     @Autowired private val activationService: BuildVariantRevisionActivationService,
@@ -249,6 +252,7 @@ internal class BuildReadinessServiceIntegrationTests(
             id = AccountContextId.generate(),
             leagueDefinitionId = leagueDefinition.id,
             ruleset = Ruleset.NORMAL,
+            ownerApplicationUserId = ConfiguredApplicationUsers.USER,
         ).also(accountContextPersistenceAdapter::save)
     }
 

@@ -9,9 +9,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.Table
 import java.util.UUID
 
-/**
- * JPA representation of one isolated account context.
- */
+/** JPA representation of one account context whose ownership and meaning are immutable. */
 @Entity
 @Table(name = "account_context")
 internal open class AccountContextEntity(
@@ -23,4 +21,6 @@ internal open class AccountContextEntity(
     @Enumerated(EnumType.STRING)
     @Column(name = "ruleset", nullable = false, updatable = false, length = 32)
     open var ruleset: Ruleset,
+    @Column(name = "owner_application_user_id", nullable = false, updatable = false)
+    open var ownerApplicationUserId: UUID,
 )

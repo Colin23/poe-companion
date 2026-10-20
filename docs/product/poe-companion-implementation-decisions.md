@@ -1534,3 +1534,62 @@ persistence types. Assert Browser's exact allowed dependencies without the broad
 read-model integration tests, Browser navigation/Build X journey, fixture gating
 and the full `./gradlew build`. The separate structure-refactor checkpoint
 in issue #22 follows this PR and is not a reason for extra refactoring here.
+
+---
+
+## 35. Stable Application Identity, Context Ownership and Per-User Selection (Milestone 5.2 PR A)
+
+### Context
+
+Milestone 5.2 expands V0.1 from one configured application login to two distinct configured logins in
+stages. The old `account_evaluation_selection` stores a database-wide singleton, and personal
+facts (manual ownership, saved attempts) are keyed by `AccountContextId` but were previously
+reachable without actor-aware authorization. Enabling a second login before restricting that
+surface would expose another person's collection and derived readiness.
+
+The two-user login mechanism is temporary development/test scaffolding. Future public browsing and
+guest probability calculations must not require login; optional GGG OAuth may later map an external
+provider subject to the same stable local application identity. OAuth subjects/usernames/roles are
+**not** the owner's database key.
+
+### Decision
+
+- Add `security.identity.ApplicationUserId` using the project's existing `data class(UUID)`
+  value-object convention, not a Kotlin inline class or a username string. Seed two deterministic
+  local UUID identities in PostgreSQL with no password, role or OAuth credentials stored there.
+  Keep the existing single USER form-login configuration until PR B.
+- Publish a small `security :: identity` interface for the authenticated current-user identity.
+  League depends only on that API; the Spring Security implementation stays internal. Do not
+  conflate a logged-in app user, owned PoE `AccountContext`, and selected `AccountEvaluation`.
+- Make account-context ownership mandatory and immutable alongside league/ruleset meaning.
+  `AccountContextAccessService` is the central owner-scoped service boundary, denying missing
+  and foreign contexts uniformly. ManualOwnership, CurrentOwnership, saved AvailableAttempts
+  (read/write/clear), and selection validate the caller at the application-service boundary.
+  Do not assume Modulith package rules constitute authorization.
+- Flyway V018 assigns *all* legacy account contexts to the seeded USER UUID without changing
+  their identities, manual quantities or saved attempt counts. Convert the global singleton
+  selection (when present) into the USER's persisted per-user selection while preserving
+  compatibility version and optional patch. A composite FK from
+  `(account_context_id, application_user_id)` to the context's unique
+  `(id, owner_application_user_id)` additionally forbids forged foreign selections.
+  Existing migrations V001–V017 remain immutable; a missing legacy selection stays missing.
+- Keep production services fail-closed without an authenticated principal. For the dev fixture,
+  the existing `poe-companion.dev-fixture.enabled` gate enables a scoped legacy-actor executor:
+  install the single configured authenticated identity only for the initializer operation,
+  restore the prior security context in `finally`, and keep the existing dev-profile
+  startup opt-in. Integration tests of personal services use an explicit test actor.
+- Keep canonical Catalog/Build/Acquisition knowledge shared, and preserve evaluation logic,
+  transaction boundaries, fixture A/B/C → Build X → Boss Y values, runtime HTTP routes and
+  the single active login. Second login activation, ADMIN curator checks, richer independent
+  personal fixtures and a context switcher are separate later PRs.
+- This decision explicitly evolves the original single-user MVP scope; it does not silently
+  edit the historical scope freeze. Long-term anonymous public access and GGG OAuth remain
+  deferred and independent of the internal ownership key.
+
+### Verification
+
+Require exactly eight Spring Modulith modules and `ApplicationModules.verify()`, correct
+`security :: identity` exposure and League dependency, forward-only PostgreSQL migration
+verification, unknown/foreign context rejection, immutable owner persistence, per-user
+selection integrity, existing fixture startup/idempotency and ownership/attempt semantics,
+and the full Gradle/CI/CodeQL/CodeRabbit review before merging.

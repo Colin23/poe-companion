@@ -19,6 +19,7 @@ import com.colinmoerbe.poecompanion.acquisition.sourceidentity.AcquisitionSource
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.AcquisitionSourceId
 import com.colinmoerbe.poecompanion.league.Ruleset
 import com.colinmoerbe.poecompanion.league.persistence.SpringDataAccountEvaluationSelectionRepository
+import com.colinmoerbe.poecompanion.security.identity.DevelopmentFixtureActor
 import org.assertj.core.api.Assertions.assertThat
 import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.AfterEach
@@ -54,6 +55,7 @@ internal class AcquisitionBrowserControllerIntegrationTests(
     @Autowired private val mockMvc: MockMvc,
     @Autowired private val initializer: DevelopmentFixtureInitializer,
     @Autowired private val attempts: AvailableAttemptsService,
+    @Autowired private val fixtureActor: DevelopmentFixtureActor,
     @Autowired private val sourceAccess: DevelopmentAcquisitionAccess,
     @Autowired private val encounters: BossEncounterKnowledgeService,
     @Autowired private val drops: DropRelationshipKnowledgeService,
@@ -112,7 +114,9 @@ internal class AcquisitionBrowserControllerIntegrationTests(
         assertThat(preview.previewAttempts).isEqualTo(20)
         assertThat(preview.effectiveAttempts).isEqualTo(20)
         assertThat(preview.relationships.single().probabilityWithinAttempts).isEqualTo("87.8%")
-        assertThat(attempts.getAvailableAttempts(ids.account, ids.source)?.count).isEqualTo(12)
+        assertThat(
+            fixtureActor.asLegacyUser { attempts.getAvailableAttempts(ids.account, ids.source) }?.count,
+        ).isEqualTo(12)
 
         val zero = detailPage("0")
         assertThat(zero.previewAttempts).isZero()
@@ -123,7 +127,7 @@ internal class AcquisitionBrowserControllerIntegrationTests(
     @Test
     fun `missing saved attempts are not treated as zero`() {
         initializer.initialize()
-        attempts.clearAvailableAttempts(ids.account, ids.source)
+        fixtureActor.asLegacyUser { attempts.clearAvailableAttempts(ids.account, ids.source) }
 
         val page = detailPage()
         assertThat(page.savedAttempts).isNull()

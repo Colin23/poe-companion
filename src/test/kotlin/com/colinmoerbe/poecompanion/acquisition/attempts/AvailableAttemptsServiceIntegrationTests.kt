@@ -16,6 +16,8 @@ import com.colinmoerbe.poecompanion.league.LeagueType
 import com.colinmoerbe.poecompanion.league.Ruleset
 import com.colinmoerbe.poecompanion.league.persistence.AccountContextPersistenceAdapter
 import com.colinmoerbe.poecompanion.league.persistence.LeagueDefinitionPersistenceAdapter
+import com.colinmoerbe.poecompanion.security.identity.ApplicationUserId
+import com.colinmoerbe.poecompanion.security.identity.ConfiguredApplicationUsers
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
@@ -27,6 +29,7 @@ import org.springframework.context.annotation.Import
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.security.test.context.support.WithMockUser
 
 /**
  * Verifies application commands and PostgreSQL constraints for manually recorded available attempts.
@@ -38,6 +41,7 @@ import org.springframework.jdbc.core.JdbcTemplate
         "poe-companion.security.password=test-password",
     ],
 )
+@WithMockUser(username = "test-user")
 internal class AvailableAttemptsServiceIntegrationTests(
     @Autowired private val service: AvailableAttemptsService,
     @Autowired private val repository: SpringDataAvailableAttemptsRepository,
@@ -200,7 +204,23 @@ internal class AvailableAttemptsServiceIntegrationTests(
     private fun createPersistedSource(): AcquisitionSource =
         AcquisitionSource(AcquisitionSourceId.generate()).also(sourcePersistenceAdapter::save)
 
-    private fun createPersistedAccountContext(): AccountContext {
+    @Test
+    fun `saved attempts cannot be read or changed for another user's context`() {
+        val foreign = createPersistedAccountContext(owner = ConfiguredApplicationUsers.ADMIN)
+        val source = createPersistedSource()
+
+        assertThatThrownBy { service.setAvailableAttempts(foreign.id, source.id, 4) }
+            .isInstanceOf(IllegalArgumentException::class.java)
+        assertThatThrownBy { service.getAvailableAttempts(foreign.id, source.id) }
+            .isInstanceOf(IllegalArgumentException::class.java)
+        assertThatThrownBy { service.clearAvailableAttempts(foreign.id, source.id) }
+            .isInstanceOf(IllegalArgumentException::class.java)
+        assertThat(repository.count()).isZero()
+    }
+
+    private fun createPersistedAccountContext(
+        owner: ApplicationUserId = ConfiguredApplicationUsers.USER,
+    ): AccountContext {
         val leagueDefinition =
             LeagueDefinition(
                 id = LeagueDefinitionId.generate(),
@@ -215,6 +235,7 @@ internal class AvailableAttemptsServiceIntegrationTests(
             id = AccountContextId.generate(),
             leagueDefinitionId = leagueDefinition.id,
             ruleset = Ruleset.NORMAL,
+            ownerApplicationUserId = owner,
         ).also(accountContextPersistenceAdapter::save)
     }
 }

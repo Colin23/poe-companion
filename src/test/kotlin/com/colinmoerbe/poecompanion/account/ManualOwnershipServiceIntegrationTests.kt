@@ -17,6 +17,8 @@ import com.colinmoerbe.poecompanion.league.LeagueType
 import com.colinmoerbe.poecompanion.league.Ruleset
 import com.colinmoerbe.poecompanion.league.persistence.AccountContextPersistenceAdapter
 import com.colinmoerbe.poecompanion.league.persistence.LeagueDefinitionPersistenceAdapter
+import com.colinmoerbe.poecompanion.security.identity.ApplicationUserId
+import com.colinmoerbe.poecompanion.security.identity.ConfiguredApplicationUsers
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
@@ -25,6 +27,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
+import org.springframework.security.test.context.support.WithMockUser
 
 /**
  * Verifies the application command semantics for manually maintained ownership.
@@ -36,6 +39,7 @@ import org.springframework.context.annotation.Import
         "poe-companion.security.password=test-password",
     ],
 )
+@WithMockUser(username = "test-user")
 internal class ManualOwnershipServiceIntegrationTests(
     @Autowired private val manualOwnershipService: ManualOwnershipService,
     @Autowired private val persistenceAdapter: ManualOwnershipPersistenceAdapter,
@@ -121,7 +125,20 @@ internal class ManualOwnershipServiceIntegrationTests(
     private fun createPersistedUniqueDefinition(): UniqueDefinition =
         UniqueDefinition(UniqueDefinitionId.generate()).also(uniqueDefinitionPersistenceAdapter::save)
 
-    private fun createPersistedAccountContext(): AccountContext {
+    @Test
+    fun `manual ownership commands reject a foreign account context`() {
+        val foreign = createPersistedAccountContext(owner = ConfiguredApplicationUsers.ADMIN)
+        val unique = createPersistedUniqueDefinition()
+
+        assertThatThrownBy { manualOwnershipService.setOwnedQuantity(foreign.id, unique.id, 1) }
+            .isInstanceOf(IllegalArgumentException::class.java)
+            .hasMessage("Account context unavailable")
+        assertThat(persistenceAdapter.findBy(foreign.id, unique.id)).isNull()
+    }
+
+    private fun createPersistedAccountContext(
+        owner: ApplicationUserId = ConfiguredApplicationUsers.USER,
+    ): AccountContext {
         val leagueDefinition =
             LeagueDefinition(
                 id = LeagueDefinitionId.generate(),
@@ -136,6 +153,7 @@ internal class ManualOwnershipServiceIntegrationTests(
             id = AccountContextId.generate(),
             leagueDefinitionId = leagueDefinition.id,
             ruleset = Ruleset.NORMAL,
+            ownerApplicationUserId = owner,
         ).also(accountContextPersistenceAdapter::save)
     }
 }
