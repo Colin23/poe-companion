@@ -212,7 +212,10 @@ internal class LeagueContextPersistenceIntegrationTests(
                      compatibility_version_major, compatibility_version_minor)
                 VALUES (?, ?, ?, ?)
                 """.trimIndent(),
-                ConfiguredApplicationUsers.ADMIN.value, id.value, 3, 30,
+                ConfiguredApplicationUsers.ADMIN.value,
+                id.value,
+                3,
+                30,
             )
         }.isInstanceOf(DataIntegrityViolationException::class.java)
     }
