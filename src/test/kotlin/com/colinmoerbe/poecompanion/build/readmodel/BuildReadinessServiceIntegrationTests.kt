@@ -1,5 +1,6 @@
 package com.colinmoerbe.poecompanion.build.readmodel
 
+import com.colinmoerbe.poecompanion.security.identity.ConfiguredApplicationUsers
 import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.account.ManualOwnershipService
 import com.colinmoerbe.poecompanion.account.persistence.SpringDataManualOwnershipRepository
@@ -50,6 +51,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
+import org.springframework.security.test.context.support.WithMockUser
 
 /**
  * Verifies composition of selected account context, current ownership, active revisions, and pure readiness evaluation.
@@ -61,6 +63,7 @@ import org.springframework.context.annotation.Import
         "poe-companion.security.password=test-password",
     ],
 )
+@WithMockUser(username = "test-user")
 internal class BuildReadinessServiceIntegrationTests(
     @Autowired private val buildReadinessService: BuildReadinessService,
     @Autowired private val activationService: BuildVariantRevisionActivationService,
@@ -249,6 +252,7 @@ internal class BuildReadinessServiceIntegrationTests(
             id = AccountContextId.generate(),
             leagueDefinitionId = leagueDefinition.id,
             ruleset = Ruleset.NORMAL,
+            ownerApplicationUserId = ConfiguredApplicationUsers.USER,
         ).also(accountContextPersistenceAdapter::save)
     }
 

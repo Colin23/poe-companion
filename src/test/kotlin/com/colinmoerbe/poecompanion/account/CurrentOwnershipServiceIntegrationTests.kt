@@ -1,5 +1,6 @@
 package com.colinmoerbe.poecompanion.account
 
+import com.colinmoerbe.poecompanion.security.identity.ConfiguredApplicationUsers
 import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.account.persistence.ManualOwnershipPersistenceAdapter
 import com.colinmoerbe.poecompanion.account.persistence.SpringDataManualOwnershipRepository
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
+import org.springframework.security.test.context.support.WithMockUser
 
 /**
  * Verifies that persisted manual ownership is projected into normalized current ownership.
@@ -35,6 +37,7 @@ import org.springframework.context.annotation.Import
         "poe-companion.security.password=test-password",
     ],
 )
+@WithMockUser(username = "test-user")
 internal class CurrentOwnershipServiceIntegrationTests(
     @Autowired private val currentOwnershipService: CurrentOwnershipService,
     @Autowired private val manualOwnershipPersistenceAdapter: ManualOwnershipPersistenceAdapter,
@@ -82,12 +85,14 @@ internal class CurrentOwnershipServiceIntegrationTests(
                 id = AccountContextId.generate(),
                 leagueDefinitionId = leagueDefinition.id,
                 ruleset = Ruleset.NORMAL,
+                ownerApplicationUserId = ConfiguredApplicationUsers.USER,
             ).also(accountContextPersistenceAdapter::save)
         val contextB =
             AccountContext(
                 id = AccountContextId.generate(),
                 leagueDefinitionId = leagueDefinition.id,
                 ruleset = Ruleset.NORMAL,
+                ownerApplicationUserId = ConfiguredApplicationUsers.USER,
             ).also(accountContextPersistenceAdapter::save)
         val sharedUnique = createPersistedUniqueDefinition()
         val contextBOnlyUnique = createPersistedUniqueDefinition()
@@ -145,6 +150,7 @@ internal class CurrentOwnershipServiceIntegrationTests(
                 id = AccountContextId.generate(),
                 leagueDefinitionId = leagueDefinition.id,
                 ruleset = Ruleset.NORMAL,
+                ownerApplicationUserId = ConfiguredApplicationUsers.USER,
             )
 
         accountContextPersistenceAdapter.save(accountContext)

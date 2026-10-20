@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Import
+import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.test.context.ActiveProfiles
 import javax.sql.DataSource
@@ -24,6 +25,7 @@ import javax.sql.DataSource
         "poe-companion.security.password=test-password",
     ],
 )
+@WithMockUser(username = "test-user")
 internal class DevelopmentFixtureStartupEnabledIntegrationTests(
     @Autowired private val context: ApplicationContext,
     @Autowired private val readiness: BuildReadinessService,

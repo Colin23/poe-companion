@@ -1,5 +1,6 @@
 package com.colinmoerbe.poecompanion
 
+import com.colinmoerbe.poecompanion.security.identity.ConfiguredApplicationUsers
 import com.colinmoerbe.poecompanion.account.ManualOwnershipService
 import com.colinmoerbe.poecompanion.acquisition.DevelopmentAcquisitionAccess
 import com.colinmoerbe.poecompanion.acquisition.attempts.AvailableAttemptsService
@@ -35,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Import
+import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.jdbc.core.JdbcTemplate
 import javax.sql.DataSource
 
@@ -49,6 +51,7 @@ import javax.sql.DataSource
         "poe-companion.security.password=test-password",
     ],
 )
+@WithMockUser(username = "test-user")
 internal class DevelopmentFixtureIntegrationTests(
     @Autowired private val initializer: DevelopmentFixtureInitializer,
     @Autowired private val buildReadiness: BuildReadinessService,
@@ -118,7 +121,7 @@ internal class DevelopmentFixtureIntegrationTests(
         attempts.setAvailableAttempts(ids.account, ids.source, 4)
 
         // A separately selected account must remain selected after another initializer run.
-        val otherAccount = AccountContext(AccountContextId.generate(), ids.league, Ruleset.NORMAL)
+        val otherAccount = AccountContext(AccountContextId.generate(), ids.league, Ruleset.NORMAL, ownerApplicationUserId = ConfiguredApplicationUsers.USER)
         accounts.save(otherAccount)
         accountEvaluation.select(otherAccount.id, CompatibilityVersion(3, 30))
         initializer.initialize()

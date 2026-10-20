@@ -1,5 +1,6 @@
 package com.colinmoerbe.poecompanion.league
 
+import com.colinmoerbe.poecompanion.security.identity.ConfiguredApplicationUsers
 import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.league.persistence.AccountContextPersistenceAdapter
 import com.colinmoerbe.poecompanion.league.persistence.LeagueDefinitionPersistenceAdapter
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
+import org.springframework.security.test.context.support.WithMockUser
 
 /**
  * Verifies persistence and derivation of the application's selected account evaluation.
@@ -25,6 +27,7 @@ import org.springframework.context.annotation.Import
         "poe-companion.security.password=test-password",
     ],
 )
+@WithMockUser(username = "test-user")
 internal class AccountEvaluationServiceIntegrationTests(
     @Autowired private val accountEvaluationService: AccountEvaluationService,
     @Autowired private val accountContextPersistenceAdapter: AccountContextPersistenceAdapter,
@@ -168,6 +171,7 @@ internal class AccountEvaluationServiceIntegrationTests(
             id = AccountContextId.generate(),
             leagueDefinitionId = leagueDefinition.id,
             ruleset = Ruleset.NORMAL,
+            ownerApplicationUserId = ConfiguredApplicationUsers.USER,
         ).also(accountContextPersistenceAdapter::save)
     }
 

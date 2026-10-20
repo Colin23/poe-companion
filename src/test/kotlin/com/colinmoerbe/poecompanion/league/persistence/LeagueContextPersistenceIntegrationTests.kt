@@ -1,5 +1,6 @@
 package com.colinmoerbe.poecompanion.league.persistence
 
+import com.colinmoerbe.poecompanion.security.identity.ConfiguredApplicationUsers
 import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.league.AccountContext
 import com.colinmoerbe.poecompanion.league.AccountContextId
@@ -84,6 +85,7 @@ internal class LeagueContextPersistenceIntegrationTests(
                 id = AccountContextId.generate(),
                 leagueDefinitionId = leagueDefinition.id,
                 ruleset = Ruleset.NORMAL,
+                ownerApplicationUserId = ConfiguredApplicationUsers.USER,
             )
 
         leagueDefinitionPersistenceAdapter.save(leagueDefinition)
@@ -111,6 +113,7 @@ internal class LeagueContextPersistenceIntegrationTests(
                 id = AccountContextId.generate(),
                 leagueDefinitionId = leagueDefinition.id,
                 ruleset = Ruleset.NORMAL,
+                ownerApplicationUserId = ConfiguredApplicationUsers.USER,
             )
 
         leagueDefinitionPersistenceAdapter.save(leagueDefinition)
@@ -139,6 +142,7 @@ internal class LeagueContextPersistenceIntegrationTests(
                 id = id,
                 leagueDefinitionId = leagueDefinition.id,
                 ruleset = Ruleset.NORMAL,
+                ownerApplicationUserId = ConfiguredApplicationUsers.USER,
             ),
         )
 
@@ -148,6 +152,7 @@ internal class LeagueContextPersistenceIntegrationTests(
                     id = id,
                     leagueDefinitionId = leagueDefinition.id,
                     ruleset = Ruleset.RUTHLESS,
+                    ownerApplicationUserId = ConfiguredApplicationUsers.USER,
                 ),
             )
         }.isInstanceOf(InvalidDataAccessApiUsageException::class.java)

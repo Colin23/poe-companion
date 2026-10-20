@@ -1,5 +1,6 @@
 package com.colinmoerbe.poecompanion.acquisition.attempts
 
+import com.colinmoerbe.poecompanion.security.identity.ConfiguredApplicationUsers
 import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.acquisition.attempts.persistence.SpringDataAvailableAttemptsRepository
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.AcquisitionSource
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
+import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.jdbc.core.JdbcTemplate
@@ -38,6 +40,7 @@ import org.springframework.jdbc.core.JdbcTemplate
         "poe-companion.security.password=test-password",
     ],
 )
+@WithMockUser(username = "test-user")
 internal class AvailableAttemptsServiceIntegrationTests(
     @Autowired private val service: AvailableAttemptsService,
     @Autowired private val repository: SpringDataAvailableAttemptsRepository,
@@ -215,6 +218,7 @@ internal class AvailableAttemptsServiceIntegrationTests(
             id = AccountContextId.generate(),
             leagueDefinitionId = leagueDefinition.id,
             ruleset = Ruleset.NORMAL,
+            ownerApplicationUserId = ConfiguredApplicationUsers.USER,
         ).also(accountContextPersistenceAdapter::save)
     }
 }

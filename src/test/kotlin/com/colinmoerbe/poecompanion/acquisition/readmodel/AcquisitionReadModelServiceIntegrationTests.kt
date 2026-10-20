@@ -1,5 +1,6 @@
 package com.colinmoerbe.poecompanion.acquisition.readmodel
 
+import com.colinmoerbe.poecompanion.security.identity.ConfiguredApplicationUsers
 import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.acquisition.attempts.AvailableAttempts
 import com.colinmoerbe.poecompanion.acquisition.attempts.AvailableAttemptsService
@@ -59,6 +60,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
+import org.springframework.security.test.context.support.WithMockUser
 import java.time.Instant
 
 /**
@@ -71,6 +73,7 @@ import java.time.Instant
         "poe-companion.security.password=test-password",
     ],
 )
+@WithMockUser(username = "test-user")
 internal class AcquisitionReadModelServiceIntegrationTests(
     @Autowired private val readModel: AcquisitionReadModelService,
     @Autowired private val accountEvaluationService: AccountEvaluationService,
@@ -492,7 +495,7 @@ internal class AcquisitionReadModelServiceIntegrationTests(
     }
 
     private fun selectLeague(league: LeagueDefinitionId = league()): LeagueDefinitionId {
-        val account = AccountContext(AccountContextId.generate(), league, Ruleset.NORMAL)
+        val account = AccountContext(AccountContextId.generate(), league, Ruleset.NORMAL, ownerApplicationUserId = ConfiguredApplicationUsers.USER)
         accountContextAdapter.save(account)
         accountEvaluationService.select(account.id, version)
         return league

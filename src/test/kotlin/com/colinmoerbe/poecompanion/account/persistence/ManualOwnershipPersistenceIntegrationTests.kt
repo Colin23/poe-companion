@@ -1,5 +1,6 @@
 package com.colinmoerbe.poecompanion.account.persistence
 
+import com.colinmoerbe.poecompanion.security.identity.ConfiguredApplicationUsers
 import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.account.ManualOwnership
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinition
@@ -200,6 +201,7 @@ internal class ManualOwnershipPersistenceIntegrationTests(
                 id = AccountContextId.generate(),
                 leagueDefinitionId = leagueDefinition.id,
                 ruleset = Ruleset.NORMAL,
+                ownerApplicationUserId = ConfiguredApplicationUsers.USER,
             )
 
         leagueDefinitionPersistenceAdapter.save(leagueDefinition)

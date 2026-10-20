@@ -1,10 +1,16 @@
 package com.colinmoerbe.poecompanion.league
 
+import com.colinmoerbe.poecompanion.security.identity.ApplicationUserId
+
 /**
- * Stable definition of one isolated personalized PoE environment.
+ * Stable definition of one owned personalized PoE environment.
  *
- * [leagueDefinitionId] and [ruleset] define the meaning of this identity and must not change after it is persisted.
- * Personalized state belongs to this identity. Game-version evaluation remains separate in [EvaluationContext], so a
- * long-lived context such as Standard is not permanently bound to one compatibility version or patch.
+ * Owner, league and ruleset define immutable identity semantics; compatibility version/patch
+ * belong to the separately persisted per-user evaluation selection.
  */
-class AccountContext(val id: AccountContextId, val leagueDefinitionId: LeagueDefinitionId, val ruleset: Ruleset)
+class AccountContext(
+    val id: AccountContextId,
+    val leagueDefinitionId: LeagueDefinitionId,
+    val ruleset: Ruleset,
+    val ownerApplicationUserId: ApplicationUserId,
+)
