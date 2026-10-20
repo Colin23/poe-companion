@@ -132,7 +132,7 @@ internal class UniqueBrowserControllerIntegrationTests(
             .andExpect(view().name("uniques/detail"))
             .andExpect(content().string(containsString("Missing · 0 copies")))
 
-        ownership.setOwnedQuantity(ids.account, ids.uniqueC, 1)
+        fixtureActor.asLegacyUser { ownership.setOwnedQuantity(ids.account, ids.uniqueC, 1) }
 
         mockMvc.perform(get(uri).with(user("test-user")))
             .andExpect(status().isOk)

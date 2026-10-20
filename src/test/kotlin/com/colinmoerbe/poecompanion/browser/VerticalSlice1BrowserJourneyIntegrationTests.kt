@@ -7,6 +7,7 @@ import com.colinmoerbe.poecompanion.acquisition.attempts.AvailableAttemptsServic
 import com.colinmoerbe.poecompanion.browser.acquisitions.AcquisitionBrowserDetailPage
 import com.colinmoerbe.poecompanion.browser.builds.BuildBrowserDetailPage
 import com.colinmoerbe.poecompanion.browser.builds.BuildBrowserState
+import com.colinmoerbe.poecompanion.security.identity.DevelopmentFixtureActor
 import org.assertj.core.api.Assertions.assertThat
 import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.AfterEach
@@ -43,6 +44,7 @@ internal class VerticalSlice1BrowserJourneyIntegrationTests(
     @Autowired private val mockMvc: MockMvc,
     @Autowired private val initializer: DevelopmentFixtureInitializer,
     @Autowired private val attempts: AvailableAttemptsService,
+    @Autowired private val fixtureActor: DevelopmentFixtureActor,
     @Autowired dataSource: DataSource,
 ) {
     private val jdbc = JdbcTemplate(dataSource)
@@ -105,7 +107,9 @@ internal class VerticalSlice1BrowserJourneyIntegrationTests(
         val dropAfterOwnership = bossAfterOwnership.relationships.single()
         assertThat(dropAfterOwnership.chancePerAttempt).isEqualTo("10.000%")
         assertThat(dropAfterOwnership.probabilityWithinAttempts).isEqualTo("71.8%")
-        assertThat(attempts.getAvailableAttempts(ids.account, ids.source)?.count).isEqualTo(12)
+        assertThat(
+            fixtureActor.asLegacyUser { attempts.getAvailableAttempts(ids.account, ids.source) }?.count,
+        ).isEqualTo(12)
     }
 
     private fun buildDetail(url: String): BuildBrowserDetailPage {

@@ -23,6 +23,7 @@ import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
 import com.colinmoerbe.poecompanion.catalog.persistence.UniqueDefinitionPersistenceAdapter
 import com.colinmoerbe.poecompanion.league.CompatibilityVersion
 import com.colinmoerbe.poecompanion.league.persistence.SpringDataAccountEvaluationSelectionRepository
+import com.colinmoerbe.poecompanion.security.identity.DevelopmentFixtureActor
 import org.assertj.core.api.Assertions.assertThat
 import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.AfterEach
@@ -58,6 +59,7 @@ internal class BuildBrowserControllerIntegrationTests(
     @Autowired private val mockMvc: MockMvc,
     @Autowired private val initializer: DevelopmentFixtureInitializer,
     @Autowired private val ownership: ManualOwnershipService,
+    @Autowired private val fixtureActor: DevelopmentFixtureActor,
     @Autowired private val selectionRepository: SpringDataAccountEvaluationSelectionRepository,
     @Autowired private val fixtureBuilds: DevelopmentBuildAccess,
     @Autowired private val archetypes: BuildArchetypePersistenceAdapter,
@@ -108,7 +110,7 @@ internal class BuildBrowserControllerIntegrationTests(
     @Test
     fun `owning C turns Build X unique ready without reloading the fixture`() {
         initializer.initialize()
-        ownership.setOwnedQuantity(ids.account, ids.uniqueC, 1)
+        fixtureActor.asLegacyUser { ownership.setOwnedQuantity(ids.account, ids.uniqueC, 1) }
 
         assertThat(detailPage(ids.variant).state).isEqualTo(BuildBrowserState.UNIQUE_READY)
         assertThat(detailPage(ids.variant).groups).allMatch { it.satisfied }
