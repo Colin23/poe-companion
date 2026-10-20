@@ -113,7 +113,7 @@ internal class LegacyAccountOwnershipMigrationIntegrationTests {
             ConfiguredApplicationUsers.USER.value,
             ConfiguredApplicationUsers.USER.value,
         )
-        assertThat(jdbc.queryForObject(
+        val quantity = jdbc.queryForObject(
             """
             SELECT quantity FROM poe_companion.manual_ownership
             WHERE account_context_id = ? AND unique_definition_id = ?
@@ -121,8 +121,9 @@ internal class LegacyAccountOwnershipMigrationIntegrationTests {
             Int::class.java,
             data.otherContext,
             data.unique,
-        )).isEqualTo(5)
-        assertThat(jdbc.queryForObject(
+        )
+        assertThat(quantity).isEqualTo(5)
+        val availableAttempts = jdbc.queryForObject(
             """
             SELECT attempt_count FROM poe_companion.available_attempts
             WHERE account_context_id = ? AND acquisition_source_id = ?
@@ -130,7 +131,8 @@ internal class LegacyAccountOwnershipMigrationIntegrationTests {
             Int::class.java,
             data.selectedContext,
             data.source,
-        )).isZero()
+        )
+        assertThat(availableAttempts).isZero()
 
         val selection = jdbc.queryForMap(
             """
@@ -144,14 +146,15 @@ internal class LegacyAccountOwnershipMigrationIntegrationTests {
         assertThat(selection["compatibility_version_minor"]).isEqualTo(30)
         assertThat(selection["game_patch"]).isEqualTo(2)
         assertThat(selection["game_patch_suffix"]).isEqualTo("b")
-        assertThat(jdbc.queryForObject(
+        val adminSelectionCount = jdbc.queryForObject(
             """
             SELECT COUNT(*) FROM poe_companion.account_evaluation_selection
             WHERE application_user_id = ?
             """.trimIndent(),
             Long::class.java,
             ConfiguredApplicationUsers.ADMIN.value,
-        )).isZero()
+        )
+        assertThat(adminSelectionCount).isZero()
     }
 
     private data class LegacyData(
