@@ -17,8 +17,10 @@ import com.colinmoerbe.poecompanion.league.LeagueType
 import com.colinmoerbe.poecompanion.league.Ruleset
 import com.colinmoerbe.poecompanion.league.persistence.AccountContextPersistenceAdapter
 import com.colinmoerbe.poecompanion.league.persistence.LeagueDefinitionPersistenceAdapter
+import com.colinmoerbe.poecompanion.security.identity.ApplicationUserId
 import com.colinmoerbe.poecompanion.security.identity.ConfiguredApplicationUsers
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -143,14 +145,25 @@ internal class CurrentOwnershipServiceIntegrationTests(
         realm = GameRealm.PC,
     ).also(leagueDefinitionPersistenceAdapter::save)
 
-    private fun createPersistedAccountContext(): AccountContext {
+    @Test
+    fun `another user's context cannot be read as CurrentOwnership`() {
+        val foreign = createPersistedAccountContext(owner = ConfiguredApplicationUsers.ADMIN)
+
+        assertThatThrownBy { currentOwnershipService.getCurrentOwnership(foreign.id) }
+            .isInstanceOf(IllegalArgumentException::class.java)
+            .hasMessage("Account context unavailable")
+    }
+
+    private fun createPersistedAccountContext(
+        owner: ApplicationUserId = ConfiguredApplicationUsers.USER,
+    ): AccountContext {
         val leagueDefinition = createPersistedLeagueDefinition()
         val accountContext =
             AccountContext(
                 id = AccountContextId.generate(),
                 leagueDefinitionId = leagueDefinition.id,
                 ruleset = Ruleset.NORMAL,
-                ownerApplicationUserId = ConfiguredApplicationUsers.USER,
+                ownerApplicationUserId = owner,
             )
 
         accountContextPersistenceAdapter.save(accountContext)

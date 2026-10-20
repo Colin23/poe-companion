@@ -16,6 +16,7 @@ import com.colinmoerbe.poecompanion.league.LeagueType
 import com.colinmoerbe.poecompanion.league.Ruleset
 import com.colinmoerbe.poecompanion.league.persistence.AccountContextPersistenceAdapter
 import com.colinmoerbe.poecompanion.league.persistence.LeagueDefinitionPersistenceAdapter
+import com.colinmoerbe.poecompanion.security.identity.ApplicationUserId
 import com.colinmoerbe.poecompanion.security.identity.ConfiguredApplicationUsers
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -203,7 +204,23 @@ internal class AvailableAttemptsServiceIntegrationTests(
     private fun createPersistedSource(): AcquisitionSource =
         AcquisitionSource(AcquisitionSourceId.generate()).also(sourcePersistenceAdapter::save)
 
-    private fun createPersistedAccountContext(): AccountContext {
+    @Test
+    fun `saved attempts cannot be read or changed for another user's context`() {
+        val foreign = createPersistedAccountContext(owner = ConfiguredApplicationUsers.ADMIN)
+        val source = createPersistedSource()
+
+        assertThatThrownBy { service.setAvailableAttempts(foreign.id, source.id, 4) }
+            .isInstanceOf(IllegalArgumentException::class.java)
+        assertThatThrownBy { service.getAvailableAttempts(foreign.id, source.id) }
+            .isInstanceOf(IllegalArgumentException::class.java)
+        assertThatThrownBy { service.clearAvailableAttempts(foreign.id, source.id) }
+            .isInstanceOf(IllegalArgumentException::class.java)
+        assertThat(repository.count()).isZero()
+    }
+
+    private fun createPersistedAccountContext(
+        owner: ApplicationUserId = ConfiguredApplicationUsers.USER,
+    ): AccountContext {
         val leagueDefinition =
             LeagueDefinition(
                 id = LeagueDefinitionId.generate(),
@@ -218,7 +235,7 @@ internal class AvailableAttemptsServiceIntegrationTests(
             id = AccountContextId.generate(),
             leagueDefinitionId = leagueDefinition.id,
             ruleset = Ruleset.NORMAL,
-            ownerApplicationUserId = ConfiguredApplicationUsers.USER,
+            ownerApplicationUserId = owner,
         ).also(accountContextPersistenceAdapter::save)
     }
 }
