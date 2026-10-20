@@ -7,6 +7,8 @@ import org.flywaydb.core.api.MigrationVersion
 import org.junit.jupiter.api.Test
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.datasource.DriverManagerDataSource
+import org.testcontainers.junit.jupiter.Container
+import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.postgresql.PostgreSQLContainer
 import org.testcontainers.utility.DockerImageName
 import java.util.UUID
@@ -15,22 +17,20 @@ import java.util.UUID
  * Exercises a real upgrade from populated legacy V017 data, not only a clean V018 installation.
  * A dedicated PostgreSQL container avoids modifying the shared Spring Boot integration-test schema.
  */
+@Testcontainers
 internal class LegacyAccountOwnershipMigrationIntegrationTests {
-    @Test
-    fun `V018 preserves legacy accounts facts and selection`() {
-        val postgres = PostgreSQLContainer(DockerImageName.parse("postgres:18.6"))
-        postgres.start()
-        try {
-            val dataSource = DriverManagerDataSource(postgres.jdbcUrl, postgres.username, postgres.password)
-            migrateTo(dataSource, "017")
-            val jdbc = JdbcTemplate(dataSource)
-            val data = seedLegacyData(jdbc)
+    @field:Container
+    private val postgres = PostgreSQLContainer(DockerImageName.parse("postgres:18.6"))
 
-            migrateTo(dataSource, "018")
-            verifyUpgradedData(jdbc, data)
-        } finally {
-            postgres.stop()
-        }
+    @Test
+    fun `V018 preserves legacy account facts and selection`() {
+        val dataSource = DriverManagerDataSource(postgres.jdbcUrl, postgres.username, postgres.password)
+        migrateTo(dataSource, "017")
+        val jdbc = JdbcTemplate(dataSource)
+        val data = seedLegacyData(jdbc)
+
+        migrateTo(dataSource, "018")
+        verifyUpgradedData(jdbc, data)
     }
 
     private fun migrateTo(dataSource: DriverManagerDataSource, version: String) {
