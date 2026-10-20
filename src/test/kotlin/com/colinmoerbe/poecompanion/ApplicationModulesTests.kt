@@ -39,6 +39,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.modulith.core.ApplicationModules
 import com.colinmoerbe.poecompanion.browser.ModuleMetadata as BrowserModuleMetadata
+import com.colinmoerbe.poecompanion.league.ModuleMetadata as LeagueModuleMetadata
 
 class ApplicationModulesTests {
 
@@ -77,6 +78,11 @@ class ApplicationModulesTests {
 
         val league = applicationModules.getModuleByName("league").orElseThrow()
         assertThat(league.isExposed(AccountContextAccessService::class.java)).isTrue()
+
+        val leagueAllowed = LeagueModuleMetadata::class.java
+            .getAnnotation(org.springframework.modulith.ApplicationModule::class.java)
+            .allowedDependencies
+        assertThat(leagueAllowed).containsExactly("security :: identity")
     }
 
     @Test
