@@ -176,17 +176,19 @@ internal class AcquisitionBrowserControllerIntegrationTests(
             Ruleset.NORMAL,
             ids.league,
         )
-        SecurityTestActors.asAdmin { encounters.recordSnapshot(
-            ids.source,
-            scope,
-            BossEncounterKnowledgeSnapshot(
+        SecurityTestActors.asAdmin {
+            encounters.recordSnapshot(
+                ids.source,
+                scope,
+                BossEncounterKnowledgeSnapshot(
+                    null,
+                    "Boss Y",
+                    AcquisitionSourceAvailability.AVAILABLE,
+                    BossParticipation.Fixed(setOf(ids.boss)),
+                ),
                 null,
-                "Boss Y",
-                AcquisitionSourceAvailability.AVAILABLE,
-                BossParticipation.Fixed(setOf(ids.boss)),
-            ),
-            null,
-        ) }
+            )
+        }
 
         val page = detailPage()
         assertThat(page.availability).isEqualTo("Ambiguous encounter scope")
@@ -201,23 +203,27 @@ internal class AcquisitionBrowserControllerIntegrationTests(
         val relationship = DropRelationshipId.generate()
         sourceAccess.saveSource(AcquisitionSource(source))
         sourceAccess.saveRelationship(DropRelationship(relationship, source, ids.uniqueC))
-        SecurityTestActors.asAdmin { encounters.recordSnapshot(
-            source,
-            AcquisitionKnowledgeScope(com.colinmoerbe.poecompanion.league.CompatibilityVersion(3, 30), Ruleset.NORMAL),
-            BossEncounterKnowledgeSnapshot(
+        SecurityTestActors.asAdmin {
+            encounters.recordSnapshot(
+                source,
+                AcquisitionKnowledgeScope(com.colinmoerbe.poecompanion.league.CompatibilityVersion(3, 30), Ruleset.NORMAL),
+                BossEncounterKnowledgeSnapshot(
+                    null,
+                    "Alternative Boss",
+                    AcquisitionSourceAvailability.AVAILABLE,
+                    BossParticipation.ConfigurationDependent,
+                ),
                 null,
-                "Alternative Boss",
-                AcquisitionSourceAvailability.AVAILABLE,
-                BossParticipation.ConfigurationDependent,
-            ),
-            null,
-        ) }
-        SecurityTestActors.asAdmin { drops.recordSnapshot(
-            relationship,
-            AcquisitionKnowledgeScope(com.colinmoerbe.poecompanion.league.CompatibilityVersion(3, 30), Ruleset.NORMAL),
-            DropRelationshipSnapshot(null, DropRelationshipState.CANNOT_DROP),
-            null,
-        ) }
+            )
+        }
+        SecurityTestActors.asAdmin {
+            drops.recordSnapshot(
+                relationship,
+                AcquisitionKnowledgeScope(com.colinmoerbe.poecompanion.league.CompatibilityVersion(3, 30), Ruleset.NORMAL),
+                DropRelationshipSnapshot(null, DropRelationshipState.CANNOT_DROP),
+                null,
+            )
+        }
 
         val page = detailPage(id = source)
         assertThat(page.availability).isEqualTo("AVAILABLE")

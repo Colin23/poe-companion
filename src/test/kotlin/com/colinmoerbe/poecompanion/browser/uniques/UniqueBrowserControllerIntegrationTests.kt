@@ -370,17 +370,19 @@ internal class UniqueBrowserControllerIntegrationTests(
     fun `ambiguous source scope is not converted into actionable probability`() {
         initializer.initialize()
         val leagueScope = AcquisitionKnowledgeScope(CompatibilityVersion(3, 30), Ruleset.NORMAL, ids.league)
-        SecurityTestActors.asAdmin { encounters.recordSnapshot(
-            ids.source,
-            leagueScope,
-            BossEncounterKnowledgeSnapshot(
+        SecurityTestActors.asAdmin {
+            encounters.recordSnapshot(
+                ids.source,
+                leagueScope,
+                BossEncounterKnowledgeSnapshot(
+                    null,
+                    "Boss Y",
+                    AcquisitionSourceAvailability.AVAILABLE,
+                    BossParticipation.ConfigurationDependent,
+                ),
                 null,
-                "Boss Y",
-                AcquisitionSourceAvailability.AVAILABLE,
-                BossParticipation.ConfigurationDependent,
-            ),
-            null,
-        ) }
+            )
+        }
 
         mockMvc.perform(get("/uniques/${ids.uniqueC.value}").with(user("test-user")))
             .andExpect(status().isOk)
@@ -400,15 +402,24 @@ internal class UniqueBrowserControllerIntegrationTests(
             acquisition.saveSource(AcquisitionSource(source))
             acquisition.saveRelationship(DropRelationship(relationship, source, ids.uniqueC))
             if (name != null && availability != null) {
-                SecurityTestActors.asAdmin { encounters.recordSnapshot(
-                    source,
-                    general,
-                    BossEncounterKnowledgeSnapshot(null, name, availability, BossParticipation.ConfigurationDependent),
-                    null,
-                ) }
+                SecurityTestActors.asAdmin {
+                    encounters.recordSnapshot(
+                        source,
+                        general,
+                        BossEncounterKnowledgeSnapshot(null, name, availability, BossParticipation.ConfigurationDependent),
+                        null,
+                    )
+                }
             }
             if (state != null) {
-                SecurityTestActors.asAdmin { drops.recordSnapshot(relationship, general, DropRelationshipSnapshot(null, state), null) }
+                SecurityTestActors.asAdmin {
+                    drops.recordSnapshot(
+                        relationship,
+                        general,
+                        DropRelationshipSnapshot(null, state),
+                        null,
+                    )
+                }
             }
         }
         addSource("Cannot Drop Encounter", AcquisitionSourceAvailability.AVAILABLE, DropRelationshipState.CANNOT_DROP)
