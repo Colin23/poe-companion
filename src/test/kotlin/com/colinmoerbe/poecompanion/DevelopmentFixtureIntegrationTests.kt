@@ -1,5 +1,6 @@
 package com.colinmoerbe.poecompanion
 
+import com.colinmoerbe.poecompanion.account.CurrentOwnershipService
 import com.colinmoerbe.poecompanion.account.ManualOwnershipService
 import com.colinmoerbe.poecompanion.acquisition.DevelopmentAcquisitionAccess
 import com.colinmoerbe.poecompanion.acquisition.attempts.AvailableAttemptsService
@@ -62,6 +63,7 @@ internal class DevelopmentFixtureIntegrationTests(
     @Autowired private val buildReadiness: BuildReadinessService,
     @Autowired private val acquisitionReadModel: AcquisitionReadModelService,
     @Autowired private val ownership: ManualOwnershipService,
+    @Autowired private val currentOwnership: CurrentOwnershipService,
     @Autowired private val attempts: AvailableAttemptsService,
     @Autowired private val accountEvaluation: AccountEvaluationService,
     @Autowired private val bosses: BossDefinitionService,
@@ -254,7 +256,10 @@ internal class DevelopmentFixtureIntegrationTests(
     @Test
     fun `rerunning the expanded fixture never restores cleared attempts or USER selection`() {
         initializer.initialize()
+        fixtureActor.asLegacyUser { ownership.setOwnedQuantity(ids.account, ids.uniqueH, 3) }
         fixtureActor.asAdmin {
+            ownership.setOwnedQuantity(ids.adminChallengeAccount, ids.uniqueH, 4)
+            ownership.setOwnedQuantity(ids.adminStandardAccount, ids.uniqueH, 5)
             attempts.clearAvailableAttempts(ids.adminChallengeAccount, ids.source)
             attempts.setAvailableAttempts(ids.adminChallengeAccount, ids.sourceP, 0)
             accountEvaluation.select(ids.adminStandardAccount, CompatibilityVersion(3, 30))
@@ -268,8 +273,13 @@ internal class DevelopmentFixtureIntegrationTests(
         initializer.initialize()
 
         assertThat(accountEvaluation.getSelected()).isNull()
+        assertThat(currentOwnership.getCurrentOwnership(ids.account).quantityOf(ids.uniqueH)).isEqualTo(3)
         fixtureActor.asAdmin {
             assertThat(accountEvaluation.getSelected()?.accountContextId).isEqualTo(ids.adminStandardAccount)
+            assertThat(currentOwnership.getCurrentOwnership(ids.adminChallengeAccount).quantityOf(ids.uniqueH))
+                .isEqualTo(4)
+            assertThat(currentOwnership.getCurrentOwnership(ids.adminStandardAccount).quantityOf(ids.uniqueH))
+                .isEqualTo(5)
             assertThat(attempts.getAvailableAttempts(ids.adminChallengeAccount, ids.source)).isNull()
             assertThat(attempts.getAvailableAttempts(ids.adminChallengeAccount, ids.sourceP)?.count).isZero()
         }

@@ -86,6 +86,17 @@ internal class AcquisitionBrowserControllerIntegrationTests(
         assertThat(bossY.availability).isEqualTo("AVAILABLE")
         assertThat(bossY.relationshipCount).isEqualTo(1)
 
+        val bossP = list.sources.single { it.id == ids.sourceP.value }
+        assertThat(bossP.displayName).isEqualTo("Boss P")
+        assertThat(bossP.availability).isEqualTo("AVAILABLE")
+        assertThat(bossP.relationshipCount).isEqualTo(2)
+
+        val expandedPage = detailPage(id = ids.sourceP)
+        assertThat(expandedPage.displayName).isEqualTo("Boss P")
+        assertThat(expandedPage.relationships).hasSize(2)
+        assertThat(expandedPage.relationships.map { it.relationshipStatus })
+            .containsExactlyInAnyOrder("CAN_DROP", "CANNOT_DROP")
+
         val page = detailPage()
         assertThat(page.displayName).isEqualTo("Boss Y")
         assertThat(page.savedAttempts).isEqualTo(12)

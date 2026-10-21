@@ -109,6 +109,20 @@ internal class UniqueBrowserControllerIntegrationTests(
     }
 
     @Test
+    fun `expanded Unique D detail links to Boss P acquisition source`() {
+        initializer.initialize()
+
+        val html = mockMvc.perform(get("/uniques/${ids.uniqueD.value}").with(user("test-user")))
+            .andExpect(status().isOk)
+            .andExpect(view().name("uniques/detail"))
+            .andExpect(content().string(containsString("Boss P")))
+            .andExpect(content().string(containsString("CAN_DROP")))
+            .andExpect(content().string(containsString("AVAILABLE")))
+            .andReturn().response.contentAsString
+        assertThat(html).contains("/acquisitions/${ids.sourceP.value}#unique-${ids.uniqueD.value}")
+    }
+
+    @Test
     fun `owned and missing filters use recorded quantities rather than fixture names`() {
         initializer.initialize()
 
