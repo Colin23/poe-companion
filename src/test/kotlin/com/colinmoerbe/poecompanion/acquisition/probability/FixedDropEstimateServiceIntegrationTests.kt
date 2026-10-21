@@ -59,6 +59,8 @@ import java.util.concurrent.TimeUnit
         "poe-companion.security.admin.password=test-admin-password",
     ],
 )
+// This long-lived PostgreSQL test suite covers many independent publication/withdrawal invariants.
+@Suppress("LargeClass")
 @WithMockUser(username = "test-admin", roles = ["ADMIN"])
 internal class FixedDropEstimateServiceIntegrationTests(
     @Autowired private val service: FixedDropEstimateService,

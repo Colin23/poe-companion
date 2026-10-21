@@ -139,15 +139,15 @@ internal class DevelopmentFixtureInitializer(
     private fun createAcquisition() {
         fixtureActor.asAdmin {
             bosses.create(BossDefinition(ids.boss, "Boss Y"))
-        acquisitionAccess.saveSource(AcquisitionSource(ids.source))
-        encounters.recordSnapshot(ids.source, scope, encounterSnapshot(), null)
-        acquisitionAccess.saveRelationship(DropRelationship(ids.relationship, ids.source, ids.uniqueC))
-        drops.recordSnapshot(
-            ids.relationship,
-            scope,
-            DropRelationshipSnapshot(null, DropRelationshipState.CAN_DROP),
-            null,
-        )
+            acquisitionAccess.saveSource(AcquisitionSource(ids.source))
+            encounters.recordSnapshot(ids.source, scope, encounterSnapshot(), null)
+            acquisitionAccess.saveRelationship(DropRelationship(ids.relationship, ids.source, ids.uniqueC))
+            drops.recordSnapshot(
+                ids.relationship,
+                scope,
+                DropRelationshipSnapshot(null, DropRelationshipState.CAN_DROP),
+                null,
+            )
             estimates.publish(ids.relationship, scope, estimateSnapshot(), null)
         }
         attempts.setAvailableAttempts(ids.account, ids.source, INITIAL_ATTEMPTS)
