@@ -86,17 +86,31 @@ internal class ExpandedDevelopmentFixture(
         ids.uniqueI, ids.uniqueJ, ids.uniqueK, ids.uniqueL,
     )
 
-    /** A missing first Unique must not mask a different partial expansion. */
-    fun hasAnyIdentities(): Boolean = newUniques.any { uniques.findById(it) != null } ||
-        league.findLeagueById(ids.standardLeague) != null ||
-        listOf(ids.adminChallengeAccount, ids.adminStandardAccount).any { league.findAccountById(it) != null } ||
-        listOf(ids.archetypeP, ids.archetypeQ, ids.archetypeR).any { builds.findArchetypeById(it) != null } ||
-        listOf(ids.variantP, ids.variantQ, ids.variantR).any { builds.findVariantById(it) != null } ||
-        listOf(ids.revisionP, ids.revisionQ, ids.revisionR).any { builds.findRevisionById(it) != null } ||
-        listOf(ids.bossP, ids.bossQ, ids.bossR).any { bosses.findById(it) != null } ||
-        listOf(ids.sourceP, ids.sourceQ, ids.sourceR).any { acquisition.findSourceById(it) != null } ||
-        listOf(ids.relationshipPD, ids.relationshipPE, ids.relationshipQH, ids.relationshipRK)
+    /** Detect any existing expansion identity, including partial expansions missing the first Unique. */
+    fun hasAnyIdentities(): Boolean {
+        if (newUniques.any { uniques.findById(it) != null }) return true
+        if (league.findLeagueById(ids.standardLeague) != null) return true
+
+        if (listOf(ids.adminChallengeAccount, ids.adminStandardAccount).any { league.findAccountById(it) != null }) {
+            return true
+        }
+
+        if (listOf(ids.archetypeP, ids.archetypeQ, ids.archetypeR).any { builds.findArchetypeById(it) != null }) {
+            return true
+        }
+        if (listOf(ids.variantP, ids.variantQ, ids.variantR).any { builds.findVariantById(it) != null }) {
+            return true
+        }
+        if (listOf(ids.revisionP, ids.revisionQ, ids.revisionR).any { builds.findRevisionById(it) != null }) {
+            return true
+        }
+
+        if (listOf(ids.bossP, ids.bossQ, ids.bossR).any { bosses.findById(it) != null }) return true
+        if (listOf(ids.sourceP, ids.sourceQ, ids.sourceR).any { acquisition.findSourceById(it) != null }) return true
+
+        return listOf(ids.relationshipPD, ids.relationshipPE, ids.relationshipQH, ids.relationshipRK)
             .any { acquisition.findRelationshipById(it) != null }
+    }
 
     fun create() {
         actor.asAdmin {
@@ -213,18 +227,41 @@ internal class ExpandedDevelopmentFixture(
         name: String,
         groups: List<RequirementGroup>,
     ) {
-        check(
-            builds.findArchetypeById(archetypeId)?.name == name &&
-                builds.findVariantById(variantId)?.let {
-                    it.buildArchetypeId == archetypeId && it.label == null
-                } == true &&
-                builds.findRevisionById(revisionId)?.let { revision ->
-                    revision.buildVariantId == variantId && revision.compatibilityVersion == version &&
-                        revision.status == BuildVariantRevisionStatus.ACTIVE &&
-                        revision.requirementGroups.map { Triple(it.importance, it.logic, it.requirements) } ==
-                        groups.map { Triple(it.importance, it.logic, it.requirements) }
-                } == true,
-        ) { "Partial expanded development fixture: $name definition" }
+        val archetype = checkNotNull(builds.findArchetypeById(archetypeId)) {
+            "Partial expanded development fixture: $name archetype is missing"
+        }
+        check(archetype.name == name) {
+            "Partial expanded development fixture: $name archetype name changed"
+        }
+
+        val variant = checkNotNull(builds.findVariantById(variantId)) {
+            "Partial expanded development fixture: $name variant is missing"
+        }
+        check(variant.buildArchetypeId == archetypeId) {
+            "Partial expanded development fixture: $name variant belongs to a different archetype"
+        }
+        check(variant.label == null) {
+            "Partial expanded development fixture: $name variant label changed"
+        }
+
+        val revision = checkNotNull(builds.findRevisionById(revisionId)) {
+            "Partial expanded development fixture: $name revision is missing"
+        }
+        check(revision.buildVariantId == variantId) {
+            "Partial expanded development fixture: $name revision belongs to a different variant"
+        }
+        check(revision.compatibilityVersion == version) {
+            "Partial expanded development fixture: $name revision compatibility changed"
+        }
+        check(revision.status == BuildVariantRevisionStatus.ACTIVE) {
+            "Partial expanded development fixture: $name revision is no longer active"
+        }
+
+        val actualGroups = revision.requirementGroups.map { Triple(it.importance, it.logic, it.requirements) }
+        val expectedGroups = groups.map { Triple(it.importance, it.logic, it.requirements) }
+        check(actualGroups == expectedGroups) {
+            "Partial expanded development fixture: $name revision requirements changed"
+        }
     }
 
     private fun createSource(

@@ -169,6 +169,17 @@ internal class DevelopmentFixtureIntegrationTests(
     }
 
     @Test
+    fun `partial expanded fixture with only a BossDefinition is rejected`() {
+        fixtureActor.asAdmin { bosses.create(BossDefinition(ids.bossR, "Boss R")) }
+
+        assertThatThrownBy { initializer.initialize() }
+            .isInstanceOf(IllegalStateException::class.java)
+            .hasMessageContaining("Partial development fixture")
+        assertThat(count("unique_definition")).isZero()
+        assertThat(count("account_context")).isZero()
+    }
+
+    @Test
     fun `failure after intermediate inserts should roll back the entire initial fixture`() {
         fixtureActor.asAdmin { bosses.create(BossDefinition(BossDefinitionId.generate(), "Boss Y")) }
 

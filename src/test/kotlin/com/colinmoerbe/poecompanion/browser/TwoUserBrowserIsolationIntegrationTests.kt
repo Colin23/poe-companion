@@ -76,7 +76,7 @@ internal class TwoUserBrowserIsolationIntegrationTests(
 
     @Test
     fun `ADMIN without a context can browse shared knowledge without personal results`() {
-        // C1 now seeds ADMIN's default selection; remove only that selection to cover no-context rendering.
+        // The fixture seeds ADMIN's selection, so clear it explicitly to test the no-context browser state.
         jdbc.update(
             "DELETE FROM poe_companion.account_evaluation_selection WHERE application_user_id = ?",
             ConfiguredApplicationUsers.ADMIN.value,

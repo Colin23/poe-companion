@@ -92,8 +92,8 @@ internal class BuildBrowserControllerIntegrationTests(
             .andReturn()
         val listPage = listing.modelAndView!!.model["page"] as BuildBrowserListPage
         assertThat(listPage.totalCount).isEqualTo(4)
-        assertThat(listPage.sections.flatMap { it.entries }.single { it.id == ids.variant.value }.state)
-            .isEqualTo(BuildBrowserState.PARTIAL)
+        val buildX = listPage.sections.flatMap { it.entries }.single { it.id == ids.variant.value }
+        assertThat(buildX.state).isEqualTo(BuildBrowserState.PARTIAL)
 
         val detail = detailPage(ids.variant)
         assertThat(detail.state).isEqualTo(BuildBrowserState.PARTIAL)
@@ -120,8 +120,8 @@ internal class BuildBrowserControllerIntegrationTests(
         assertThat(detailPage(ids.variant).groups).allMatch { it.satisfied }
 
         val page = listPage()
-        assertThat(page.sections.flatMap { it.entries }.single { it.id == ids.variant.value }.state)
-            .isEqualTo(BuildBrowserState.UNIQUE_READY)
+        val buildX = page.sections.flatMap { it.entries }.single { it.id == ids.variant.value }
+        assertThat(buildX.state).isEqualTo(BuildBrowserState.UNIQUE_READY)
     }
 
     @Test
