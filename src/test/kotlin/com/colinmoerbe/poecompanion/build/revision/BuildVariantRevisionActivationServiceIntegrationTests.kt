@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
-import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService
+import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.support.TransactionTemplate
@@ -203,7 +203,7 @@ internal class BuildVariantRevisionActivationServiceIntegrationTests(
         val firstUpdated = CountDownLatch(1)
         val secondAttempting = CountDownLatch(1)
         val allowFirstCommit = CountDownLatch(1)
-        val executor = DelegatingSecurityContextExecutorService(Executors.newFixedThreadPool(2))
+        val executor = Executors.newFixedThreadPool(2)
 
         try {
             val firstResult =
