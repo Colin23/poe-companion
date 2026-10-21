@@ -80,10 +80,22 @@ internal class AcquisitionBrowserControllerIntegrationTests(
         initializer.initialize()
         val list = listPage()
         assertThat(list.accountSelected).isTrue()
-        assertThat(list.sources).hasSize(1)
-        assertThat(list.sources.single().displayName).isEqualTo("Boss Y")
-        assertThat(list.sources.single().availability).isEqualTo("AVAILABLE")
-        assertThat(list.sources.single().relationshipCount).isEqualTo(1)
+        assertThat(list.sources).hasSize(4)
+        val bossY = list.sources.single { it.id == ids.source.value }
+        assertThat(bossY.displayName).isEqualTo("Boss Y")
+        assertThat(bossY.availability).isEqualTo("AVAILABLE")
+        assertThat(bossY.relationshipCount).isEqualTo(1)
+
+        val bossP = list.sources.single { it.id == ids.sourceP.value }
+        assertThat(bossP.displayName).isEqualTo("Boss P")
+        assertThat(bossP.availability).isEqualTo("AVAILABLE")
+        assertThat(bossP.relationshipCount).isEqualTo(2)
+
+        val expandedPage = detailPage(id = ids.sourceP)
+        assertThat(expandedPage.displayName).isEqualTo("Boss P")
+        assertThat(expandedPage.relationships).hasSize(2)
+        assertThat(expandedPage.relationships.map { it.relationshipStatus })
+            .containsExactlyInAnyOrder("CAN_DROP", "CANNOT_DROP")
 
         val page = detailPage()
         assertThat(page.displayName).isEqualTo("Boss Y")
@@ -155,7 +167,7 @@ internal class AcquisitionBrowserControllerIntegrationTests(
 
         val list = listPage()
         assertThat(list.accountSelected).isFalse()
-        assertThat(list.sources).hasSize(2)
+        assertThat(list.sources).hasSize(5)
         assertThat(list.sources.single { it.id == orphan.value }.relationshipCount).isZero()
         assertThat(list.sources).allMatch { it.availability.contains("no account selected") }
 

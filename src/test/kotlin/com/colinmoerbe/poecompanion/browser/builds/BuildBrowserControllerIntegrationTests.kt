@@ -91,8 +91,9 @@ internal class BuildBrowserControllerIntegrationTests(
             .andExpect(content().string(containsString("Partial")))
             .andReturn()
         val listPage = listing.modelAndView!!.model["page"] as BuildBrowserListPage
-        assertThat(listPage.totalCount).isEqualTo(1)
-        assertThat(listPage.sections.single().state).isEqualTo(BuildBrowserState.PARTIAL)
+        assertThat(listPage.totalCount).isEqualTo(4)
+        val buildX = listPage.sections.flatMap { it.entries }.single { it.id == ids.variant.value }
+        assertThat(buildX.state).isEqualTo(BuildBrowserState.PARTIAL)
 
         val detail = detailPage(ids.variant)
         assertThat(detail.state).isEqualTo(BuildBrowserState.PARTIAL)
@@ -111,6 +112,40 @@ internal class BuildBrowserControllerIntegrationTests(
     }
 
     @Test
+    fun `expanded Builds P Q and R render independent readiness and requirements`() {
+        initializer.initialize()
+
+        val entries = listPage().sections.flatMap { it.entries }
+        assertThat(entries.map { it.displayName })
+            .containsExactlyInAnyOrder("Build X", "Build P", "Build Q", "Build R")
+
+        val buildP = detailPage(ids.variantP)
+        assertThat(buildP.state).isEqualTo(BuildBrowserState.BLOCKED)
+        assertThat(buildP.groups.map { it.logic }).containsExactly("ANY", "ALL")
+
+        val buildQ = detailPage(ids.variantQ)
+        assertThat(buildQ.state).isEqualTo(BuildBrowserState.PARTIAL)
+        val coreRequirement = buildQ.groups.single { it.importance == "CORE" }.requirements.single()
+        assertThat(coreRequirement.requiredQuantity).isEqualTo(2)
+        assertThat(coreRequirement.ownedQuantity).isEqualTo(1)
+
+        val buildR = detailPage(ids.variantR)
+        assertThat(buildR.state).isEqualTo(BuildBrowserState.UNIQUE_READY)
+        assertThat(buildR.hasRequiredUniqueGroups).isFalse()
+
+        listOf(
+            ids.variantP to "Any one of the alternatives",
+            ids.variantQ to "missing copies",
+            ids.variantR to "Upgrades do not affect primary Unique readiness.",
+        ).forEach { (id, marker) ->
+            mockMvc.perform(get("/builds/${id.value}").with(user("test-user")))
+                .andExpect(status().isOk)
+                .andExpect(view().name("builds/detail"))
+                .andExpect(content().string(containsString(marker)))
+        }
+    }
+
+    @Test
     fun `owning C turns Build X unique ready without reloading the fixture`() {
         initializer.initialize()
         fixtureActor.asLegacyUser { ownership.setOwnedQuantity(ids.account, ids.uniqueC, 1) }
@@ -119,7 +154,8 @@ internal class BuildBrowserControllerIntegrationTests(
         assertThat(detailPage(ids.variant).groups).allMatch { it.satisfied }
 
         val page = listPage()
-        assertThat(page.sections.single().state).isEqualTo(BuildBrowserState.UNIQUE_READY)
+        val buildX = page.sections.flatMap { it.entries }.single { it.id == ids.variant.value }
+        assertThat(buildX.state).isEqualTo(BuildBrowserState.UNIQUE_READY)
     }
 
     @Test

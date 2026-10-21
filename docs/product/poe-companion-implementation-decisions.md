@@ -1644,3 +1644,25 @@ anonymous and USER canonical-write rejection, ADMIN canonical authoring, both-ro
 personal service isolation and Browser composition, CSRF, session independence,
 fixture idempotency and PostgreSQL-backed existing knowledge tests. Preserve the
 Spring Modulith eight-module boundary and full Gradle/CI/CodeQL checks.
+
+---
+
+## 37. Additive Synthetic Fixture and Independent Personal Contexts (Milestone 5.2 PR C1)
+
+The development fixture expands shared synthetic data to twelve Uniques, four Builds and four
+Acquisition sources, retaining original A/B/C → Build X → Boss Y identities. New scenarios
+exercise ENABLING/CORE/UPGRADE, ANY/ALL, multi-copy, upgrade-only, source availability,
+CANNOT_DROP relationships and absent probability estimates.
+
+USER retains its legacy Challenge SSF AccountContext; ADMIN gets independent Challenge SSF
+and Standard SSF contexts. These contexts are personally owned, but LeagueDefinitions and
+canonical game knowledge are shared. Fixture context counts must **not** determine which
+leagues/versions other users may browse; global game-context selection and private personal
+context selection remain distinct future UI responsibilities.
+
+The opt-in fixture supports first creation, atomic upgrade from a complete legacy A/B/C
+fixture, and re-verification of the complete expanded fixture. It refuses partial/corrupt
+canonical data and checks AccountContext ownership, without resetting personal quantities,
+attempt records (including recorded zero versus absence) or changed/cleared selections.
+Initial selections are written only when their personal contexts are first seeded.
+No public guest access, new migration, or production fixture startup is introduced.

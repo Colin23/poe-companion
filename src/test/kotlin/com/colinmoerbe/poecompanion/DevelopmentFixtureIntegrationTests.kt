@@ -1,5 +1,6 @@
 package com.colinmoerbe.poecompanion
 
+import com.colinmoerbe.poecompanion.account.CurrentOwnershipService
 import com.colinmoerbe.poecompanion.account.ManualOwnershipService
 import com.colinmoerbe.poecompanion.acquisition.DevelopmentAcquisitionAccess
 import com.colinmoerbe.poecompanion.acquisition.attempts.AvailableAttemptsService
@@ -7,6 +8,8 @@ import com.colinmoerbe.poecompanion.acquisition.knowledge.ScopedAcquisitionKnowl
 import com.colinmoerbe.poecompanion.acquisition.probability.FixedDropEstimateResolution
 import com.colinmoerbe.poecompanion.acquisition.readmodel.AcquisitionQueryResult
 import com.colinmoerbe.poecompanion.acquisition.readmodel.AcquisitionReadModelService
+import com.colinmoerbe.poecompanion.acquisition.relationship.DropRelationshipResolution
+import com.colinmoerbe.poecompanion.acquisition.relationship.DropRelationshipState
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.BossDefinition
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.BossDefinitionCreationConflictException
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.BossDefinitionId
@@ -60,6 +63,7 @@ internal class DevelopmentFixtureIntegrationTests(
     @Autowired private val buildReadiness: BuildReadinessService,
     @Autowired private val acquisitionReadModel: AcquisitionReadModelService,
     @Autowired private val ownership: ManualOwnershipService,
+    @Autowired private val currentOwnership: CurrentOwnershipService,
     @Autowired private val attempts: AvailableAttemptsService,
     @Autowired private val accountEvaluation: AccountEvaluationService,
     @Autowired private val bosses: BossDefinitionService,
@@ -147,9 +151,12 @@ internal class DevelopmentFixtureIntegrationTests(
             .sources.single()
         assertThat(source.availableAttempts?.count).isEqualTo(4)
         assertThat(source.calculation?.probabilityWithinAvailableAttempts).isCloseTo(0.3439, offset(1e-12))
-        assertThat(count("unique_definition")).isEqualTo(3)
-        assertThat(count("drop_relationship")).isEqualTo(1)
-        assertThat(count("fixed_drop_estimate")).isEqualTo(1)
+        assertThat(count("unique_definition")).isEqualTo(12)
+        assertThat(count("build_archetype")).isEqualTo(4)
+        assertThat(count("acquisition_source")).isEqualTo(4)
+        assertThat(count("account_context")).isEqualTo(4) // Three fixture contexts plus the test-created USER context.
+        assertThat(count("drop_relationship")).isEqualTo(5)
+        assertThat(count("fixed_drop_estimate")).isEqualTo(3)
     }
 
     @Test
@@ -164,6 +171,17 @@ internal class DevelopmentFixtureIntegrationTests(
     }
 
     @Test
+    fun `partial expanded fixture with only a BossDefinition is rejected`() {
+        fixtureActor.asAdmin { bosses.create(BossDefinition(ids.bossR, "Boss R")) }
+
+        assertThatThrownBy { initializer.initialize() }
+            .isInstanceOf(IllegalStateException::class.java)
+            .hasMessageContaining("Partial development fixture")
+        assertThat(count("unique_definition")).isZero()
+        assertThat(count("account_context")).isZero()
+    }
+
+    @Test
     fun `failure after intermediate inserts should roll back the entire initial fixture`() {
         fixtureActor.asAdmin { bosses.create(BossDefinition(BossDefinitionId.generate(), "Boss Y")) }
 
@@ -175,6 +193,133 @@ internal class DevelopmentFixtureIntegrationTests(
         assertThat(count("account_context")).isZero()
         assertThat(count("drop_relationship")).isZero()
         assertThat(accountEvaluation.getSelected()).isNull()
+    }
+
+    @Test
+    fun `expanded fixture shares four Builds but derives independent readiness for each context`() {
+        initializer.initialize()
+
+        assertReadiness(ids.variant, UniqueReadiness.PARTIAL)
+        assertReadiness(ids.variantP, UniqueReadiness.BLOCKED)
+        assertReadiness(ids.variantQ, UniqueReadiness.PARTIAL)
+        assertReadiness(ids.variantR, UniqueReadiness.UNIQUE_READY)
+
+        fixtureActor.asAdmin {
+            assertThat(accountEvaluation.getSelected()?.accountContextId).isEqualTo(ids.adminChallengeAccount)
+            assertReadiness(ids.variant, UniqueReadiness.UNIQUE_READY)
+            assertReadiness(ids.variantP, UniqueReadiness.PARTIAL)
+            assertReadiness(ids.variantQ, UniqueReadiness.UNIQUE_READY)
+            assertReadiness(ids.variantR, UniqueReadiness.UNIQUE_READY)
+
+            assertThat(attempts.getAvailableAttempts(ids.adminChallengeAccount, ids.source)?.count).isZero()
+            assertThat(attempts.getAvailableAttempts(ids.adminChallengeAccount, ids.sourceP)?.count).isEqualTo(4)
+            assertThat(attempts.getAvailableAttempts(ids.adminStandardAccount, ids.sourceP)?.count).isZero()
+            assertThat(attempts.getAvailableAttempts(ids.adminStandardAccount, ids.sourceQ)?.count).isEqualTo(2)
+            assertThat(attempts.getAvailableAttempts(ids.adminStandardAccount, ids.source)).isNull()
+
+            accountEvaluation.select(ids.adminStandardAccount, CompatibilityVersion(3, 30))
+            assertReadiness(ids.variant, UniqueReadiness.BLOCKED)
+            assertReadiness(ids.variantP, UniqueReadiness.UNIQUE_READY)
+            assertReadiness(ids.variantQ, UniqueReadiness.PARTIAL)
+            assertReadiness(ids.variantR, UniqueReadiness.UNIQUE_READY)
+        }
+        assertThat(accountEvaluation.getSelected()?.accountContextId).isEqualTo(ids.account)
+        assertThat(attempts.getAvailableAttempts(ids.account, ids.source)?.count).isEqualTo(12)
+
+        val sourceP = acquisitionReadModel.findForSource(ids.sourceP)!!
+        assertThat(
+            sourceP.relationships.single { it.relationship.uniqueDefinitionId == ids.uniqueD }
+                .assessment?.calculation,
+        ).isNotNull()
+        val negative = sourceP.relationships.single { it.relationship.uniqueDefinitionId == ids.uniqueE }
+        val relationship = negative.assessment?.relationshipKnowledge as ScopedAcquisitionKnowledge.Selected
+        assertThat((relationship.resolution as DropRelationshipResolution.Resolved).snapshot.state)
+            .isEqualTo(DropRelationshipState.CANNOT_DROP)
+        assertThat(negative.assessment?.calculation).isNull()
+
+        val noEstimate = acquisitionReadModel.findForSource(ids.sourceQ)!!.relationships.single()
+        assertThat(noEstimate.assessment?.calculation).isNull()
+        val unavailable = acquisitionReadModel.findForSource(ids.sourceR)!!.relationships.single()
+        val accepted = unavailable.assessment?.probabilityKnowledge as ScopedAcquisitionKnowledge.Selected
+        assertThat(accepted.resolution).isInstanceOf(FixedDropEstimateResolution.Resolved::class.java)
+        assertThat(unavailable.assessment?.calculation).isNull()
+
+        assertThat(count("unique_definition")).isEqualTo(12)
+        assertThat(count("league_definition")).isEqualTo(2)
+        assertThat(count("account_context")).isEqualTo(3)
+        assertThat(count("build_archetype")).isEqualTo(4)
+        assertThat(count("acquisition_source")).isEqualTo(4)
+        assertThat(count("drop_relationship")).isEqualTo(5)
+        assertThat(count("fixed_drop_estimate")).isEqualTo(3)
+    }
+
+    @Test
+    fun `rerunning the expanded fixture never restores cleared attempts or USER selection`() {
+        initializer.initialize()
+        fixtureActor.asLegacyUser { ownership.setOwnedQuantity(ids.account, ids.uniqueH, 3) }
+        fixtureActor.asAdmin {
+            ownership.setOwnedQuantity(ids.adminChallengeAccount, ids.uniqueH, 4)
+            ownership.setOwnedQuantity(ids.adminStandardAccount, ids.uniqueH, 5)
+            attempts.clearAvailableAttempts(ids.adminChallengeAccount, ids.source)
+            attempts.setAvailableAttempts(ids.adminChallengeAccount, ids.sourceP, 0)
+            accountEvaluation.select(ids.adminStandardAccount, CompatibilityVersion(3, 30))
+        }
+        jdbc.update(
+            "DELETE FROM poe_companion.account_evaluation_selection WHERE application_user_id = ?",
+            ConfiguredApplicationUsers.USER.value,
+        )
+
+        initializer.initialize()
+        initializer.initialize()
+
+        assertThat(accountEvaluation.getSelected()).isNull()
+        assertThat(currentOwnership.getCurrentOwnership(ids.account).quantityOf(ids.uniqueH)).isEqualTo(3)
+        fixtureActor.asAdmin {
+            assertThat(accountEvaluation.getSelected()?.accountContextId).isEqualTo(ids.adminStandardAccount)
+            assertThat(currentOwnership.getCurrentOwnership(ids.adminChallengeAccount).quantityOf(ids.uniqueH))
+                .isEqualTo(4)
+            assertThat(currentOwnership.getCurrentOwnership(ids.adminStandardAccount).quantityOf(ids.uniqueH))
+                .isEqualTo(5)
+            assertThat(attempts.getAvailableAttempts(ids.adminChallengeAccount, ids.source)).isNull()
+            assertThat(attempts.getAvailableAttempts(ids.adminChallengeAccount, ids.sourceP)?.count).isZero()
+        }
+    }
+
+    @Test
+    fun `rerunning the expanded fixture never restores cleared ADMIN selection`() {
+        initializer.initialize()
+        jdbc.update(
+            "DELETE FROM poe_companion.account_evaluation_selection WHERE application_user_id = ?",
+            ConfiguredApplicationUsers.ADMIN.value,
+        )
+
+        initializer.initialize()
+        initializer.initialize()
+
+        fixtureActor.asAdmin {
+            assertThat(accountEvaluation.getSelected()).isNull()
+        }
+        assertThat(accountEvaluation.getSelected()?.accountContextId).isEqualTo(ids.account)
+    }
+
+    @Test
+    fun `partial expanded identities cannot be treated as a clean fixture`() {
+        uniques.save(UniqueDefinition(ids.uniqueG))
+
+        assertThatThrownBy { initializer.initialize() }
+            .isInstanceOf(IllegalStateException::class.java)
+            .hasMessageContaining("Partial development fixture")
+
+        assertThat(count("unique_definition")).isEqualTo(1)
+        assertThat(count("account_context")).isZero()
+    }
+
+    private fun assertReadiness(
+        variantId: com.colinmoerbe.poecompanion.build.identity.BuildVariantId,
+        expected: UniqueReadiness,
+    ) {
+        val result = buildReadiness.evaluate(variantId) as BuildReadinessQueryResult.Evaluated
+        assertThat(result.readiness.readiness).isEqualTo(expected)
     }
 
     private fun count(table: String): Long =

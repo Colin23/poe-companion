@@ -81,28 +81,32 @@ internal class DevelopmentFixtureInitializer(
     private val estimates: FixedDropEstimateService,
     private val attempts: AvailableAttemptsService,
     private val fixtureActor: DevelopmentFixtureActor,
+    private val expansion: ExpandedDevelopmentFixture,
 ) {
     private val ids = DevelopmentFixtureIds
     private val compatibilityVersion = CompatibilityVersion(COMPATIBILITY_MAJOR, COMPATIBILITY_MINOR)
     private val scope = AcquisitionKnowledgeScope(compatibilityVersion, Ruleset.NORMAL)
 
-    /** Creates an atomic fixture or verifies an existing fixture without resetting player-editable state. */
+    /** Upgrades an intact legacy fixture atomically; existing personal data is never re-seeded. */
     @Transactional
     fun initialize() = fixtureActor.asLegacyUser {
         if (uniques.findById(ids.uniqueA) != null) {
             verifyExistingFixture()
         } else {
-            check(noOtherFixtureIdentitiesExist()) {
+            check(noOtherFixtureIdentitiesExist() && !expansion.hasAnyIdentities()) {
                 "Partial development fixture detected; do not overwrite it. Restore or remove the synthetic data."
             }
             createCatalogAndAccount()
             createBuild()
             createAcquisition()
+            // Only newly created USER contexts receive a default selection.
+            accountEvaluation.select(ids.account, compatibilityVersion)
         }
 
-        // Respect any already-selected account; this is never a reset operation.
-        if (accountEvaluation.getSelected() == null) {
-            accountEvaluation.select(ids.account, compatibilityVersion)
+        if (expansion.hasAnyIdentities()) {
+            expansion.verify()
+        } else {
+            expansion.create()
         }
     }
 

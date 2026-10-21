@@ -103,9 +103,23 @@ internal class UniqueBrowserControllerIntegrationTests(
             .andExpect(content().string(containsString(">Unique A</a>")))
             .andExpect(content().string(containsString(">Unique B</a>")))
             .andExpect(content().string(containsString(">Unique C</a>")))
-            .andExpect(content().string(containsString("2</strong> owned")))
-            .andExpect(content().string(containsString("1</strong> missing")))
+            .andExpect(content().string(containsString("3</strong> owned")))
+            .andExpect(content().string(containsString("9</strong> missing")))
             .andExpect(content().string(containsString("Synthetic development item")))
+    }
+
+    @Test
+    fun `expanded Unique D detail links to Boss P acquisition source`() {
+        initializer.initialize()
+
+        val html = mockMvc.perform(get("/uniques/${ids.uniqueD.value}").with(user("test-user")))
+            .andExpect(status().isOk)
+            .andExpect(view().name("uniques/detail"))
+            .andExpect(content().string(containsString("Boss P")))
+            .andExpect(content().string(containsString("CAN_DROP")))
+            .andExpect(content().string(containsString("AVAILABLE")))
+            .andReturn().response.contentAsString
+        assertThat(html).contains("/acquisitions/${ids.sourceP.value}#unique-${ids.uniqueD.value}")
     }
 
     @Test
