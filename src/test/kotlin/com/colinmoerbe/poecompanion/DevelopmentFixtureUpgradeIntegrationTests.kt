@@ -158,58 +158,66 @@ internal class DevelopmentFixtureUpgradeIntegrationTests(
                     realm = GameRealm.PC,
                 ),
             )
-            val revision = BuildVariantRevision(ids.revision, ids.variant, version)
-            revision.updateRequirementGroups(
-                listOf(
-                    RequirementGroup(
-                        RequirementImportance.ENABLING,
-                        RequirementLogic.ALL,
-                        listOf(Requirement(ids.uniqueA, 1)),
-                    ),
-                    RequirementGroup(
-                        RequirementImportance.CORE,
-                        RequirementLogic.ALL,
-                        listOf(Requirement(ids.uniqueB, 1), Requirement(ids.uniqueC, 1)),
-                    ),
-                ),
-            )
-            builds.createAndActivate(
-                BuildArchetype(ids.archetype, "Build X"),
-                BuildVariant(ids.variant, ids.archetype),
-                revision,
-            )
-            bosses.create(BossDefinition(ids.boss, "Boss Y"))
-            acquisition.saveSource(AcquisitionSource(ids.source))
-            encounters.recordSnapshot(
-                ids.source, scope,
-                BossEncounterKnowledgeSnapshot(
-                    null,
-                    "Boss Y",
-                    AcquisitionSourceAvailability.AVAILABLE,
-                    BossParticipation.Fixed(setOf(ids.boss)),
-                ),
-                null,
-            )
-            acquisition.saveRelationship(DropRelationship(ids.relationship, ids.source, ids.uniqueC))
-            relationships.recordSnapshot(
-                ids.relationship,
-                scope,
-                DropRelationshipSnapshot(null, DropRelationshipState.CAN_DROP),
-                null,
-            )
-            estimates.publish(
-                ids.relationship, scope,
-                FixedDropEstimateSnapshot(
-                    id = ids.estimate,
-                    effectiveFromPatch = null,
-                    model = FixedBernoulliModel(0.10),
-                    provenance = DropEstimateProvenance.MEASURED,
-                    evidenceReference = "synthetic-development-fixture:boss-y-to-unique-c",
-                    reviewedAt = Instant.parse("2026-10-01T00:00:00Z"),
-                ),
-                null,
-            )
+            seedLegacyBuild()
+            seedLegacyAcquisition()
         }
+    }
+
+    private fun seedLegacyBuild() {
+        val revision = BuildVariantRevision(ids.revision, ids.variant, version)
+        revision.updateRequirementGroups(
+            listOf(
+                RequirementGroup(
+                    RequirementImportance.ENABLING,
+                    RequirementLogic.ALL,
+                    listOf(Requirement(ids.uniqueA, 1)),
+                ),
+                RequirementGroup(
+                    RequirementImportance.CORE,
+                    RequirementLogic.ALL,
+                    listOf(Requirement(ids.uniqueB, 1), Requirement(ids.uniqueC, 1)),
+                ),
+            ),
+        )
+        builds.createAndActivate(
+            BuildArchetype(ids.archetype, "Build X"),
+            BuildVariant(ids.variant, ids.archetype),
+            revision,
+        )
+    }
+
+    private fun seedLegacyAcquisition() {
+        bosses.create(BossDefinition(ids.boss, "Boss Y"))
+        acquisition.saveSource(AcquisitionSource(ids.source))
+        encounters.recordSnapshot(
+            ids.source, scope,
+            BossEncounterKnowledgeSnapshot(
+                null,
+                "Boss Y",
+                AcquisitionSourceAvailability.AVAILABLE,
+                BossParticipation.Fixed(setOf(ids.boss)),
+            ),
+            null,
+        )
+        acquisition.saveRelationship(DropRelationship(ids.relationship, ids.source, ids.uniqueC))
+        relationships.recordSnapshot(
+            ids.relationship,
+            scope,
+            DropRelationshipSnapshot(null, DropRelationshipState.CAN_DROP),
+            null,
+        )
+        estimates.publish(
+            ids.relationship, scope,
+            FixedDropEstimateSnapshot(
+                id = ids.estimate,
+                effectiveFromPatch = null,
+                model = FixedBernoulliModel(0.10),
+                provenance = DropEstimateProvenance.MEASURED,
+                evidenceReference = "synthetic-development-fixture:boss-y-to-unique-c",
+                reviewedAt = Instant.parse("2026-10-01T00:00:00Z"),
+            ),
+            null,
+        )
     }
 
     private fun seedLegacyUserState() {
