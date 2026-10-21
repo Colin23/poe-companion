@@ -236,7 +236,8 @@ internal class ExpandedDevelopmentFixture(
         check(
             bosses.findById(bossId)?.displayName == name &&
                 acquisition.findSourceById(sourceId) != null &&
-                encounters.findTimeline(sourceId, scope)?.snapshots == listOf(definitions.snapshot(bossId, name, availability)),
+                encounters.findTimeline(sourceId, scope)?.snapshots ==
+                listOf(definitions.snapshot(bossId, name, availability)),
         ) { "Partial expanded development fixture: $name encounter knowledge" }
     }
 
