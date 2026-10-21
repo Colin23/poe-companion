@@ -183,7 +183,7 @@ internal class DevelopmentFixtureIntegrationTests(
     }
 
     @Test
-    fun \`expanded fixture shares four Builds but derives independent readiness for each context\`() {
+    fun `expanded fixture shares four Builds but derives independent readiness for each context`() {
         initializer.initialize()
 
         assertReadiness(ids.variant, UniqueReadiness.PARTIAL)
@@ -239,7 +239,7 @@ internal class DevelopmentFixtureIntegrationTests(
     }
 
     @Test
-    fun \`rerunning the expanded fixture never restores cleared attempts or USER selection\`() {
+    fun `rerunning the expanded fixture never restores cleared attempts or USER selection`() {
         initializer.initialize()
         fixtureActor.asAdmin {
             attempts.clearAvailableAttempts(ids.adminChallengeAccount, ids.source)
@@ -263,7 +263,7 @@ internal class DevelopmentFixtureIntegrationTests(
     }
 
     @Test
-    fun \`partial expanded identities cannot be treated as a clean fixture\`() {
+    fun `partial expanded identities cannot be treated as a clean fixture`() {
         uniques.save(UniqueDefinition(ids.uniqueG))
 
         assertThatThrownBy { initializer.initialize() }
