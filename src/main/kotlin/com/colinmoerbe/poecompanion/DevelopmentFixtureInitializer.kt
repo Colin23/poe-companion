@@ -107,17 +107,19 @@ internal class DevelopmentFixtureInitializer(
     }
 
     private fun createCatalogAndAccount() {
-        listOf(ids.uniqueA, ids.uniqueB, ids.uniqueC).forEach { uniques.save(UniqueDefinition(it)) }
-        leagueAccess.saveLeague(
-            LeagueDefinition(
-                id = ids.league,
-                name = "Development SSF league",
-                type = LeagueType.CHALLENGE,
-                participation = LeagueParticipation.SSF,
-                mortality = LeagueMortality.SOFTCORE,
-                realm = GameRealm.PC,
-            ),
-        )
+        fixtureActor.asAdmin {
+            listOf(ids.uniqueA, ids.uniqueB, ids.uniqueC).forEach { uniques.save(UniqueDefinition(it)) }
+            leagueAccess.saveLeague(
+                LeagueDefinition(
+                    id = ids.league,
+                    name = "Development SSF league",
+                    type = LeagueType.CHALLENGE,
+                    participation = LeagueParticipation.SSF,
+                    mortality = LeagueMortality.SOFTCORE,
+                    realm = GameRealm.PC,
+                ),
+            )
+        }
         leagueAccess.saveAccount(
             AccountContext(ids.account, ids.league, Ruleset.NORMAL, ConfiguredApplicationUsers.USER),
         )
