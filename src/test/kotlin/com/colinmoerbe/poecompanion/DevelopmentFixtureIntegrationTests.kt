@@ -276,6 +276,23 @@ internal class DevelopmentFixtureIntegrationTests(
     }
 
     @Test
+    fun `rerunning the expanded fixture never restores cleared ADMIN selection`() {
+        initializer.initialize()
+        jdbc.update(
+            "DELETE FROM poe_companion.account_evaluation_selection WHERE application_user_id = ?",
+            ConfiguredApplicationUsers.ADMIN.value,
+        )
+
+        initializer.initialize()
+        initializer.initialize()
+
+        fixtureActor.asAdmin {
+            assertThat(accountEvaluation.getSelected()).isNull()
+        }
+        assertThat(accountEvaluation.getSelected()?.accountContextId).isEqualTo(ids.account)
+    }
+
+    @Test
     fun `partial expanded identities cannot be treated as a clean fixture`() {
         uniques.save(UniqueDefinition(ids.uniqueG))
 
