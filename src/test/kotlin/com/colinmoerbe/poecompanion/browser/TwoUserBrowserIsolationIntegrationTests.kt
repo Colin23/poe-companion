@@ -66,22 +66,50 @@ internal class TwoUserBrowserIsolationIntegrationTests(
     private val adminContextId = AccountContextId.generate()
 
     @BeforeEach
-    fun prepareContexts() {
+    fun prepareFixture() {
         clearFixture()
         fixture.initialize()
-        league.saveAccount(AccountContext(adminContextId, ids.league, Ruleset.NORMAL, ConfiguredApplicationUsers.ADMIN))
-        asActor("test-admin", "ADMIN") {
-            selection.select(adminContextId, CompatibilityVersion(3, 30))
-            listOf(ids.uniqueA, ids.uniqueB, ids.uniqueC).forEach { ownership.setOwnedQuantity(adminContextId, it, 1) }
-            attempts.setAvailableAttempts(adminContextId, ids.source, 0)
-        }
     }
 
     @AfterEach
     fun cleanContexts() = clearFixture()
 
     @Test
+    fun `ADMIN without a context can browse shared knowledge without personal results`() {
+        asActor("test-admin", "ADMIN") { assertThat(selection.getSelected()).isNull() }
+
+        listOf("/builds", "/uniques", "/acquisitions").forEach { path ->
+            mockMvc.perform(get(path).with(user("test-admin").roles("ADMIN")))
+                .andExpect(status().isOk)
+        }
+
+        val build = buildPage("test-admin", "ADMIN")
+        assertThat(build.displayName).isEqualTo("Build X")
+        assertThat(build.state).isEqualTo(BuildBrowserState.NO_ACCOUNT)
+        assertThat(build.hasRequiredUniqueGroups).isNull()
+
+        val unique = uniquePage("test-admin", "ADMIN")
+        assertThat(unique.item.displayName).isEqualTo("Unique C")
+        assertThat(unique.accountSelected).isFalse()
+        assertThat(unique.item.ownedQuantity).isNull()
+        assertThat(unique.acquisitionSources.single().sourceId).isEqualTo(ids.source.value)
+
+        val acquisition = acquisitionPage("test-admin", "ADMIN")
+        assertThat(acquisition.id).isEqualTo(ids.source.value)
+        assertThat(acquisition.accountSelected).isFalse()
+        assertThat(acquisition.savedAttempts).isNull()
+        assertThat(acquisition.effectiveAttempts).isNull()
+        assertThat(acquisition.relationships.single().uniqueId).isEqualTo(ids.uniqueC.value)
+        assertThat(acquisition.relationships.single().actionable).isFalse()
+        assertThat(acquisition.relationships.single().probabilityWithinAttempts).isNull()
+
+        assertThat(buildPage("test-user", "USER").state).isEqualTo(BuildBrowserState.PARTIAL)
+        assertThat(acquisitionPage("test-user", "USER").savedAttempts).isEqualTo(12)
+    }
+
+    @Test
     fun `the same shared Build and source show independent personal readiness and attempts`() {
+        prepareAdminContext()
         assertThat(buildPage("test-user", "USER").state).isEqualTo(BuildBrowserState.PARTIAL)
         assertThat(buildPage("test-admin", "ADMIN").state).isEqualTo(BuildBrowserState.UNIQUE_READY)
         assertThat(uniquePage("test-user", "USER").item.ownedQuantity).isZero()
@@ -97,6 +125,7 @@ internal class TwoUserBrowserIsolationIntegrationTests(
 
     @Test
     fun `neither role may read write clear or select another user's context`() {
+        prepareAdminContext()
         asActor("test-admin", "ADMIN") {
             assertForeignContextRejected(ids.account)
         }
@@ -116,6 +145,7 @@ internal class TwoUserBrowserIsolationIntegrationTests(
 
     @Test
     fun `admin ownership form only changes admin data and CSRF is required`() {
+        prepareAdminContext()
         val url = "/uniques/${ids.uniqueC.value}/ownership"
         mockMvc.perform(post(url).param("quantity", "9").with(user("test-admin").roles("ADMIN")))
             .andExpect(status().isForbidden)
@@ -127,6 +157,15 @@ internal class TwoUserBrowserIsolationIntegrationTests(
         assertThat(uniquePage("test-admin", "ADMIN").item.ownedQuantity).isEqualTo(2)
         assertThat(uniquePage("test-user", "USER").item.ownedQuantity).isZero()
         assertThat(buildPage("test-user", "USER").state).isEqualTo(BuildBrowserState.PARTIAL)
+    }
+
+    private fun prepareAdminContext() {
+        league.saveAccount(AccountContext(adminContextId, ids.league, Ruleset.NORMAL, ConfiguredApplicationUsers.ADMIN))
+        asActor("test-admin", "ADMIN") {
+            selection.select(adminContextId, CompatibilityVersion(3, 30))
+            listOf(ids.uniqueA, ids.uniqueB, ids.uniqueC).forEach { ownership.setOwnedQuantity(adminContextId, it, 1) }
+            attempts.setAvailableAttempts(adminContextId, ids.source, 0)
+        }
     }
 
     private fun assertForeignContextRejected(id: AccountContextId) {

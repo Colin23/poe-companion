@@ -66,11 +66,21 @@ class CurrentApplicationUserTests {
             .isInstanceOf(AccessDeniedException::class.java)
     }
 
-    private fun authenticate(username: String, authority: String) {
+    @Test
+    fun `principals with both roles cannot resolve either configured identity`() {
+        listOf("test-user", "test-admin").forEach { username ->
+            authenticate(username, "ROLE_USER", "ROLE_ADMIN")
+
+            assertThatThrownBy { currentUser.requireId() }
+                .isInstanceOf(AccessDeniedException::class.java)
+        }
+    }
+
+    private fun authenticate(username: String, vararg authorities: String) {
         SecurityContextHolder.getContext().authentication = UsernamePasswordAuthenticationToken(
             username,
             null,
-            listOf(SimpleGrantedAuthority(authority)),
+            authorities.map { SimpleGrantedAuthority(it) },
         )
     }
 }
