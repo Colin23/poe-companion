@@ -33,16 +33,20 @@ import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.support.TransactionTemplate
 import java.util.concurrent.CountDownLatch
+import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 @Import(TestcontainersConfiguration::class)
 @SpringBootTest(
     properties = [
-        "poe-companion.security.username=test-user",
-        "poe-companion.security.password=test-password",
+        "poe-companion.security.user.username=test-user",
+        "poe-companion.security.user.password=test-password",
+        "poe-companion.security.admin.username=test-admin",
+        "poe-companion.security.admin.password=test-admin-password",
     ],
 )
+@WithMockUser(username = "test-admin", roles = ["ADMIN"])
 internal class BuildVariantRevisionActivationServiceIntegrationTests(
     @Autowired private val activationService: BuildVariantRevisionActivationService,
     @Autowired private val revisionPersistenceAdapter: BuildVariantRevisionPersistenceAdapter,
@@ -199,7 +203,7 @@ internal class BuildVariantRevisionActivationServiceIntegrationTests(
         val firstUpdated = CountDownLatch(1)
         val secondAttempting = CountDownLatch(1)
         val allowFirstCommit = CountDownLatch(1)
-        val executor = Executors.newFixedThreadPool(2)
+        val executor = DelegatingSecurityContextExecutorService(Executors.newFixedThreadPool(2))
 
         try {
             val firstResult =

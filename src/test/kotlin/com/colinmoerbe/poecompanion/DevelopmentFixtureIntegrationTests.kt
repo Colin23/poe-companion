@@ -26,6 +26,7 @@ import com.colinmoerbe.poecompanion.league.DevelopmentLeagueAccess
 import com.colinmoerbe.poecompanion.league.Ruleset
 import com.colinmoerbe.poecompanion.league.persistence.AccountContextPersistenceAdapter
 import com.colinmoerbe.poecompanion.security.identity.ConfiguredApplicationUsers
+import com.colinmoerbe.poecompanion.security.identity.DevelopmentFixtureActor
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.assertj.core.data.Offset.offset
@@ -47,8 +48,10 @@ import javax.sql.DataSource
 @SpringBootTest(
     properties = [
         "poe-companion.dev-fixture.enabled=true",
-        "poe-companion.security.username=test-user",
-        "poe-companion.security.password=test-password",
+        "poe-companion.security.user.username=test-user",
+        "poe-companion.security.user.password=test-password",
+        "poe-companion.security.admin.username=test-admin",
+        "poe-companion.security.admin.password=test-admin-password",
     ],
 )
 @WithMockUser(username = "test-user")
@@ -60,6 +63,7 @@ internal class DevelopmentFixtureIntegrationTests(
     @Autowired private val attempts: AvailableAttemptsService,
     @Autowired private val accountEvaluation: AccountEvaluationService,
     @Autowired private val bosses: BossDefinitionService,
+    @Autowired private val fixtureActor: DevelopmentFixtureActor,
     @Autowired private val uniques: UniqueDefinitionPersistenceAdapter,
     @Autowired private val accounts: AccountContextPersistenceAdapter,
     @Autowired private val context: ApplicationContext,
@@ -161,7 +165,7 @@ internal class DevelopmentFixtureIntegrationTests(
 
     @Test
     fun `failure after intermediate inserts should roll back the entire initial fixture`() {
-        bosses.create(BossDefinition(BossDefinitionId.generate(), "Boss Y"))
+        fixtureActor.asAdmin { bosses.create(BossDefinition(BossDefinitionId.generate(), "Boss Y")) }
 
         assertThatThrownBy { initializer.initialize() }
             .isInstanceOf(BossDefinitionCreationConflictException::class.java)
