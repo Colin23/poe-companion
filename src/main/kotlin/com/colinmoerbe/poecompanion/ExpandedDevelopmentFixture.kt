@@ -78,6 +78,7 @@ internal class ExpandedDevelopmentFixture(
     private val actor: DevelopmentFixtureActor,
 ) {
     private val ids = DevelopmentFixtureIds
+    private val definitions = ExpandedFixtureDefinitions
     private val version = CompatibilityVersion(3, 30)
     private val scope = AcquisitionKnowledgeScope(version, Ruleset.NORMAL)
     private val newUniques = listOf(
@@ -101,10 +102,10 @@ internal class ExpandedDevelopmentFixture(
     fun create() {
         actor.asAdmin {
             newUniques.forEach { uniques.save(UniqueDefinition(it)) }
-            league.saveLeague(standardLeague())
-            createBuild(ids.archetypeP, ids.variantP, ids.revisionP, "Build P", buildPRequirements())
-            createBuild(ids.archetypeQ, ids.variantQ, ids.revisionQ, "Build Q", buildQRequirements())
-            createBuild(ids.archetypeR, ids.variantR, ids.revisionR, "Build R", buildRRequirements())
+            league.saveLeague(definitions.standardLeague())
+            createBuild(ids.archetypeP, ids.variantP, ids.revisionP, "Build P", definitions.buildPRequirements())
+            createBuild(ids.archetypeQ, ids.variantQ, ids.revisionQ, "Build Q", definitions.buildQRequirements())
+            createBuild(ids.archetypeR, ids.variantR, ids.revisionR, "Build R", definitions.buildRRequirements())
             createSource(ids.bossP, ids.sourceP, "Boss P", AcquisitionSourceAvailability.AVAILABLE)
             createSource(ids.bossQ, ids.sourceQ, "Boss Q", AcquisitionSourceAvailability.AVAILABLE)
             createSource(ids.bossR, ids.sourceR, "Boss R", AcquisitionSourceAvailability.UNAVAILABLE)
@@ -112,8 +113,8 @@ internal class ExpandedDevelopmentFixture(
             createRelationship(ids.relationshipPE, ids.sourceP, ids.uniqueE, DropRelationshipState.CANNOT_DROP)
             createRelationship(ids.relationshipQH, ids.sourceQ, ids.uniqueH, DropRelationshipState.CAN_DROP)
             createRelationship(ids.relationshipRK, ids.sourceR, ids.uniqueK, DropRelationshipState.CAN_DROP)
-            publish(ids.relationshipPD, ids.estimateP, 0.15, "boss-p-to-unique-d")
-            publish(ids.relationshipRK, ids.estimateR, 0.05, "boss-r-to-unique-k")
+            publish(ids.relationshipPD, ids.estimateP, BOSS_P_CHANCE, "boss-p-to-unique-d")
+            publish(ids.relationshipRK, ids.estimateR, BOSS_R_CHANCE, "boss-r-to-unique-k")
         }
 
         actor.asLegacyUser {
@@ -124,7 +125,9 @@ internal class ExpandedDevelopmentFixture(
                 AccountContext(ids.adminChallengeAccount, ids.league, Ruleset.NORMAL, ConfiguredApplicationUsers.ADMIN),
             )
             league.saveAccount(
-                AccountContext(ids.adminStandardAccount, ids.standardLeague, Ruleset.NORMAL, ConfiguredApplicationUsers.ADMIN),
+                AccountContext(
+                    ids.adminStandardAccount, ids.standardLeague, Ruleset.NORMAL, ConfiguredApplicationUsers.ADMIN,
+                ),
             )
             listOf(ids.uniqueA, ids.uniqueB, ids.uniqueC, ids.uniqueD, ids.uniqueF).forEach {
                 ownership.setOwnedQuantity(ids.adminChallengeAccount, it, 1)
@@ -136,7 +139,7 @@ internal class ExpandedDevelopmentFixture(
             }
 
             attempts.setAvailableAttempts(ids.adminChallengeAccount, ids.source, 0)
-            attempts.setAvailableAttempts(ids.adminChallengeAccount, ids.sourceP, 4)
+            attempts.setAvailableAttempts(ids.adminChallengeAccount, ids.sourceP, ADMIN_CHALLENGE_P_ATTEMPTS)
             attempts.setAvailableAttempts(ids.adminStandardAccount, ids.sourceP, 0)
             attempts.setAvailableAttempts(ids.adminStandardAccount, ids.sourceQ, 2)
             // First-time default only: a later cleared or changed selection must remain untouched.
@@ -161,9 +164,9 @@ internal class ExpandedDevelopmentFixture(
             } == true
         }) { "Partial expanded development fixture: ADMIN AccountContext ownership or league" }
 
-        verifyBuild(ids.archetypeP, ids.variantP, ids.revisionP, "Build P", buildPRequirements())
-        verifyBuild(ids.archetypeQ, ids.variantQ, ids.revisionQ, "Build Q", buildQRequirements())
-        verifyBuild(ids.archetypeR, ids.variantR, ids.revisionR, "Build R", buildRRequirements())
+        verifyBuild(ids.archetypeP, ids.variantP, ids.revisionP, "Build P", definitions.buildPRequirements())
+        verifyBuild(ids.archetypeQ, ids.variantQ, ids.revisionQ, "Build Q", definitions.buildQRequirements())
+        verifyBuild(ids.archetypeR, ids.variantR, ids.revisionR, "Build R", definitions.buildRRequirements())
         verifySource(ids.bossP, ids.sourceP, "Boss P", AcquisitionSourceAvailability.AVAILABLE)
         verifySource(ids.bossQ, ids.sourceQ, "Boss Q", AcquisitionSourceAvailability.AVAILABLE)
         verifySource(ids.bossR, ids.sourceR, "Boss R", AcquisitionSourceAvailability.UNAVAILABLE)
@@ -171,8 +174,8 @@ internal class ExpandedDevelopmentFixture(
         verifyRelationship(ids.relationshipPE, ids.sourceP, ids.uniqueE, DropRelationshipState.CANNOT_DROP)
         verifyRelationship(ids.relationshipQH, ids.sourceQ, ids.uniqueH, DropRelationshipState.CAN_DROP)
         verifyRelationship(ids.relationshipRK, ids.sourceR, ids.uniqueK, DropRelationshipState.CAN_DROP)
-        verifyEstimate(ids.relationshipPD, ids.estimateP, 0.15, "boss-p-to-unique-d")
-        verifyEstimate(ids.relationshipRK, ids.estimateR, 0.05, "boss-r-to-unique-k")
+        verifyEstimate(ids.relationshipPD, ids.estimateP, BOSS_P_CHANCE, "boss-p-to-unique-d")
+        verifyEstimate(ids.relationshipRK, ids.estimateR, BOSS_R_CHANCE, "boss-r-to-unique-k")
         check(
             estimates.findAcceptedTimeline(ids.relationshipPE, scope) == null &&
                 estimates.findAcceptedTimeline(ids.relationshipQH, scope) == null,
@@ -221,7 +224,7 @@ internal class ExpandedDevelopmentFixture(
     ) {
         bosses.create(BossDefinition(bossId, name))
         acquisition.saveSource(AcquisitionSource(sourceId))
-        encounters.recordSnapshot(sourceId, scope, snapshot(bossId, name, availability), null)
+        encounters.recordSnapshot(sourceId, scope, definitions.snapshot(bossId, name, availability), null)
     }
 
     private fun verifySource(
@@ -233,7 +236,7 @@ internal class ExpandedDevelopmentFixture(
         check(
             bosses.findById(bossId)?.displayName == name &&
                 acquisition.findSourceById(sourceId) != null &&
-                encounters.findTimeline(sourceId, scope)?.snapshots == listOf(snapshot(bossId, name, availability)),
+                encounters.findTimeline(sourceId, scope)?.snapshots == listOf(definitions.snapshot(bossId, name, availability)),
         ) { "Partial expanded development fixture: $name encounter knowledge" }
     }
 
@@ -263,25 +266,34 @@ internal class ExpandedDevelopmentFixture(
     }
 
     private fun publish(relationshipId: DropRelationshipId, id: DropEstimateId, chance: Double, label: String) {
-        estimates.publish(relationshipId, scope, estimate(id, chance, label), null)
+        estimates.publish(relationshipId, scope, definitions.estimate(id, chance, label), null)
     }
 
     private fun verifyEstimate(relationshipId: DropRelationshipId, id: DropEstimateId, chance: Double, label: String) {
         val timeline = estimates.findAcceptedTimeline(relationshipId, scope)
         check(
-            timeline?.snapshots == listOf(estimate(id, chance, label)) &&
+            timeline?.snapshots == listOf(definitions.estimate(id, chance, label)) &&
                 timeline?.withdrawals?.isEmpty() == true,
         ) { "Partial expanded development fixture: estimate for $label" }
     }
 
-    private fun snapshot(
+    private companion object {
+        const val BOSS_P_CHANCE = 0.15
+        const val BOSS_R_CHANCE = 0.05
+        const val ADMIN_CHALLENGE_P_ATTEMPTS = 4
+    }
+}
+
+private object ExpandedFixtureDefinitions {
+    private val ids = DevelopmentFixtureIds
+    fun snapshot(
         bossId: BossDefinitionId,
         label: String,
         availability: AcquisitionSourceAvailability,
     ): BossEncounterKnowledgeSnapshot =
         BossEncounterKnowledgeSnapshot(null, label, availability, BossParticipation.Fixed(setOf(bossId)))
 
-    private fun estimate(id: DropEstimateId, chance: Double, label: String): FixedDropEstimateSnapshot =
+    fun estimate(id: DropEstimateId, chance: Double, label: String): FixedDropEstimateSnapshot =
         FixedDropEstimateSnapshot(
             id = id,
             effectiveFromPatch = null,
@@ -291,7 +303,7 @@ internal class ExpandedDevelopmentFixture(
             reviewedAt = Instant.parse("2026-10-01T00:00:00Z"),
         )
 
-    private fun standardLeague(): LeagueDefinition = LeagueDefinition(
+    fun standardLeague(): LeagueDefinition = LeagueDefinition(
         id = ids.standardLeague,
         name = "Development Standard SSF",
         type = LeagueType.STANDARD,
@@ -300,7 +312,7 @@ internal class ExpandedDevelopmentFixture(
         realm = GameRealm.PC,
     )
 
-    private fun buildPRequirements(): List<RequirementGroup> = listOf(
+    fun buildPRequirements(): List<RequirementGroup> = listOf(
         RequirementGroup(
             RequirementImportance.ENABLING, RequirementLogic.ANY,
             listOf(Requirement(ids.uniqueD, 1), Requirement(ids.uniqueE, 1)),
@@ -311,7 +323,7 @@ internal class ExpandedDevelopmentFixture(
         ),
     )
 
-    private fun buildQRequirements(): List<RequirementGroup> = listOf(
+    fun buildQRequirements(): List<RequirementGroup> = listOf(
         RequirementGroup(
             RequirementImportance.CORE, RequirementLogic.ALL,
             listOf(Requirement(ids.uniqueH, 2)),
@@ -322,7 +334,7 @@ internal class ExpandedDevelopmentFixture(
         ),
     )
 
-    private fun buildRRequirements(): List<RequirementGroup> = listOf(
+    fun buildRRequirements(): List<RequirementGroup> = listOf(
         RequirementGroup(
             RequirementImportance.UPGRADE, RequirementLogic.ALL,
             listOf(Requirement(ids.uniqueK, 1), Requirement(ids.uniqueL, 1)),
