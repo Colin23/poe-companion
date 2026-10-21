@@ -147,9 +147,12 @@ internal class DevelopmentFixtureIntegrationTests(
             .sources.single()
         assertThat(source.availableAttempts?.count).isEqualTo(4)
         assertThat(source.calculation?.probabilityWithinAvailableAttempts).isCloseTo(0.3439, offset(1e-12))
-        assertThat(count("unique_definition")).isEqualTo(3)
-        assertThat(count("drop_relationship")).isEqualTo(1)
-        assertThat(count("fixed_drop_estimate")).isEqualTo(1)
+        assertThat(count("unique_definition")).isEqualTo(12)
+        assertThat(count("build_archetype")).isEqualTo(4)
+        assertThat(count("acquisition_source")).isEqualTo(4)
+        assertThat(count("account_context")).isEqualTo(4) // Three fixture contexts plus the test-created USER context.
+        assertThat(count("drop_relationship")).isEqualTo(5)
+        assertThat(count("fixed_drop_estimate")).isEqualTo(3)
     }
 
     @Test
@@ -175,6 +178,90 @@ internal class DevelopmentFixtureIntegrationTests(
         assertThat(count("account_context")).isZero()
         assertThat(count("drop_relationship")).isZero()
         assertThat(accountEvaluation.getSelected()).isNull()
+    }
+
+    @Test
+    fun \`expanded fixture shares four Builds but derives independent readiness for each context\`() {
+        initializer.initialize()
+
+        assertReadiness(ids.variant, UniqueReadiness.PARTIAL)
+        assertReadiness(ids.variantP, UniqueReadiness.BLOCKED)
+        assertReadiness(ids.variantQ, UniqueReadiness.PARTIAL)
+        assertReadiness(ids.variantR, UniqueReadiness.UNIQUE_READY)
+
+        fixtureActor.asAdmin {
+            assertThat(accountEvaluation.getSelected()?.accountContextId).isEqualTo(ids.adminChallengeAccount)
+            assertReadiness(ids.variant, UniqueReadiness.UNIQUE_READY)
+            assertReadiness(ids.variantP, UniqueReadiness.PARTIAL)
+            assertReadiness(ids.variantQ, UniqueReadiness.UNIQUE_READY)
+            assertReadiness(ids.variantR, UniqueReadiness.UNIQUE_READY)
+
+            assertThat(attempts.getAvailableAttempts(ids.adminChallengeAccount, ids.source)?.count).isZero()
+            assertThat(attempts.getAvailableAttempts(ids.adminChallengeAccount, ids.sourceP)?.count).isEqualTo(4)
+            assertThat(attempts.getAvailableAttempts(ids.adminStandardAccount, ids.sourceP)?.count).isZero()
+            assertThat(attempts.getAvailableAttempts(ids.adminStandardAccount, ids.sourceQ)?.count).isEqualTo(2)
+            assertThat(attempts.getAvailableAttempts(ids.adminStandardAccount, ids.source)).isNull()
+
+            accountEvaluation.select(ids.adminStandardAccount, CompatibilityVersion(3, 30))
+            assertReadiness(ids.variant, UniqueReadiness.BLOCKED)
+            assertReadiness(ids.variantP, UniqueReadiness.UNIQUE_READY)
+            assertReadiness(ids.variantQ, UniqueReadiness.PARTIAL)
+            assertReadiness(ids.variantR, UniqueReadiness.UNIQUE_READY)
+        }
+        assertThat(accountEvaluation.getSelected()?.accountContextId).isEqualTo(ids.account)
+        assertThat(attempts.getAvailableAttempts(ids.account, ids.source)?.count).isEqualTo(12)
+
+        assertThat(count("unique_definition")).isEqualTo(12)
+        assertThat(count("league_definition")).isEqualTo(2)
+        assertThat(count("account_context")).isEqualTo(3)
+        assertThat(count("build_archetype")).isEqualTo(4)
+        assertThat(count("acquisition_source")).isEqualTo(4)
+        assertThat(count("drop_relationship")).isEqualTo(5)
+        assertThat(count("fixed_drop_estimate")).isEqualTo(3)
+    }
+
+    @Test
+    fun \`rerunning the expanded fixture never restores cleared attempts or USER selection\`() {
+        initializer.initialize()
+        fixtureActor.asAdmin {
+            attempts.clearAvailableAttempts(ids.adminChallengeAccount, ids.source)
+            attempts.setAvailableAttempts(ids.adminChallengeAccount, ids.sourceP, 0)
+            accountEvaluation.select(ids.adminStandardAccount, CompatibilityVersion(3, 30))
+        }
+        jdbc.update(
+            "DELETE FROM poe_companion.account_evaluation_selection WHERE application_user_id = ?",
+            ConfiguredApplicationUsers.USER.value,
+        )
+
+        initializer.initialize()
+        initializer.initialize()
+
+        assertThat(accountEvaluation.getSelected()).isNull()
+        fixtureActor.asAdmin {
+            assertThat(accountEvaluation.getSelected()?.accountContextId).isEqualTo(ids.adminStandardAccount)
+            assertThat(attempts.getAvailableAttempts(ids.adminChallengeAccount, ids.source)).isNull()
+            assertThat(attempts.getAvailableAttempts(ids.adminChallengeAccount, ids.sourceP)?.count).isZero()
+        }
+    }
+
+    @Test
+    fun \`partial expanded identities cannot be treated as a clean fixture\`() {
+        uniques.save(UniqueDefinition(ids.uniqueG))
+
+        assertThatThrownBy { initializer.initialize() }
+            .isInstanceOf(IllegalStateException::class.java)
+            .hasMessageContaining("Partial development fixture")
+
+        assertThat(count("unique_definition")).isEqualTo(1)
+        assertThat(count("account_context")).isZero()
+    }
+
+    private fun assertReadiness(
+        variantId: com.colinmoerbe.poecompanion.build.identity.BuildVariantId,
+        expected: UniqueReadiness,
+    ) {
+        val result = buildReadiness.evaluate(variantId) as BuildReadinessQueryResult.Evaluated
+        assertThat(result.readiness.readiness).isEqualTo(expected)
     }
 
     private fun count(table: String): Long =
