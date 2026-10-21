@@ -79,7 +79,7 @@ database remains running after the application stops.
 To load the synthetic A/B/C, Build X and Boss Y scenario into your **local** PostgreSQL database, run:
 
 ```bash
-SPRING_PROFILES_ACTIVE=dev POE_COMPANION_DEV_FIXTURE_ENABLED=true ./gradlew bootRun
+./run-app-with-fixtures
 ```
 
 This requires both switches; an ordinary startup never automatically seeds development data. The fixture uses stable,

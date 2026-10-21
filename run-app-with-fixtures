@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -e
+
+set -a
+source .env
+set +a
+
+SPRING_PROFILES_ACTIVE=dev \
+POE_COMPANION_DEV_FIXTURE_ENABLED=true \
+./gradlew bootRun
