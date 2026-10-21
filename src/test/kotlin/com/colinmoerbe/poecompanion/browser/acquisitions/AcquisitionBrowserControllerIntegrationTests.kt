@@ -2,6 +2,7 @@ package com.colinmoerbe.poecompanion.browser.acquisitions
 
 import com.colinmoerbe.poecompanion.DevelopmentFixtureIds
 import com.colinmoerbe.poecompanion.DevelopmentFixtureInitializer
+import com.colinmoerbe.poecompanion.SecurityTestActors
 import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.acquisition.DevelopmentAcquisitionAccess
 import com.colinmoerbe.poecompanion.acquisition.attempts.AvailableAttemptsService
@@ -175,7 +176,7 @@ internal class AcquisitionBrowserControllerIntegrationTests(
             Ruleset.NORMAL,
             ids.league,
         )
-        encounters.recordSnapshot(
+        SecurityTestActors.asAdmin { encounters.recordSnapshot(
             ids.source,
             scope,
             BossEncounterKnowledgeSnapshot(
@@ -185,7 +186,7 @@ internal class AcquisitionBrowserControllerIntegrationTests(
                 BossParticipation.Fixed(setOf(ids.boss)),
             ),
             null,
-        )
+        ) }
 
         val page = detailPage()
         assertThat(page.availability).isEqualTo("Ambiguous encounter scope")
@@ -200,7 +201,7 @@ internal class AcquisitionBrowserControllerIntegrationTests(
         val relationship = DropRelationshipId.generate()
         sourceAccess.saveSource(AcquisitionSource(source))
         sourceAccess.saveRelationship(DropRelationship(relationship, source, ids.uniqueC))
-        encounters.recordSnapshot(
+        SecurityTestActors.asAdmin { encounters.recordSnapshot(
             source,
             AcquisitionKnowledgeScope(com.colinmoerbe.poecompanion.league.CompatibilityVersion(3, 30), Ruleset.NORMAL),
             BossEncounterKnowledgeSnapshot(
@@ -210,13 +211,13 @@ internal class AcquisitionBrowserControllerIntegrationTests(
                 BossParticipation.ConfigurationDependent,
             ),
             null,
-        )
-        drops.recordSnapshot(
+        ) }
+        SecurityTestActors.asAdmin { drops.recordSnapshot(
             relationship,
             AcquisitionKnowledgeScope(com.colinmoerbe.poecompanion.league.CompatibilityVersion(3, 30), Ruleset.NORMAL),
             DropRelationshipSnapshot(null, DropRelationshipState.CANNOT_DROP),
             null,
-        )
+        ) }
 
         val page = detailPage(id = source)
         assertThat(page.availability).isEqualTo("AVAILABLE")

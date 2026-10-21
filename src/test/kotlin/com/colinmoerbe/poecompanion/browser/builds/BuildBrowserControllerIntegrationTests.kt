@@ -2,6 +2,7 @@ package com.colinmoerbe.poecompanion.browser.builds
 
 import com.colinmoerbe.poecompanion.DevelopmentFixtureIds
 import com.colinmoerbe.poecompanion.DevelopmentFixtureInitializer
+import com.colinmoerbe.poecompanion.SecurityTestActors
 import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.account.ManualOwnershipService
 import com.colinmoerbe.poecompanion.build.DevelopmentBuildAccess
@@ -258,7 +259,7 @@ internal class BuildBrowserControllerIntegrationTests(
         val revision = BuildVariantRevision(BuildVariantRevisionId.generate(), variant.id, version)
         revision.updateRequirementGroups(groups)
         if (activate) {
-            fixtureBuilds.createAndActivate(archetype, variant, revision)
+            SecurityTestActors.asAdmin { fixtureBuilds.createAndActivate(archetype, variant, revision) }
         } else {
             archetypes.save(archetype)
             variants.save(variant)

@@ -1,5 +1,6 @@
 package com.colinmoerbe.poecompanion.build.readmodel
 
+import com.colinmoerbe.poecompanion.SecurityTestActors
 import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.account.ManualOwnershipService
 import com.colinmoerbe.poecompanion.account.persistence.SpringDataManualOwnershipRepository
@@ -234,7 +235,7 @@ internal class BuildReadinessServiceIntegrationTests(
     ).also { revision ->
         revision.updateRequirementGroups(requirementGroups)
         revisionPersistenceAdapter.saveDraftSnapshot(revision)
-        activationService.activate(revision.id)
+        SecurityTestActors.asAdmin { activationService.activate(revision.id) }
     }
 
     private fun createPersistedUniqueDefinition(): UniqueDefinition =
