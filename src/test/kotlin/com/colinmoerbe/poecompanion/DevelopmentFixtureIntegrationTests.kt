@@ -7,6 +7,8 @@ import com.colinmoerbe.poecompanion.acquisition.knowledge.ScopedAcquisitionKnowl
 import com.colinmoerbe.poecompanion.acquisition.probability.FixedDropEstimateResolution
 import com.colinmoerbe.poecompanion.acquisition.readmodel.AcquisitionQueryResult
 import com.colinmoerbe.poecompanion.acquisition.readmodel.AcquisitionReadModelService
+import com.colinmoerbe.poecompanion.acquisition.relationship.DropRelationshipResolution
+import com.colinmoerbe.poecompanion.acquisition.relationship.DropRelationshipState
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.BossDefinition
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.BossDefinitionCreationConflictException
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.BossDefinitionId
@@ -210,6 +212,22 @@ internal class DevelopmentFixtureIntegrationTests(
         }
         assertThat(accountEvaluation.getSelected()?.accountContextId).isEqualTo(ids.account)
         assertThat(attempts.getAvailableAttempts(ids.account, ids.source)?.count).isEqualTo(12)
+
+        val sourceP = acquisitionReadModel.findForSource(ids.sourceP)!!
+        assertThat(sourceP.relationships.single { it.relationship.uniqueDefinitionId == ids.uniqueD }
+            .assessment?.calculation).isNotNull()
+        val negative = sourceP.relationships.single { it.relationship.uniqueDefinitionId == ids.uniqueE }
+        val relationship = negative.assessment?.relationshipKnowledge as ScopedAcquisitionKnowledge.Selected
+        assertThat((relationship.resolution as DropRelationshipResolution.Resolved).snapshot.state)
+            .isEqualTo(DropRelationshipState.CANNOT_DROP)
+        assertThat(negative.assessment?.calculation).isNull()
+
+        val noEstimate = acquisitionReadModel.findForSource(ids.sourceQ)!!.relationships.single()
+        assertThat(noEstimate.assessment?.calculation).isNull()
+        val unavailable = acquisitionReadModel.findForSource(ids.sourceR)!!.relationships.single()
+        val accepted = unavailable.assessment?.probabilityKnowledge as ScopedAcquisitionKnowledge.Selected
+        assertThat(accepted.resolution).isInstanceOf(FixedDropEstimateResolution.Resolved::class.java)
+        assertThat(unavailable.assessment?.calculation).isNull()
 
         assertThat(count("unique_definition")).isEqualTo(12)
         assertThat(count("league_definition")).isEqualTo(2)
