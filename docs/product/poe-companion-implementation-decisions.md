@@ -1612,7 +1612,8 @@ the existing legacy USER fixture and postponing broader ADMIN fixture data to PR
   Environment variables are `POE_COMPANION_APP_USER_USERNAME`,
   `POE_COMPANION_APP_USER_PASSWORD`, `POE_COMPANION_APP_ADMIN_USERNAME` and
   `POE_COMPANION_APP_ADMIN_PASSWORD`. The previous flat variables are intentionally
-  removed before deployment; usernames and passwords for the two logins must differ.
+  removed before deployment. Usernames must differ to keep identity resolution
+  unambiguous; strong, distinct passwords are recommended but not required.
 - Keep credentials and Spring Security roles out of the domain identity and PostgreSQL
   `application_identity` rows. Resolve a configured authenticated username **and**
   its expected authority to the existing fixed USER/ADMIN `ApplicationUserId` UUID;

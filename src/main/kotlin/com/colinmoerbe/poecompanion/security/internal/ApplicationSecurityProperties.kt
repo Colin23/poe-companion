@@ -14,7 +14,6 @@ internal class ApplicationSecurityProperties(
 ) {
     init {
         require(user.username != admin.username) { "USER and ADMIN usernames must differ" }
-        require(user.password != admin.password) { "USER and ADMIN passwords must differ" }
     }
 }
 

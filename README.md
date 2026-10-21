@@ -108,8 +108,9 @@ The health endpoint is public. Other application endpoints require one of two co
 `POE_COMPANION_APP_USER_USERNAME` / `POE_COMPANION_APP_USER_PASSWORD` or
 `POE_COMPANION_APP_ADMIN_USERNAME` / `POE_COMPANION_APP_ADMIN_PASSWORD`.
 Both can view canonical PoE knowledge and edit only their own personal data; only ADMIN can curate shared knowledge.
-The ADMIN has no development AccountContext until one is created or seeded separately. Username and password values
-must be distinct between the two logins. These are temporary V0.1 logins, not GGG OAuth identities.
+The ADMIN has no development AccountContext until one is created or seeded separately. The two logins
+must have distinct usernames; strong, separate passwords are recommended but not required.
+These are temporary V0.1 logins, not GGG OAuth identities.
 
 To stop local PostgreSQL:
 
