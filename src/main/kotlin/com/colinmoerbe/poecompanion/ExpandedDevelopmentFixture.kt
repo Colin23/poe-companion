@@ -87,17 +87,16 @@ internal class ExpandedDevelopmentFixture(
     )
 
     /** A missing first Unique must not mask a different partial expansion. */
-    fun hasAnyIdentities(): Boolean =
-        newUniques.any { uniques.findById(it) != null } ||
-            league.findLeagueById(ids.standardLeague) != null ||
-            listOf(ids.adminChallengeAccount, ids.adminStandardAccount).any { league.findAccountById(it) != null } ||
-            listOf(ids.archetypeP, ids.archetypeQ, ids.archetypeR).any { builds.findArchetypeById(it) != null } ||
-            listOf(ids.variantP, ids.variantQ, ids.variantR).any { builds.findVariantById(it) != null } ||
-            listOf(ids.revisionP, ids.revisionQ, ids.revisionR).any { builds.findRevisionById(it) != null } ||
-            listOf(ids.bossP, ids.bossQ, ids.bossR).any { bosses.findById(it) != null } ||
-            listOf(ids.sourceP, ids.sourceQ, ids.sourceR).any { acquisition.findSourceById(it) != null } ||
-            listOf(ids.relationshipPD, ids.relationshipPE, ids.relationshipQH, ids.relationshipRK)
-                .any { acquisition.findRelationshipById(it) != null }
+    fun hasAnyIdentities(): Boolean = newUniques.any { uniques.findById(it) != null } ||
+        league.findLeagueById(ids.standardLeague) != null ||
+        listOf(ids.adminChallengeAccount, ids.adminStandardAccount).any { league.findAccountById(it) != null } ||
+        listOf(ids.archetypeP, ids.archetypeQ, ids.archetypeR).any { builds.findArchetypeById(it) != null } ||
+        listOf(ids.variantP, ids.variantQ, ids.variantR).any { builds.findVariantById(it) != null } ||
+        listOf(ids.revisionP, ids.revisionQ, ids.revisionR).any { builds.findRevisionById(it) != null } ||
+        listOf(ids.bossP, ids.bossQ, ids.bossR).any { bosses.findById(it) != null } ||
+        listOf(ids.sourceP, ids.sourceQ, ids.sourceR).any { acquisition.findSourceById(it) != null } ||
+        listOf(ids.relationshipPD, ids.relationshipPE, ids.relationshipQH, ids.relationshipRK)
+            .any { acquisition.findRelationshipById(it) != null }
 
     fun create() {
         actor.asAdmin {
@@ -126,7 +125,10 @@ internal class ExpandedDevelopmentFixture(
             )
             league.saveAccount(
                 AccountContext(
-                    ids.adminStandardAccount, ids.standardLeague, Ruleset.NORMAL, ConfiguredApplicationUsers.ADMIN,
+                    ids.adminStandardAccount,
+                    ids.standardLeague,
+                    Ruleset.NORMAL,
+                    ConfiguredApplicationUsers.ADMIN,
                 ),
             )
             listOf(ids.uniqueA, ids.uniqueB, ids.uniqueC, ids.uniqueD, ids.uniqueF).forEach {
@@ -151,18 +153,27 @@ internal class ExpandedDevelopmentFixture(
         check(newUniques.all { uniques.findById(it) != null }) {
             "Partial expanded development fixture: missing Unique definitions"
         }
-        check(league.findLeagueById(ids.standardLeague)?.let {
-            it.name == "Development Standard SSF" && it.type == LeagueType.STANDARD &&
-                it.participation == LeagueParticipation.SSF && it.mortality == LeagueMortality.SOFTCORE &&
-                it.realm == GameRealm.PC
-        } == true) { "Partial expanded development fixture: Standard league metadata" }
-        check(listOf(ids.adminChallengeAccount to ids.league, ids.adminStandardAccount to ids.standardLeague).all {
-            (accountId, leagueId) ->
+        val standardLeague = league.findLeagueById(ids.standardLeague)
+        check(
+            standardLeague?.name == "Development Standard SSF" &&
+                standardLeague.type == LeagueType.STANDARD &&
+                standardLeague.participation == LeagueParticipation.SSF &&
+                standardLeague.mortality == LeagueMortality.SOFTCORE &&
+                standardLeague.realm == GameRealm.PC,
+        ) { "Partial expanded development fixture: Standard league metadata" }
+
+        val adminContextsValid = listOf(
+            ids.adminChallengeAccount to ids.league,
+            ids.adminStandardAccount to ids.standardLeague,
+        ).all { (accountId, leagueId) ->
             league.findAccountById(accountId)?.let { account ->
                 account.leagueDefinitionId == leagueId && account.ruleset == Ruleset.NORMAL &&
                     account.ownerApplicationUserId == ConfiguredApplicationUsers.ADMIN
             } == true
-        }) { "Partial expanded development fixture: ADMIN AccountContext ownership or league" }
+        }
+        check(adminContextsValid) {
+            "Partial expanded development fixture: ADMIN AccountContext ownership or league"
+        }
 
         verifyBuild(ids.archetypeP, ids.variantP, ids.revisionP, "Build P", definitions.buildPRequirements())
         verifyBuild(ids.archetypeQ, ids.variantQ, ids.revisionQ, "Build Q", definitions.buildQRequirements())
@@ -287,6 +298,7 @@ internal class ExpandedDevelopmentFixture(
 
 private object ExpandedFixtureDefinitions {
     private val ids = DevelopmentFixtureIds
+
     fun snapshot(
         bossId: BossDefinitionId,
         label: String,

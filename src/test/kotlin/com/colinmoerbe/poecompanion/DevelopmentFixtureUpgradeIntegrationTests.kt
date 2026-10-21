@@ -150,19 +150,25 @@ internal class DevelopmentFixtureUpgradeIntegrationTests(
             listOf(ids.uniqueA, ids.uniqueB, ids.uniqueC).forEach { catalog.save(UniqueDefinition(it)) }
             league.saveLeague(
                 LeagueDefinition(
-                    ids.league, "Development SSF league", LeagueType.CHALLENGE, LeagueParticipation.SSF,
-                    LeagueMortality.SOFTCORE, GameRealm.PC,
+                    id = ids.league,
+                    name = "Development SSF league",
+                    type = LeagueType.CHALLENGE,
+                    participation = LeagueParticipation.SSF,
+                    mortality = LeagueMortality.SOFTCORE,
+                    realm = GameRealm.PC,
                 ),
             )
             val revision = BuildVariantRevision(ids.revision, ids.variant, version)
             revision.updateRequirementGroups(
                 listOf(
                     RequirementGroup(
-                        RequirementImportance.ENABLING, RequirementLogic.ALL,
+                        RequirementImportance.ENABLING,
+                        RequirementLogic.ALL,
                         listOf(Requirement(ids.uniqueA, 1)),
                     ),
                     RequirementGroup(
-                        RequirementImportance.CORE, RequirementLogic.ALL,
+                        RequirementImportance.CORE,
+                        RequirementLogic.ALL,
                         listOf(Requirement(ids.uniqueB, 1), Requirement(ids.uniqueC, 1)),
                     ),
                 ),
@@ -177,14 +183,19 @@ internal class DevelopmentFixtureUpgradeIntegrationTests(
             encounters.recordSnapshot(
                 ids.source, scope,
                 BossEncounterKnowledgeSnapshot(
-                    null, "Boss Y", AcquisitionSourceAvailability.AVAILABLE,
+                    null,
+                    "Boss Y",
+                    AcquisitionSourceAvailability.AVAILABLE,
                     BossParticipation.Fixed(setOf(ids.boss)),
                 ),
                 null,
             )
             acquisition.saveRelationship(DropRelationship(ids.relationship, ids.source, ids.uniqueC))
             relationships.recordSnapshot(
-                ids.relationship, scope, DropRelationshipSnapshot(null, DropRelationshipState.CAN_DROP), null,
+                ids.relationship,
+                scope,
+                DropRelationshipSnapshot(null, DropRelationshipState.CAN_DROP),
+                null,
             )
             estimates.publish(
                 ids.relationship, scope,
