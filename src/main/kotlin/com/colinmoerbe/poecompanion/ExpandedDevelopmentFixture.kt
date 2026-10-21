@@ -327,29 +327,34 @@ private object ExpandedFixtureDefinitions {
 
     fun buildPRequirements(): List<RequirementGroup> = listOf(
         RequirementGroup(
-            RequirementImportance.ENABLING, RequirementLogic.ANY,
+            RequirementImportance.ENABLING,
+            RequirementLogic.ANY,
             listOf(Requirement(ids.uniqueD, 1), Requirement(ids.uniqueE, 1)),
         ),
         RequirementGroup(
-            RequirementImportance.CORE, RequirementLogic.ALL,
+            RequirementImportance.CORE,
+            RequirementLogic.ALL,
             listOf(Requirement(ids.uniqueF, 1), Requirement(ids.uniqueG, 1)),
         ),
     )
 
     fun buildQRequirements(): List<RequirementGroup> = listOf(
         RequirementGroup(
-            RequirementImportance.CORE, RequirementLogic.ALL,
+            RequirementImportance.CORE,
+            RequirementLogic.ALL,
             listOf(Requirement(ids.uniqueH, 2)),
         ),
         RequirementGroup(
-            RequirementImportance.UPGRADE, RequirementLogic.ANY,
+            RequirementImportance.UPGRADE,
+            RequirementLogic.ANY,
             listOf(Requirement(ids.uniqueI, 1), Requirement(ids.uniqueJ, 1)),
         ),
     )
 
     fun buildRRequirements(): List<RequirementGroup> = listOf(
         RequirementGroup(
-            RequirementImportance.UPGRADE, RequirementLogic.ALL,
+            RequirementImportance.UPGRADE,
+            RequirementLogic.ALL,
             listOf(Requirement(ids.uniqueK, 1), Requirement(ids.uniqueL, 1)),
         ),
     )

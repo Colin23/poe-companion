@@ -214,8 +214,10 @@ internal class DevelopmentFixtureIntegrationTests(
         assertThat(attempts.getAvailableAttempts(ids.account, ids.source)?.count).isEqualTo(12)
 
         val sourceP = acquisitionReadModel.findForSource(ids.sourceP)!!
-        assertThat(sourceP.relationships.single { it.relationship.uniqueDefinitionId == ids.uniqueD }
-            .assessment?.calculation).isNotNull()
+        assertThat(
+            sourceP.relationships.single { it.relationship.uniqueDefinitionId == ids.uniqueD }
+                .assessment?.calculation,
+        ).isNotNull()
         val negative = sourceP.relationships.single { it.relationship.uniqueDefinitionId == ids.uniqueE }
         val relationship = negative.assessment?.relationshipKnowledge as ScopedAcquisitionKnowledge.Selected
         assertThat((relationship.resolution as DropRelationshipResolution.Resolved).snapshot.state)
