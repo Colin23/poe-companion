@@ -2,6 +2,7 @@ package com.colinmoerbe.poecompanion.browser.uniques
 
 import com.colinmoerbe.poecompanion.DevelopmentFixtureIds
 import com.colinmoerbe.poecompanion.DevelopmentFixtureInitializer
+import com.colinmoerbe.poecompanion.SecurityTestActors
 import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.account.CurrentOwnershipService
 import com.colinmoerbe.poecompanion.account.ManualOwnershipService
@@ -60,8 +61,10 @@ import javax.sql.DataSource
 @SpringBootTest(
     properties = [
         "poe-companion.dev-fixture.enabled=true",
-        "poe-companion.security.username=test-user",
-        "poe-companion.security.password=test-password",
+        "poe-companion.security.user.username=test-user",
+        "poe-companion.security.user.password=test-password",
+        "poe-companion.security.admin.username=test-admin",
+        "poe-companion.security.admin.password=test-admin-password",
     ],
 )
 @Suppress("LongParameterList")
@@ -367,17 +370,19 @@ internal class UniqueBrowserControllerIntegrationTests(
     fun `ambiguous source scope is not converted into actionable probability`() {
         initializer.initialize()
         val leagueScope = AcquisitionKnowledgeScope(CompatibilityVersion(3, 30), Ruleset.NORMAL, ids.league)
-        encounters.recordSnapshot(
-            ids.source,
-            leagueScope,
-            BossEncounterKnowledgeSnapshot(
+        SecurityTestActors.asAdmin {
+            encounters.recordSnapshot(
+                ids.source,
+                leagueScope,
+                BossEncounterKnowledgeSnapshot(
+                    null,
+                    "Boss Y",
+                    AcquisitionSourceAvailability.AVAILABLE,
+                    BossParticipation.ConfigurationDependent,
+                ),
                 null,
-                "Boss Y",
-                AcquisitionSourceAvailability.AVAILABLE,
-                BossParticipation.ConfigurationDependent,
-            ),
-            null,
-        )
+            )
+        }
 
         mockMvc.perform(get("/uniques/${ids.uniqueC.value}").with(user("test-user")))
             .andExpect(status().isOk)
@@ -397,15 +402,29 @@ internal class UniqueBrowserControllerIntegrationTests(
             acquisition.saveSource(AcquisitionSource(source))
             acquisition.saveRelationship(DropRelationship(relationship, source, ids.uniqueC))
             if (name != null && availability != null) {
-                encounters.recordSnapshot(
-                    source,
-                    general,
-                    BossEncounterKnowledgeSnapshot(null, name, availability, BossParticipation.ConfigurationDependent),
-                    null,
-                )
+                SecurityTestActors.asAdmin {
+                    encounters.recordSnapshot(
+                        source,
+                        general,
+                        BossEncounterKnowledgeSnapshot(
+                            null,
+                            name,
+                            availability,
+                            BossParticipation.ConfigurationDependent,
+                        ),
+                        null,
+                    )
+                }
             }
             if (state != null) {
-                drops.recordSnapshot(relationship, general, DropRelationshipSnapshot(null, state), null)
+                SecurityTestActors.asAdmin {
+                    drops.recordSnapshot(
+                        relationship,
+                        general,
+                        DropRelationshipSnapshot(null, state),
+                        null,
+                    )
+                }
             }
         }
         addSource("Cannot Drop Encounter", AcquisitionSourceAvailability.AVAILABLE, DropRelationshipState.CANNOT_DROP)

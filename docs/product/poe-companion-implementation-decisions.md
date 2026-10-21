@@ -1593,3 +1593,54 @@ Require exactly eight Spring Modulith modules and `ApplicationModules.verify()`,
 verification, unknown/foreign context rejection, immutable owner persistence, per-user
 selection integrity, existing fixture startup/idempotency and ownership/attempt semantics,
 and the full Gradle/CI/CodeQL/CodeRabbit review before merging.
+
+---
+
+## 36. Two Configured Logins and Canonical Curator Authorization (Milestone 5.2 PR B)
+
+### Context
+
+PR A introduced application-owned UUID identities, mandatory AccountContext ownership and
+per-user selections without activating a second login. V0.1 now needs an independent ADMIN
+principal to verify privacy boundaries and curate shared PoE knowledge, while preserving
+the existing legacy USER fixture and postponing broader ADMIN fixture data to PR C.
+
+### Decision
+
+- Configure exactly two temporary local form logins under sibling
+  `poe-companion.security.user` and `poe-companion.security.admin` properties.
+  Environment variables are `POE_COMPANION_APP_USER_USERNAME`,
+  `POE_COMPANION_APP_USER_PASSWORD`, `POE_COMPANION_APP_ADMIN_USERNAME` and
+  `POE_COMPANION_APP_ADMIN_PASSWORD`. The previous flat variables are intentionally
+  removed before deployment. Usernames must differ to keep identity resolution
+  unambiguous; strong, distinct passwords are recommended but not required.
+- Keep credentials and Spring Security roles out of the domain identity and PostgreSQL
+  `application_identity` rows. Resolve a configured authenticated username **and**
+  its expected authority to the existing fixed USER/ADMIN `ApplicationUserId` UUID;
+  reject anonymous, unknown and mismatched-role principals. Preserve form login,
+  logout, secure session behavior, CSRF and anonymous health checks.
+- Keep League's existing owner-only `AccountContextAccessService` authorization for
+  **both** roles. ADMIN may not select, read, modify or clear another user's personal
+  context, ownership or saved attempts. Browser/read-model results continue to derive
+  personal facts from the current user's own selection.
+- Introduce a small `security :: authorization` named interface and enforce ADMIN
+  inside existing canonical application commands: Boss creation, encounter knowledge,
+  drop relationship knowledge, fixed-probability publication/withdrawal and Build
+  revision activation. Shared reads remain available to either authenticated user.
+  Do not add speculative canonical CRUD controllers or public authoring APIs.
+- Keep the development initializer behind its existing property/profile controls.
+  Canonical seeding runs with an explicitly scoped trusted ADMIN principal, while
+  legacy USER AccountContext ownership, attempts and selected evaluation are
+  initialized only as USER. Each scope restores the previous SecurityContext, even
+  on failure. Preserve atomicity, deterministic IDs and player edits on reruns.
+- Do not introduce schema changes, new OAuth/provider identities, public guest
+  access, full user management, an ADMIN AccountContext fixture, or a context
+  selector UI. The last two belong to PR C.
+
+### Verification
+
+Exercise both actual configured form logins and role mapping, wrong/missing credentials,
+anonymous and USER canonical-write rejection, ADMIN canonical authoring, both-role
+personal service isolation and Browser composition, CSRF, session independence,
+fixture idempotency and PostgreSQL-backed existing knowledge tests. Preserve the
+Spring Modulith eight-module boundary and full Gradle/CI/CodeQL checks.

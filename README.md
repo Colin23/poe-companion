@@ -56,7 +56,8 @@ Set non-empty local values for at least:
 
 ```dotenv
 POE_COMPANION_DB_PASSWORD=choose-a-local-database-password
-POE_COMPANION_APP_PASSWORD=choose-a-local-application-password
+POE_COMPANION_APP_USER_PASSWORD=choose-a-local-user-password
+POE_COMPANION_APP_ADMIN_PASSWORD=choose-a-different-local-admin-password
 ```
 
 `.env` is for local development only. Do not commit it or reuse its credentials in a hosted environment.
@@ -103,8 +104,13 @@ Useful local endpoints:
 - Login: <http://localhost:8080/login>
 - Health: <http://localhost:8080/actuator/health>
 
-The health endpoint is public. Other application endpoints require authentication with `POE_COMPANION_APP_USERNAME` and
-`POE_COMPANION_APP_PASSWORD`.
+The health endpoint is public. Other application endpoints require one of two configured application logins:
+`POE_COMPANION_APP_USER_USERNAME` / `POE_COMPANION_APP_USER_PASSWORD` or
+`POE_COMPANION_APP_ADMIN_USERNAME` / `POE_COMPANION_APP_ADMIN_PASSWORD`.
+Both can view canonical PoE knowledge and edit only their own personal data; only ADMIN can curate shared knowledge.
+The ADMIN has no development AccountContext until one is created or seeded separately. The two logins
+must have distinct usernames; strong, separate passwords are recommended but not required.
+These are temporary V0.1 logins, not GGG OAuth identities.
 
 To stop local PostgreSQL:
 

@@ -1,5 +1,6 @@
 package com.colinmoerbe.poecompanion.acquisition.readmodel
 
+import com.colinmoerbe.poecompanion.SecurityTestActors
 import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.acquisition.attempts.AvailableAttempts
 import com.colinmoerbe.poecompanion.acquisition.attempts.AvailableAttemptsService
@@ -69,8 +70,10 @@ import java.time.Instant
 @Import(TestcontainersConfiguration::class)
 @SpringBootTest(
     properties = [
-        "poe-companion.security.username=test-user",
-        "poe-companion.security.password=test-password",
+        "poe-companion.security.user.username=test-user",
+        "poe-companion.security.user.password=test-password",
+        "poe-companion.security.admin.username=test-admin",
+        "poe-companion.security.admin.password=test-admin-password",
     ],
 )
 @WithMockUser(username = "test-user")
@@ -139,9 +142,23 @@ internal class AcquisitionReadModelServiceIntegrationTests(
         val second = relationship(targetUnique)
         val otherUnique = unique()
         relationship(otherUnique)
-        encounterService.recordSnapshot(first.acquisitionSourceId, broad, encounter(), null)
-        relationshipKnowledgeService.recordSnapshot(first.id, broad, drop(), null)
-        relationshipKnowledgeService.recordSnapshot(second.id, broad, drop(DropRelationshipState.CANNOT_DROP), null)
+        SecurityTestActors.asAdmin {
+            encounterService.recordSnapshot(
+                first.acquisitionSourceId,
+                broad,
+                encounter(),
+                null,
+            )
+        }
+        SecurityTestActors.asAdmin { relationshipKnowledgeService.recordSnapshot(first.id, broad, drop(), null) }
+        SecurityTestActors.asAdmin {
+            relationshipKnowledgeService.recordSnapshot(
+                second.id,
+                broad,
+                drop(DropRelationshipState.CANNOT_DROP),
+                null,
+            )
+        }
 
         val result = evaluated(targetUnique)
         assertThat(result.sources).hasSize(2)
@@ -167,15 +184,31 @@ internal class AcquisitionReadModelServiceIntegrationTests(
         val unique = unique()
         val relationship = relationship(unique)
         val specific = broad.copy(leagueDefinitionId = league)
-        encounterService.recordSnapshot(relationship.acquisitionSourceId, broad, encounter(), null)
-        encounterService.recordSnapshot(relationship.acquisitionSourceId, specific, encounter(), null)
-        relationshipKnowledgeService.recordSnapshot(relationship.id, broad, drop(), null)
-        relationshipKnowledgeService.recordSnapshot(
-            relationship.id,
-            specific,
-            drop(DropRelationshipState.CANNOT_DROP),
-            null,
-        )
+        SecurityTestActors.asAdmin {
+            encounterService.recordSnapshot(
+                relationship.acquisitionSourceId,
+                broad,
+                encounter(),
+                null,
+            )
+        }
+        SecurityTestActors.asAdmin {
+            encounterService.recordSnapshot(
+                relationship.acquisitionSourceId,
+                specific,
+                encounter(),
+                null,
+            )
+        }
+        SecurityTestActors.asAdmin { relationshipKnowledgeService.recordSnapshot(relationship.id, broad, drop(), null) }
+        SecurityTestActors.asAdmin {
+            relationshipKnowledgeService.recordSnapshot(
+                relationship.id,
+                specific,
+                drop(DropRelationshipState.CANNOT_DROP),
+                null,
+            )
+        }
 
         val assessed = evaluated(unique).sources.single()
 
@@ -189,13 +222,22 @@ internal class AcquisitionReadModelServiceIntegrationTests(
         val anotherLeague = league()
         val unique = unique()
         val relationship = relationship(unique)
-        encounterService.recordSnapshot(relationship.acquisitionSourceId, broad, encounter(), null)
-        encounterService.recordSnapshot(
-            relationship.acquisitionSourceId,
-            broad.copy(leagueDefinitionId = anotherLeague),
-            encounter(AcquisitionSourceAvailability.UNAVAILABLE),
-            null,
-        )
+        SecurityTestActors.asAdmin {
+            encounterService.recordSnapshot(
+                relationship.acquisitionSourceId,
+                broad,
+                encounter(),
+                null,
+            )
+        }
+        SecurityTestActors.asAdmin {
+            encounterService.recordSnapshot(
+                relationship.acquisitionSourceId,
+                broad.copy(leagueDefinitionId = anotherLeague),
+                encounter(AcquisitionSourceAvailability.UNAVAILABLE),
+                null,
+            )
+        }
 
         assertThat(evaluated(unique).sources.single().sourceKnowledge).isEqualTo(
             ScopedAcquisitionKnowledge.Selected(BossEncounterKnowledgeResolution.Resolved(encounter())),
@@ -207,13 +249,22 @@ internal class AcquisitionReadModelServiceIntegrationTests(
         selectLeague()
         val unique = unique()
         val relationship = relationship(unique)
-        encounterService.recordSnapshot(relationship.acquisitionSourceId, broad, encounter(), null)
-        encounterService.recordSnapshot(
-            relationship.acquisitionSourceId,
-            broad,
-            encounter(AcquisitionSourceAvailability.UNAVAILABLE, GamePatch(version, 2)),
-            null,
-        )
+        SecurityTestActors.asAdmin {
+            encounterService.recordSnapshot(
+                relationship.acquisitionSourceId,
+                broad,
+                encounter(),
+                null,
+            )
+        }
+        SecurityTestActors.asAdmin {
+            encounterService.recordSnapshot(
+                relationship.acquisitionSourceId,
+                broad,
+                encounter(AcquisitionSourceAvailability.UNAVAILABLE, GamePatch(version, 2)),
+                null,
+            )
+        }
 
         assertThat(evaluated(unique).sources.single().sourceKnowledge).isEqualTo(
             ScopedAcquisitionKnowledge.Selected(BossEncounterKnowledgeResolution.Unknown),
@@ -226,18 +277,22 @@ internal class AcquisitionReadModelServiceIntegrationTests(
         val secondLeague = league()
         val unique = unique()
         val relationship = relationship(unique)
-        relationshipKnowledgeService.recordSnapshot(
-            relationship.id,
-            broad.copy(leagueDefinitionId = firstLeague),
-            drop(),
-            null,
-        )
-        relationshipKnowledgeService.recordSnapshot(
-            relationship.id,
-            broad.copy(leagueDefinitionId = secondLeague),
-            drop(DropRelationshipState.CANNOT_DROP),
-            null,
-        )
+        SecurityTestActors.asAdmin {
+            relationshipKnowledgeService.recordSnapshot(
+                relationship.id,
+                broad.copy(leagueDefinitionId = firstLeague),
+                drop(),
+                null,
+            )
+        }
+        SecurityTestActors.asAdmin {
+            relationshipKnowledgeService.recordSnapshot(
+                relationship.id,
+                broad.copy(leagueDefinitionId = secondLeague),
+                drop(DropRelationshipState.CANNOT_DROP),
+                null,
+            )
+        }
 
         assertThat(evaluated(unique).sources.single().relationshipKnowledge).isEqualTo(
             ScopedAcquisitionKnowledge.Selected(DropRelationshipResolution.Resolved(drop())),
@@ -258,7 +313,7 @@ internal class AcquisitionReadModelServiceIntegrationTests(
         val relationship = relationship(target)
         makeApplicable(relationship)
         val published = estimate()
-        fixedEstimateService.publish(relationship.id, broad, published, null)
+        SecurityTestActors.asAdmin { fixedEstimateService.publish(relationship.id, broad, published, null) }
         attemptsService.setAvailableAttempts(accountId, relationship.acquisitionSourceId, 12)
 
         val assessed = evaluated(target).sources.single()
@@ -289,7 +344,7 @@ internal class AcquisitionReadModelServiceIntegrationTests(
         val target = unique()
         val relationship = relationship(target)
         makeApplicable(relationship)
-        fixedEstimateService.publish(relationship.id, broad, estimate(), null)
+        SecurityTestActors.asAdmin { fixedEstimateService.publish(relationship.id, broad, estimate(), null) }
 
         val missingAttempts = evaluated(target).sources.single()
         assertThat(missingAttempts.availableAttempts).isNull()
@@ -304,6 +359,7 @@ internal class AcquisitionReadModelServiceIntegrationTests(
     }
 
     @Test
+    @Suppress("LongMethod") // Explicit ADMIN-scoped canonical setup expands the existing scenario.
     fun `unknown and negative prerequisite facts should retain knowledge without actionable calculations`() {
         selectAccount()
         val target = unique()
@@ -312,25 +368,50 @@ internal class AcquisitionReadModelServiceIntegrationTests(
         val cannotDrop = relationship(target)
         val missingProbability = relationship(target)
 
-        relationshipKnowledgeService.recordSnapshot(unknownSource.id, broad, drop(), null)
-        encounterService.recordSnapshot(
-            unavailableSource.acquisitionSourceId,
-            broad,
-            encounter(AcquisitionSourceAvailability.UNAVAILABLE),
-            null,
-        )
-        relationshipKnowledgeService.recordSnapshot(unavailableSource.id, broad, drop(), null)
-        encounterService.recordSnapshot(cannotDrop.acquisitionSourceId, broad, encounter(), null)
-        relationshipKnowledgeService.recordSnapshot(
-            cannotDrop.id,
-            broad,
-            drop(DropRelationshipState.CANNOT_DROP),
-            null,
-        )
+        SecurityTestActors.asAdmin {
+            relationshipKnowledgeService.recordSnapshot(
+                unknownSource.id,
+                broad,
+                drop(),
+                null,
+            )
+        }
+        SecurityTestActors.asAdmin {
+            encounterService.recordSnapshot(
+                unavailableSource.acquisitionSourceId,
+                broad,
+                encounter(AcquisitionSourceAvailability.UNAVAILABLE),
+                null,
+            )
+        }
+        SecurityTestActors.asAdmin {
+            relationshipKnowledgeService.recordSnapshot(
+                unavailableSource.id,
+                broad,
+                drop(),
+                null,
+            )
+        }
+        SecurityTestActors.asAdmin {
+            encounterService.recordSnapshot(
+                cannotDrop.acquisitionSourceId,
+                broad,
+                encounter(),
+                null,
+            )
+        }
+        SecurityTestActors.asAdmin {
+            relationshipKnowledgeService.recordSnapshot(
+                cannotDrop.id,
+                broad,
+                drop(DropRelationshipState.CANNOT_DROP),
+                null,
+            )
+        }
         makeApplicable(missingProbability)
 
         for (relationship in listOf(unknownSource, unavailableSource, cannotDrop)) {
-            fixedEstimateService.publish(relationship.id, broad, estimate(), null)
+            SecurityTestActors.asAdmin { fixedEstimateService.publish(relationship.id, broad, estimate(), null) }
         }
 
         val byId = evaluated(target).sources.associateBy { it.relationship.id }
@@ -350,8 +431,15 @@ internal class AcquisitionReadModelServiceIntegrationTests(
         val target = unique()
         val relationship = relationship(target)
         makeApplicable(relationship)
-        fixedEstimateService.publish(relationship.id, broad, estimate(), null)
-        fixedEstimateService.publish(relationship.id, broad.copy(leagueDefinitionId = leagueId), estimate(), null)
+        SecurityTestActors.asAdmin { fixedEstimateService.publish(relationship.id, broad, estimate(), null) }
+        SecurityTestActors.asAdmin {
+            fixedEstimateService.publish(
+                relationship.id,
+                broad.copy(leagueDefinitionId = leagueId),
+                estimate(),
+                null,
+            )
+        }
 
         val assessed = evaluated(target).sources.single()
 
@@ -367,19 +455,23 @@ internal class AcquisitionReadModelServiceIntegrationTests(
         val target = unique()
         val relationship = relationship(target)
         makeApplicable(relationship)
-        fixedEstimateService.publish(relationship.id, broad, estimate(), null)
-        fixedEstimateService.publish(
-            relationship.id,
-            broad.copy(leagueDefinitionId = league()),
-            estimate(probability = 0.25),
-            null,
-        )
-        fixedEstimateService.publish(
-            relationship.id,
-            AcquisitionKnowledgeScope(CompatibilityVersion(3, 31), Ruleset.NORMAL),
-            estimate(probability = 0.30),
-            null,
-        )
+        SecurityTestActors.asAdmin { fixedEstimateService.publish(relationship.id, broad, estimate(), null) }
+        SecurityTestActors.asAdmin {
+            fixedEstimateService.publish(
+                relationship.id,
+                broad.copy(leagueDefinitionId = league()),
+                estimate(probability = 0.25),
+                null,
+            )
+        }
+        SecurityTestActors.asAdmin {
+            fixedEstimateService.publish(
+                relationship.id,
+                AcquisitionKnowledgeScope(CompatibilityVersion(3, 31), Ruleset.NORMAL),
+                estimate(probability = 0.30),
+                null,
+            )
+        }
 
         val assessed = evaluated(target).sources.single()
         assertThat(assessed.probabilityKnowledge)
@@ -393,19 +485,21 @@ internal class AcquisitionReadModelServiceIntegrationTests(
         val target = unique()
         val relationship = relationship(target)
         makeApplicable(relationship)
-        fixedEstimateService.publish(relationship.id, broad, estimate(), null)
-        fixedEstimateService.withdraw(
-            relationship.id,
-            broad,
-            FixedProbabilityWithdrawal(
-                id = FixedProbabilityWithdrawalId.generate(),
-                effectiveFromPatch = GamePatch(version, 2),
-                reason = "Evidence invalidated",
-                evidenceReference = "test-withdrawal-evidence",
-                reviewedAt = Instant.parse("2026-10-01T00:00:00Z"),
-            ),
-            null,
-        )
+        SecurityTestActors.asAdmin { fixedEstimateService.publish(relationship.id, broad, estimate(), null) }
+        SecurityTestActors.asAdmin {
+            fixedEstimateService.withdraw(
+                relationship.id,
+                broad,
+                FixedProbabilityWithdrawal(
+                    id = FixedProbabilityWithdrawalId.generate(),
+                    effectiveFromPatch = GamePatch(version, 2),
+                    reason = "Evidence invalidated",
+                    evidenceReference = "test-withdrawal-evidence",
+                    reviewedAt = Instant.parse("2026-10-01T00:00:00Z"),
+                ),
+                null,
+            )
+        }
 
         accountEvaluationService.select(accountId, version, GamePatch(version, 1))
         assertThat(evaluated(target).sources.single().calculation?.attemptsFor95Percent).isEqualTo(29)
@@ -430,9 +524,9 @@ internal class AcquisitionReadModelServiceIntegrationTests(
             DropRelationship(DropRelationshipId.generate(), primary.acquisitionSourceId, siblingUnique)
                 .also(relationshipAdapter::save)
         makeApplicable(primary)
-        relationshipKnowledgeService.recordSnapshot(sibling.id, broad, drop(), null)
-        fixedEstimateService.publish(primary.id, broad, estimate(), null)
-        fixedEstimateService.publish(sibling.id, broad, estimate(), null)
+        SecurityTestActors.asAdmin { relationshipKnowledgeService.recordSnapshot(sibling.id, broad, drop(), null) }
+        SecurityTestActors.asAdmin { fixedEstimateService.publish(primary.id, broad, estimate(), null) }
+        SecurityTestActors.asAdmin { fixedEstimateService.publish(sibling.id, broad, estimate(), null) }
         attemptsService.setAvailableAttempts(firstAccount, primary.acquisitionSourceId, 12)
 
         val first = evaluated(target).sources.single()
@@ -459,8 +553,15 @@ internal class AcquisitionReadModelServiceIntegrationTests(
         )
 
     private fun makeApplicable(relationship: DropRelationship) {
-        encounterService.recordSnapshot(relationship.acquisitionSourceId, broad, encounter(), null)
-        relationshipKnowledgeService.recordSnapshot(relationship.id, broad, drop(), null)
+        SecurityTestActors.asAdmin {
+            encounterService.recordSnapshot(
+                relationship.acquisitionSourceId,
+                broad,
+                encounter(),
+                null,
+            )
+        }
+        SecurityTestActors.asAdmin { relationshipKnowledgeService.recordSnapshot(relationship.id, broad, drop(), null) }
     }
 
     private fun selectAccount(): AccountContextId {

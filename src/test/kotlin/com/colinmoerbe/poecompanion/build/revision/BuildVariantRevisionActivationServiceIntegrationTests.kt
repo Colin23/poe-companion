@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
+import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.support.TransactionTemplate
@@ -39,10 +40,13 @@ import java.util.concurrent.TimeUnit
 @Import(TestcontainersConfiguration::class)
 @SpringBootTest(
     properties = [
-        "poe-companion.security.username=test-user",
-        "poe-companion.security.password=test-password",
+        "poe-companion.security.user.username=test-user",
+        "poe-companion.security.user.password=test-password",
+        "poe-companion.security.admin.username=test-admin",
+        "poe-companion.security.admin.password=test-admin-password",
     ],
 )
+@WithMockUser(username = "test-admin", roles = ["ADMIN"])
 internal class BuildVariantRevisionActivationServiceIntegrationTests(
     @Autowired private val activationService: BuildVariantRevisionActivationService,
     @Autowired private val revisionPersistenceAdapter: BuildVariantRevisionPersistenceAdapter,

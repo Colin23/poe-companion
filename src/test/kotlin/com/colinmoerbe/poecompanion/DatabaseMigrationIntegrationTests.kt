@@ -13,8 +13,10 @@ import javax.sql.DataSource
 @Import(TestcontainersConfiguration::class)
 @SpringBootTest(
     properties = [
-        "poe-companion.security.username=test-user",
-        "poe-companion.security.password=test-password",
+        "poe-companion.security.user.username=test-user",
+        "poe-companion.security.user.password=test-password",
+        "poe-companion.security.admin.username=test-admin",
+        "poe-companion.security.admin.password=test-admin-password",
     ],
 )
 class DatabaseMigrationIntegrationTests(

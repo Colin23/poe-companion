@@ -1,5 +1,6 @@
 package com.colinmoerbe.poecompanion.build.readmodel
 
+import com.colinmoerbe.poecompanion.SecurityTestActors
 import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.account.ManualOwnershipService
 import com.colinmoerbe.poecompanion.account.persistence.SpringDataManualOwnershipRepository
@@ -59,8 +60,10 @@ import org.springframework.security.test.context.support.WithMockUser
 @Import(TestcontainersConfiguration::class)
 @SpringBootTest(
     properties = [
-        "poe-companion.security.username=test-user",
-        "poe-companion.security.password=test-password",
+        "poe-companion.security.user.username=test-user",
+        "poe-companion.security.user.password=test-password",
+        "poe-companion.security.admin.username=test-admin",
+        "poe-companion.security.admin.password=test-admin-password",
     ],
 )
 @WithMockUser(username = "test-user")
@@ -232,7 +235,7 @@ internal class BuildReadinessServiceIntegrationTests(
     ).also { revision ->
         revision.updateRequirementGroups(requirementGroups)
         revisionPersistenceAdapter.saveDraftSnapshot(revision)
-        activationService.activate(revision.id)
+        SecurityTestActors.asAdmin { activationService.activate(revision.id) }
     }
 
     private fun createPersistedUniqueDefinition(): UniqueDefinition =

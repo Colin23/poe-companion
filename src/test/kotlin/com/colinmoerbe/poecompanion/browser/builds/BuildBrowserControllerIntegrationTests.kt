@@ -2,6 +2,7 @@ package com.colinmoerbe.poecompanion.browser.builds
 
 import com.colinmoerbe.poecompanion.DevelopmentFixtureIds
 import com.colinmoerbe.poecompanion.DevelopmentFixtureInitializer
+import com.colinmoerbe.poecompanion.SecurityTestActors
 import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.account.ManualOwnershipService
 import com.colinmoerbe.poecompanion.build.DevelopmentBuildAccess
@@ -50,8 +51,10 @@ import javax.sql.DataSource
 @SpringBootTest(
     properties = [
         "poe-companion.dev-fixture.enabled=true",
-        "poe-companion.security.username=test-user",
-        "poe-companion.security.password=test-password",
+        "poe-companion.security.user.username=test-user",
+        "poe-companion.security.user.password=test-password",
+        "poe-companion.security.admin.username=test-admin",
+        "poe-companion.security.admin.password=test-admin-password",
     ],
 )
 @Suppress("LongParameterList")
@@ -256,7 +259,7 @@ internal class BuildBrowserControllerIntegrationTests(
         val revision = BuildVariantRevision(BuildVariantRevisionId.generate(), variant.id, version)
         revision.updateRequirementGroups(groups)
         if (activate) {
-            fixtureBuilds.createAndActivate(archetype, variant, revision)
+            SecurityTestActors.asAdmin { fixtureBuilds.createAndActivate(archetype, variant, revision) }
         } else {
             archetypes.save(archetype)
             variants.save(variant)

@@ -107,17 +107,19 @@ internal class DevelopmentFixtureInitializer(
     }
 
     private fun createCatalogAndAccount() {
-        listOf(ids.uniqueA, ids.uniqueB, ids.uniqueC).forEach { uniques.save(UniqueDefinition(it)) }
-        leagueAccess.saveLeague(
-            LeagueDefinition(
-                id = ids.league,
-                name = "Development SSF league",
-                type = LeagueType.CHALLENGE,
-                participation = LeagueParticipation.SSF,
-                mortality = LeagueMortality.SOFTCORE,
-                realm = GameRealm.PC,
-            ),
-        )
+        fixtureActor.asAdmin {
+            listOf(ids.uniqueA, ids.uniqueB, ids.uniqueC).forEach { uniques.save(UniqueDefinition(it)) }
+            leagueAccess.saveLeague(
+                LeagueDefinition(
+                    id = ids.league,
+                    name = "Development SSF league",
+                    type = LeagueType.CHALLENGE,
+                    participation = LeagueParticipation.SSF,
+                    mortality = LeagueMortality.SOFTCORE,
+                    realm = GameRealm.PC,
+                ),
+            )
+        }
         leagueAccess.saveAccount(
             AccountContext(ids.account, ids.league, Ruleset.NORMAL, ConfiguredApplicationUsers.USER),
         )
@@ -126,7 +128,7 @@ internal class DevelopmentFixtureInitializer(
         // C=0 is represented by an absent ownership row.
     }
 
-    private fun createBuild() {
+    private fun createBuild() = fixtureActor.asAdmin {
         val revision = BuildVariantRevision(ids.revision, ids.variant, compatibilityVersion)
         revision.updateRequirementGroups(requirementGroups())
         buildAccess.createAndActivate(
@@ -137,17 +139,19 @@ internal class DevelopmentFixtureInitializer(
     }
 
     private fun createAcquisition() {
-        bosses.create(BossDefinition(ids.boss, "Boss Y"))
-        acquisitionAccess.saveSource(AcquisitionSource(ids.source))
-        encounters.recordSnapshot(ids.source, scope, encounterSnapshot(), null)
-        acquisitionAccess.saveRelationship(DropRelationship(ids.relationship, ids.source, ids.uniqueC))
-        drops.recordSnapshot(
-            ids.relationship,
-            scope,
-            DropRelationshipSnapshot(null, DropRelationshipState.CAN_DROP),
-            null,
-        )
-        estimates.publish(ids.relationship, scope, estimateSnapshot(), null)
+        fixtureActor.asAdmin {
+            bosses.create(BossDefinition(ids.boss, "Boss Y"))
+            acquisitionAccess.saveSource(AcquisitionSource(ids.source))
+            encounters.recordSnapshot(ids.source, scope, encounterSnapshot(), null)
+            acquisitionAccess.saveRelationship(DropRelationship(ids.relationship, ids.source, ids.uniqueC))
+            drops.recordSnapshot(
+                ids.relationship,
+                scope,
+                DropRelationshipSnapshot(null, DropRelationshipState.CAN_DROP),
+                null,
+            )
+            estimates.publish(ids.relationship, scope, estimateSnapshot(), null)
+        }
         attempts.setAvailableAttempts(ids.account, ids.source, INITIAL_ATTEMPTS)
     }
 

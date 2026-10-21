@@ -37,6 +37,8 @@ import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.dao.InvalidDataAccessApiUsageException
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService
+import org.springframework.security.test.context.support.WithMockUser
 import java.sql.Timestamp
 import java.time.Instant
 import java.util.UUID
@@ -51,10 +53,15 @@ import java.util.concurrent.TimeUnit
 @Import(TestcontainersConfiguration::class)
 @SpringBootTest(
     properties = [
-        "poe-companion.security.username=test-user",
-        "poe-companion.security.password=test-password",
+        "poe-companion.security.user.username=test-user",
+        "poe-companion.security.user.password=test-password",
+        "poe-companion.security.admin.username=test-admin",
+        "poe-companion.security.admin.password=test-admin-password",
     ],
 )
+// This long-lived PostgreSQL test suite covers many independent publication/withdrawal invariants.
+@Suppress("LargeClass")
+@WithMockUser(username = "test-admin", roles = ["ADMIN"])
 internal class FixedDropEstimateServiceIntegrationTests(
     @Autowired private val service: FixedDropEstimateService,
     @Autowired private val estimateRepository: SpringDataFixedDropEstimateRepository,
@@ -702,7 +709,7 @@ internal class FixedDropEstimateServiceIntegrationTests(
     }
 
     private fun racePublications(first: () -> Unit, second: () -> Unit): List<Result<Unit>> {
-        val executor = Executors.newFixedThreadPool(2)
+        val executor = DelegatingSecurityContextExecutorService(Executors.newFixedThreadPool(2))
         val ready = CountDownLatch(2)
         val start = CountDownLatch(1)
 
