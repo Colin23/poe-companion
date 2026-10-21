@@ -359,6 +359,7 @@ internal class AcquisitionReadModelServiceIntegrationTests(
     }
 
     @Test
+    @Suppress("LongMethod") // Explicit ADMIN-scoped canonical setup expands the existing scenario.
     fun `unknown and negative prerequisite facts should retain knowledge without actionable calculations`() {
         selectAccount()
         val target = unique()
