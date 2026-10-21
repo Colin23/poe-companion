@@ -18,6 +18,7 @@ import com.colinmoerbe.poecompanion.acquisition.relationship.DropRelationshipSna
 import com.colinmoerbe.poecompanion.acquisition.relationship.DropRelationshipState
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.AcquisitionSource
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.AcquisitionSourceId
+import com.colinmoerbe.poecompanion.league.CompatibilityVersion
 import com.colinmoerbe.poecompanion.league.Ruleset
 import com.colinmoerbe.poecompanion.league.persistence.SpringDataAccountEvaluationSelectionRepository
 import com.colinmoerbe.poecompanion.security.identity.DevelopmentFixtureActor
@@ -172,7 +173,7 @@ internal class AcquisitionBrowserControllerIntegrationTests(
     fun `ambiguous source scope blocks actionable probability even if values agree`() {
         initializer.initialize()
         val scope = AcquisitionKnowledgeScope(
-            com.colinmoerbe.poecompanion.league.CompatibilityVersion(3, 30),
+            CompatibilityVersion(3, 30),
             Ruleset.NORMAL,
             ids.league,
         )
@@ -206,7 +207,7 @@ internal class AcquisitionBrowserControllerIntegrationTests(
         SecurityTestActors.asAdmin {
             encounters.recordSnapshot(
                 source,
-                AcquisitionKnowledgeScope(com.colinmoerbe.poecompanion.league.CompatibilityVersion(3, 30), Ruleset.NORMAL),
+                AcquisitionKnowledgeScope(CompatibilityVersion(3, 30), Ruleset.NORMAL),
                 BossEncounterKnowledgeSnapshot(
                     null,
                     "Alternative Boss",
@@ -219,7 +220,7 @@ internal class AcquisitionBrowserControllerIntegrationTests(
         SecurityTestActors.asAdmin {
             drops.recordSnapshot(
                 relationship,
-                AcquisitionKnowledgeScope(com.colinmoerbe.poecompanion.league.CompatibilityVersion(3, 30), Ruleset.NORMAL),
+                AcquisitionKnowledgeScope(CompatibilityVersion(3, 30), Ruleset.NORMAL),
                 DropRelationshipSnapshot(null, DropRelationshipState.CANNOT_DROP),
                 null,
             )

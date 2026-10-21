@@ -406,7 +406,12 @@ internal class UniqueBrowserControllerIntegrationTests(
                     encounters.recordSnapshot(
                         source,
                         general,
-                        BossEncounterKnowledgeSnapshot(null, name, availability, BossParticipation.ConfigurationDependent),
+                        BossEncounterKnowledgeSnapshot(
+                            null,
+                            name,
+                            availability,
+                            BossParticipation.ConfigurationDependent,
+                        ),
                         null,
                     )
                 }
