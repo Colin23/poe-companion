@@ -190,7 +190,8 @@ internal class DevelopmentFixtureUpgradeIntegrationTests(
         bosses.create(BossDefinition(ids.boss, "Boss Y"))
         acquisition.saveSource(AcquisitionSource(ids.source))
         encounters.recordSnapshot(
-            ids.source, scope,
+            ids.source,
+            scope,
             BossEncounterKnowledgeSnapshot(
                 null,
                 "Boss Y",
@@ -207,7 +208,8 @@ internal class DevelopmentFixtureUpgradeIntegrationTests(
             null,
         )
         estimates.publish(
-            ids.relationship, scope,
+            ids.relationship,
+            scope,
             FixedDropEstimateSnapshot(
                 id = ids.estimate,
                 effectiveFromPatch = null,
