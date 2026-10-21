@@ -69,7 +69,7 @@ internal class CanonicalCurationAuthorizationIntegrationTests(
                     null,
                     "Forbidden source",
                     AcquisitionSourceAvailability.AVAILABLE,
-                    BossParticipation.Fixed(emptySet()),
+                    BossParticipation.ConfigurationDependent,
                 ),
                 null,
             )
@@ -123,7 +123,8 @@ internal class CanonicalCurationAuthorizationIntegrationTests(
     @Test
     @WithMockUser(username = "test-admin", roles = ["ADMIN"])
     fun `ADMIN can create shared canonical boss knowledge`() {
-        val definition = BossDefinition(BossDefinitionId.generate(), "Admin test boss ${System.nanoTime()}")
+        val id = BossDefinitionId.generate()
+        val definition = BossDefinition(id, "Admin test boss ${id.value}")
 
         bosses.create(definition)
 
