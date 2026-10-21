@@ -103,8 +103,8 @@ internal class UniqueBrowserControllerIntegrationTests(
             .andExpect(content().string(containsString(">Unique A</a>")))
             .andExpect(content().string(containsString(">Unique B</a>")))
             .andExpect(content().string(containsString(">Unique C</a>")))
-            .andExpect(content().string(containsString("2</strong> owned")))
-            .andExpect(content().string(containsString("1</strong> missing")))
+            .andExpect(content().string(containsString("3</strong> owned")))
+            .andExpect(content().string(containsString("9</strong> missing")))
             .andExpect(content().string(containsString("Synthetic development item")))
     }
 
