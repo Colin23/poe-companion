@@ -29,11 +29,11 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
+import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.support.TransactionTemplate
 import java.util.concurrent.CountDownLatch
-import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 

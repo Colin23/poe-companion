@@ -90,7 +90,9 @@ internal class TwoUserBrowserIsolationIntegrationTests(
         assertThat(acquisitionPage("test-admin", "ADMIN").savedAttempts).isZero()
 
         asActor("test-user", "USER") { assertThat(selection.getSelected()?.accountContextId).isEqualTo(ids.account) }
-        asActor("test-admin", "ADMIN") { assertThat(selection.getSelected()?.accountContextId).isEqualTo(adminContextId) }
+        asActor("test-admin", "ADMIN") {
+            assertThat(selection.getSelected()?.accountContextId).isEqualTo(adminContextId)
+        }
     }
 
     @Test

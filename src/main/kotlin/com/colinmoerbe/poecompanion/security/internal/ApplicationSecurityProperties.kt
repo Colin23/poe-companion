@@ -18,7 +18,4 @@ internal class ApplicationSecurityProperties(
     }
 }
 
-internal class ConfiguredCredentials(
-    @field:NotBlank val username: String,
-    @field:NotBlank val password: String,
-)
+internal class ConfiguredCredentials(@field:NotBlank val username: String, @field:NotBlank val password: String)

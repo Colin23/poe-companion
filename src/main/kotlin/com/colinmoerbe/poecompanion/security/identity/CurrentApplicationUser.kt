@@ -20,8 +20,10 @@ class CurrentApplicationUser internal constructor(private val properties: Applic
         return when {
             authentication.name == properties.user.username && "ROLE_USER" in authorities &&
                 "ROLE_ADMIN" !in authorities -> ConfiguredApplicationUsers.USER
+
             authentication.name == properties.admin.username && "ROLE_ADMIN" in authorities &&
                 "ROLE_USER" !in authorities -> ConfiguredApplicationUsers.ADMIN
+
             else -> throw AccessDeniedException("Application authentication required")
         }
     }
