@@ -27,8 +27,10 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.view
 @AutoConfigureMockMvc
 @SpringBootTest(
     properties = [
-        "poe-companion.security.username=test-user",
-        "poe-companion.security.password=test-password",
+        "poe-companion.security.user.username=test-user",
+        "poe-companion.security.user.password=test-password",
+        "poe-companion.security.admin.username=test-admin",
+        "poe-companion.security.admin.password=test-admin-password",
     ],
 )
 class SecurityConfigurationTests(@Autowired private val mockMvc: MockMvc) {
@@ -61,6 +63,38 @@ class SecurityConfigurationTests(@Autowired private val mockMvc: MockMvc) {
     }
 
     @Test
+    fun `accepts the separately configured ADMIN credentials`() {
+        mockMvc
+            .perform(formLogin().user("test-admin").password("test-admin-password"))
+            .andExpect(status().is3xxRedirection)
+            .andExpect(redirectedUrl("/"))
+            .andExpect(authenticated().withUsername("test-admin").withRoles("ADMIN"))
+    }
+
+    @Test
+    fun `rejects wrong credentials for either login`() {
+        mockMvc.perform(formLogin().user("test-admin").password("test-password"))
+            .andExpect(unauthenticated())
+        mockMvc.perform(formLogin().user("test-user").password("test-admin-password"))
+            .andExpect(unauthenticated())
+    }
+
+    @Test
+    fun `separate USER and ADMIN sessions render their own authenticated identities`() {
+        val userSession = mockMvc.perform(formLogin().user("test-user").password("test-password"))
+            .andReturn().request.session as org.springframework.mock.web.MockHttpSession
+        val adminSession = mockMvc.perform(formLogin().user("test-admin").password("test-admin-password"))
+            .andReturn().request.session as org.springframework.mock.web.MockHttpSession
+
+        mockMvc.perform(get("/").session(userSession))
+            .andExpect(status().isOk)
+            .andExpect(content().string(containsString("test-user")))
+        mockMvc.perform(get("/").session(adminSession))
+            .andExpect(status().isOk)
+            .andExpect(content().string(containsString("test-admin")))
+    }
+
+    @Test
     fun rendersHomePageForAuthenticatedUser() {
         mockMvc
             .perform(
@@ -83,6 +117,12 @@ class SecurityConfigurationTests(@Autowired private val mockMvc: MockMvc) {
                 post("/logout")
                     .with(user("test-user")),
             ).andExpect(status().isForbidden)
+    }
+
+    @Test
+    fun `ADMIN requests also require CSRF for state changes`() {
+        mockMvc.perform(post("/logout").with(user("test-admin").roles("ADMIN")))
+            .andExpect(status().isForbidden)
     }
 
     @Test
