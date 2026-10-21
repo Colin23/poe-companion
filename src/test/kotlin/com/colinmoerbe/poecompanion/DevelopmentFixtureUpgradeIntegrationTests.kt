@@ -141,6 +141,11 @@ internal class DevelopmentFixtureUpgradeIntegrationTests(
     }
 
     private fun seedLegacyFixture() {
+        seedLegacyCanonicalKnowledge()
+        seedLegacyUserState()
+    }
+
+    private fun seedLegacyCanonicalKnowledge() {
         actor.asAdmin {
             listOf(ids.uniqueA, ids.uniqueB, ids.uniqueC).forEach { catalog.save(UniqueDefinition(it)) }
             league.saveLeague(
@@ -194,6 +199,9 @@ internal class DevelopmentFixtureUpgradeIntegrationTests(
                 null,
             )
         }
+    }
+
+    private fun seedLegacyUserState() {
         actor.asLegacyUser {
             league.saveAccount(AccountContext(ids.account, ids.league, Ruleset.NORMAL, ConfiguredApplicationUsers.USER))
             ownership.setOwnedQuantity(ids.account, ids.uniqueA, 1)
