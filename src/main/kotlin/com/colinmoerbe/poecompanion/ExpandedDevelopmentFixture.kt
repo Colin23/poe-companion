@@ -89,15 +89,21 @@ internal class ExpandedDevelopmentFixture(
     /** Detect any existing expansion identity, including partial expansions missing the first Unique. */
     fun hasAnyIdentities(): Boolean = when {
         newUniques.any { uniques.findById(it) != null } -> true
+
         league.findLeagueById(ids.standardLeague) != null -> true
+
         listOf(ids.adminChallengeAccount, ids.adminStandardAccount).any { league.findAccountById(it) != null } -> true
 
         listOf(ids.archetypeP, ids.archetypeQ, ids.archetypeR).any { builds.findArchetypeById(it) != null } -> true
+
         listOf(ids.variantP, ids.variantQ, ids.variantR).any { builds.findVariantById(it) != null } -> true
+
         listOf(ids.revisionP, ids.revisionQ, ids.revisionR).any { builds.findRevisionById(it) != null } -> true
 
         listOf(ids.bossP, ids.bossQ, ids.bossR).any { bosses.findById(it) != null } -> true
+
         listOf(ids.sourceP, ids.sourceQ, ids.sourceR).any { acquisition.findSourceById(it) != null } -> true
+
         listOf(ids.relationshipPD, ids.relationshipPE, ids.relationshipQH, ids.relationshipRK)
             .any { acquisition.findRelationshipById(it) != null } -> true
 
