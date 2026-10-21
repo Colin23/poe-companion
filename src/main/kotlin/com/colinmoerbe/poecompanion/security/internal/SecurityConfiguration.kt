@@ -22,14 +22,18 @@ internal class SecurityConfiguration {
         properties: ApplicationSecurityProperties,
         passwordEncoder: PasswordEncoder,
     ): UserDetailsService {
-        val user =
-            User
-                .withUsername(properties.username)
-                .password(passwordEncoder.encode(properties.password))
-                .roles("USER")
-                .build()
+        val user = User
+            .withUsername(properties.user.username)
+            .password(passwordEncoder.encode(properties.user.password))
+            .roles("USER")
+            .build()
+        val admin = User
+            .withUsername(properties.admin.username)
+            .password(passwordEncoder.encode(properties.admin.password))
+            .roles("ADMIN")
+            .build()
 
-        return InMemoryUserDetailsManager(user)
+        return InMemoryUserDetailsManager(user, admin)
     }
 
     @Bean

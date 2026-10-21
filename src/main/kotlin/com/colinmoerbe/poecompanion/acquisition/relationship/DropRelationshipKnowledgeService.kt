@@ -2,6 +2,7 @@ package com.colinmoerbe.poecompanion.acquisition.relationship
 
 import com.colinmoerbe.poecompanion.acquisition.knowledge.AcquisitionKnowledgeScope
 import com.colinmoerbe.poecompanion.acquisition.relationship.internal.DropRelationshipKnowledgePersistencePort
+import com.colinmoerbe.poecompanion.security.authorization.CanonicalCurationAuthorization
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DropRelationshipKnowledgeService internal constructor(
     private val persistencePort: DropRelationshipKnowledgePersistencePort,
+    private val authorization: CanonicalCurationAuthorization,
 ) {
     @Transactional
     fun recordSnapshot(
@@ -21,6 +23,7 @@ class DropRelationshipKnowledgeService internal constructor(
         snapshot: DropRelationshipSnapshot,
         expectedRevision: Long?,
     ): Long {
+        authorization.requireAdmin()
         require(expectedRevision == null || expectedRevision >= 0) { "Expected revision must not be negative" }
         require(persistencePort.relationshipExists(dropRelationshipId)) {
             "Drop relationship must exist before its applicability knowledge can be curated"

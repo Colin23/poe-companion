@@ -29,8 +29,12 @@ spring:
 
 poe-companion:
   security:
-    username: ${POE_COMPANION_APP_USERNAME}
-    password: ${POE_COMPANION_APP_PASSWORD}
+    user:
+      username: ${POE_COMPANION_APP_USER_USERNAME}
+      password: ${POE_COMPANION_APP_USER_PASSWORD}
+    admin:
+      username: ${POE_COMPANION_APP_ADMIN_USERNAME}
+      password: ${POE_COMPANION_APP_ADMIN_PASSWORD}
 
 server:
   servlet:

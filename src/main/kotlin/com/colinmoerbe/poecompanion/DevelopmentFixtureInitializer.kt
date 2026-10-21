@@ -126,7 +126,7 @@ internal class DevelopmentFixtureInitializer(
         // C=0 is represented by an absent ownership row.
     }
 
-    private fun createBuild() {
+    private fun createBuild() = fixtureActor.asAdmin {
         val revision = BuildVariantRevision(ids.revision, ids.variant, compatibilityVersion)
         revision.updateRequirementGroups(requirementGroups())
         buildAccess.createAndActivate(
@@ -137,7 +137,8 @@ internal class DevelopmentFixtureInitializer(
     }
 
     private fun createAcquisition() {
-        bosses.create(BossDefinition(ids.boss, "Boss Y"))
+        fixtureActor.asAdmin {
+            bosses.create(BossDefinition(ids.boss, "Boss Y"))
         acquisitionAccess.saveSource(AcquisitionSource(ids.source))
         encounters.recordSnapshot(ids.source, scope, encounterSnapshot(), null)
         acquisitionAccess.saveRelationship(DropRelationship(ids.relationship, ids.source, ids.uniqueC))
@@ -147,7 +148,8 @@ internal class DevelopmentFixtureInitializer(
             DropRelationshipSnapshot(null, DropRelationshipState.CAN_DROP),
             null,
         )
-        estimates.publish(ids.relationship, scope, estimateSnapshot(), null)
+            estimates.publish(ids.relationship, scope, estimateSnapshot(), null)
+        }
         attempts.setAvailableAttempts(ids.account, ids.source, INITIAL_ATTEMPTS)
     }
 

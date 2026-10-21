@@ -1,6 +1,7 @@
 package com.colinmoerbe.poecompanion.build.revision
 
 import com.colinmoerbe.poecompanion.build.revision.internal.BuildVariantRevisionPersistencePort
+import com.colinmoerbe.poecompanion.security.authorization.CanonicalCurationAuthorization
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -10,9 +11,11 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class BuildVariantRevisionActivationService internal constructor(
     private val persistencePort: BuildVariantRevisionPersistencePort,
+    private val authorization: CanonicalCurationAuthorization,
 ) {
     @Transactional
     fun activate(id: BuildVariantRevisionId) {
+        authorization.requireAdmin()
         val target =
             requireNotNull(persistencePort.findById(id)) {
                 "Build variant revision does not exist: $id"

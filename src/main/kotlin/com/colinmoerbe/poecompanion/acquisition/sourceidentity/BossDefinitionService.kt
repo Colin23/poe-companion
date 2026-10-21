@@ -1,6 +1,7 @@
 package com.colinmoerbe.poecompanion.acquisition.sourceidentity
 
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.internal.BossDefinitionPersistencePort
+import com.colinmoerbe.poecompanion.security.authorization.CanonicalCurationAuthorization
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.text.Normalizer
@@ -13,9 +14,13 @@ import java.util.Locale
  * sequential duplicates, not concurrent creations with distinct UUIDs; no name-based database uniqueness is claimed.
  */
 @Service
-class BossDefinitionService internal constructor(private val persistencePort: BossDefinitionPersistencePort) {
+class BossDefinitionService internal constructor(
+    private val persistencePort: BossDefinitionPersistencePort,
+    private val authorization: CanonicalCurationAuthorization,
+) {
     @Transactional
     fun create(bossDefinition: BossDefinition) {
+        authorization.requireAdmin()
         val previous = persistencePort.findById(bossDefinition.id)
         if (previous != null) {
             ensureSameDefinition(previous, bossDefinition)

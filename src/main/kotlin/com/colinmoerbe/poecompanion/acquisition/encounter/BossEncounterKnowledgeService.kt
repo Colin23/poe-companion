@@ -3,6 +3,7 @@ package com.colinmoerbe.poecompanion.acquisition.encounter
 import com.colinmoerbe.poecompanion.acquisition.encounter.internal.BossEncounterKnowledgePersistencePort
 import com.colinmoerbe.poecompanion.acquisition.knowledge.AcquisitionKnowledgeScope
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.AcquisitionSourceId
+import com.colinmoerbe.poecompanion.security.authorization.CanonicalCurationAuthorization
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class BossEncounterKnowledgeService internal constructor(
     private val persistencePort: BossEncounterKnowledgePersistencePort,
+    private val authorization: CanonicalCurationAuthorization,
 ) {
     @Transactional
     fun recordSnapshot(
@@ -20,6 +22,7 @@ class BossEncounterKnowledgeService internal constructor(
         snapshot: BossEncounterKnowledgeSnapshot,
         expectedRevision: Long?,
     ): Long {
+        authorization.requireAdmin()
         require(expectedRevision == null || expectedRevision >= 0) { "Expected revision must not be negative" }
         require(persistencePort.sourceExists(acquisitionSourceId)) {
             "Acquisition source must exist before encounter knowledge can be curated"

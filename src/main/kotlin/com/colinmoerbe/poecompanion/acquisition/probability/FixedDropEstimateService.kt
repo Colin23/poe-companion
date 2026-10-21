@@ -4,6 +4,7 @@ import com.colinmoerbe.poecompanion.acquisition.attempts.CompletedBossEncounterA
 import com.colinmoerbe.poecompanion.acquisition.knowledge.AcquisitionKnowledgeScope
 import com.colinmoerbe.poecompanion.acquisition.probability.internal.FixedDropEstimatePersistencePort
 import com.colinmoerbe.poecompanion.acquisition.relationship.DropRelationshipId
+import com.colinmoerbe.poecompanion.security.authorization.CanonicalCurationAuthorization
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -11,7 +12,10 @@ import org.springframework.transaction.annotation.Transactional
  * Publishes known estimates and explicit withdrawals without inferring CAN_DROP or source availability.
  */
 @Service
-class FixedDropEstimateService internal constructor(private val persistencePort: FixedDropEstimatePersistencePort) {
+class FixedDropEstimateService internal constructor(
+    private val persistencePort: FixedDropEstimatePersistencePort,
+    private val authorization: CanonicalCurationAuthorization,
+) {
     @Transactional
     fun publish(
         dropRelationshipId: DropRelationshipId,
@@ -44,6 +48,7 @@ class FixedDropEstimateService internal constructor(private val persistencePort:
         changePoint: FixedProbabilityChangePoint,
         expectedActivePublicationId: FixedProbabilityPublicationId?,
     ) {
+        authorization.requireAdmin()
         require(changePoint.publicationId.value != expectedActivePublicationId?.value) {
             "A replacement probability publication must have a new identity"
         }
