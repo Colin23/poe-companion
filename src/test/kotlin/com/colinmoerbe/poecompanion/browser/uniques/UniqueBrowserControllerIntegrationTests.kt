@@ -157,7 +157,7 @@ internal class UniqueBrowserControllerIntegrationTests(
     }
 
     @Test
-    fun `without an account selection ownership is unknown not zero`() {
+    fun `without a game environment selection ownership is unknown not zero`() {
         initializer.initialize()
         selectionRepository.deleteAllInBatch()
 
@@ -169,7 +169,9 @@ internal class UniqueBrowserControllerIntegrationTests(
 
         mockMvc.perform(get("/uniques/${ids.uniqueC.value}").with(user("test-user")))
             .andExpect(status().isOk)
+            .andExpect(content().string(containsString("Select an environment")))
             .andExpect(content().string(containsString("Unknown — no personal collection")))
+            .andExpect(content().string(not(containsString("Change game environment"))))
 
         mockMvc.perform(get("/uniques").param("filter", "missing").with(user("test-user")))
             .andExpect(status().isBadRequest)

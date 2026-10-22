@@ -55,7 +55,7 @@
             <p class="small-muted" th:if="${page.accountSelected}">
                 Set the quantity to 0 to mark this Unique as missing in your personal collection for this environment.
             </p>
-            <p class="notice" th:unless="${page.accountSelected}">
+            <p class="notice" th:if="${page.environmentSelected and !page.accountSelected}">
                 Ownership cannot be saved because there is no personal collection for the selected environment.
                 <a th:href="@{/environment}">Change game environment</a>.
             </p>
