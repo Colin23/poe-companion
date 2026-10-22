@@ -6,10 +6,8 @@ import com.colinmoerbe.poecompanion.security.identity.CurrentApplicationUser
 import org.springframework.stereotype.Service
 
 /**
- * The signed-in user's game-context preference, independent of personally owned AccountContexts.
- *
- * The same EvaluationContext can be selected by users who own no personal state in that league.
- * Browser migration and anonymous selection belong to later increments.
+ * Stores the signed-in user's game-environment preference independently of personal ownership.
+ * Selecting an EvaluationContext does not require an owned AccountContext for that league.
  */
 @Service
 class GameEnvironmentSelectionService internal constructor(

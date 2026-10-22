@@ -3,15 +3,15 @@ package com.colinmoerbe.poecompanion.league
 import org.springframework.stereotype.Service
 
 /**
- * Compatibility API for existing personal evaluation consumers during C2 migration.
- * The persisted source of truth is the independently selected game environment.
+ * Resolves the selected game environment together with the current user's matching personal context.
+ * Game environment selection is persisted independently of personal ownership.
  */
 @Service
 class AccountEvaluationService internal constructor(
     private val gameSelection: GameEnvironmentSelectionService,
     private val access: AccountContextAccessService,
 ) {
-    /** Transitional entry point for the existing development fixture and personal-service tests. */
+    /** Selects the game environment identified by an owned context's league and ruleset. */
     fun select(
         accountContextId: AccountContextId,
         compatibilityVersion: CompatibilityVersion,
@@ -28,10 +28,7 @@ class AccountEvaluationService internal constructor(
         )
     }
 
-    /**
-     * Legacy personal view: no matching owned context means no personal evaluation,
-     * even if a game environment was selected. C2B will consume game selection directly.
-     */
+    /** Returns null when no game environment or matching owned AccountContext is available. */
     fun getSelected(): AccountEvaluation? {
         val context = gameSelection.getSelected() ?: return null
         val leagueId = requireNotNull(context.leagueDefinitionId)

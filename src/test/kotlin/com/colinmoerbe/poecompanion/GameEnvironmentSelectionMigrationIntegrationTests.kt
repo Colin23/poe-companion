@@ -72,13 +72,15 @@ internal class GameEnvironmentSelectionMigrationIntegrationTests {
         val jdbc = JdbcTemplate(source)
         val league = UUID.randomUUID()
         seedLeague(jdbc, league)
-        seedAccount(jdbc, league, UUID.randomUUID())
-        seedAccount(jdbc, league, UUID.randomUUID())
+        val firstContext = UUID.randomUUID()
+        val secondContext = UUID.randomUUID()
+        seedAccount(jdbc, league, firstContext)
+        seedAccount(jdbc, league, secondContext)
 
         assertThatThrownBy { migrate(source, "019") }
             .hasStackTraceContaining("Duplicate account contexts for one owner/league/ruleset")
-        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM poe_companion.account_context", Long::class.java))
-            .isEqualTo(2L)
+        assertThat(jdbc.queryForList("SELECT id FROM poe_companion.account_context", UUID::class.java))
+            .containsExactlyInAnyOrder(firstContext, secondContext)
     }
 
     private fun migrate(source: DriverManagerDataSource, version: String) {

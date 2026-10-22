@@ -9,10 +9,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.Table
 import java.util.UUID
 
-/**
- * Per-user game environment preference. Kept under the historical persistence type name in
- * C2A to minimize migration churn for existing callers; no AccountContext FK remains.
- */
+/** Per-user game environment selection, independent of any owned AccountContext. */
 @Entity
 @Table(name = "account_evaluation_selection")
 internal open class AccountEvaluationSelectionEntity(
