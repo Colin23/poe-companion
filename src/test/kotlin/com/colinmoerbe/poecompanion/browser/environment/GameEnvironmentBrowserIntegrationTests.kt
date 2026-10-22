@@ -199,7 +199,11 @@ internal class GameEnvironmentBrowserIntegrationTests(
         mvc.perform(get("/environment").with(user("test-user").roles("USER")))
             .andExpect(content().string(containsString("not among currently curated choices")))
         fixture.initialize()
-        assertThat(SecurityTestActors.asUser { selections.getSelected()?.compatibilityVersion }).isEqualTo(unknownVersion)
+        assertThat(
+            SecurityTestActors.asUser {
+                selections.getSelected()?.compatibilityVersion
+            },
+        ).isEqualTo(unknownVersion)
         assertThat(optionCount()).isEqualTo(2L)
     }
 
