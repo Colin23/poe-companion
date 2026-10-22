@@ -37,11 +37,11 @@ class GameEnvironmentOptionService internal constructor(
     }
 
     @Transactional(readOnly = true)
-    fun current(): CurrentGameEnvironment? {
-        val context = selections.getSelected() ?: return null
-        val league = context.leagueDefinitionId?.let(leagues::findById) ?: return null
-        val precise = context.gamePatch?.let { " · $it" } ?: ""
-        return CurrentGameEnvironment(context, GameEnvironmentLabels.compact(context, league) + precise)
+    fun current(): CurrentGameEnvironment? = selections.getSelected()?.let { context ->
+        context.leagueDefinitionId?.let(leagues::findById)?.let { league ->
+            val precise = context.gamePatch?.let { " · $it" } ?: ""
+            CurrentGameEnvironment(context, GameEnvironmentLabels.compact(context, league) + precise)
+        }
     }
 
     @Transactional

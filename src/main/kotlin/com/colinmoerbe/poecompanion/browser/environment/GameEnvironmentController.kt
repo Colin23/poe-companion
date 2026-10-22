@@ -43,6 +43,7 @@ internal class GameEnvironmentController(private val environments: GameEnvironme
         )
     }
 
+    @Suppress("ThrowsCount")
     @PostMapping("/environment")
     fun select(
         @RequestParam version: String,

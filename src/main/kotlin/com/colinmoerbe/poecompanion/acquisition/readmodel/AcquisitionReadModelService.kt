@@ -146,10 +146,9 @@ class AcquisitionReadModelService internal constructor(
         return KnowledgeScopes(context, general, general.copy(leagueDefinitionId = selectedLeague))
     }
 
-    private fun personal(context: EvaluationContext?): AccountEvaluation? {
-        if (context == null) return null
-        val league = context.leagueDefinitionId ?: return null
-        return access.findOwned(league, context.ruleset)?.let { AccountEvaluation(it.id, context) }
+    private fun personal(context: EvaluationContext?): AccountEvaluation? = context?.let { selected ->
+        selected.leagueDefinitionId?.let { access.findOwned(it, selected.ruleset) }
+            ?.let { AccountEvaluation(it.id, selected) }
     }
 
     private fun resolveSource(

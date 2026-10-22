@@ -40,7 +40,7 @@ internal data class BuildBrowserRequirement(
 internal data class BuildBrowserGroup(
     val importance: String,
     val logic: String,
-    val satisfied: Boolean,
+    val satisfied: Boolean?,
     val requirements: List<BuildBrowserRequirement>,
 )
 

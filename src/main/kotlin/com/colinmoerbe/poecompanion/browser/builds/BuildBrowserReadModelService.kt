@@ -85,7 +85,9 @@ internal class BuildBrowserReadModelService(
 
             is BuildReadinessQueryResult.PersonalOwnershipUnavailable -> {
                 val catalogIds = catalog.findAll().mapTo(hashSetOf()) { it.id }
-                val hasRequired = result.revision.requirementGroups.any { it.importance != RequirementImportance.UPGRADE }
+                val hasRequired = result.revision.requirementGroups.any {
+                    it.importance != RequirementImportance.UPGRADE
+                }
                 BuildBrowserDetailPage(
                     id = id.value,
                     displayName = build.displayName,

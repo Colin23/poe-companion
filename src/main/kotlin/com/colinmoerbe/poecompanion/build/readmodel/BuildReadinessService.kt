@@ -26,6 +26,7 @@ class BuildReadinessService internal constructor(
     fun evaluate(buildVariantId: BuildVariantId): BuildReadinessQueryResult =
         evaluateAll(listOf(buildVariantId)).getValue(buildVariantId)
 
+    @Suppress("ReturnCount")
     @Transactional(readOnly = true)
     fun evaluateAll(buildVariantIds: Collection<BuildVariantId>): Map<BuildVariantId, BuildReadinessQueryResult> {
         if (buildVariantIds.isEmpty()) return emptyMap()
