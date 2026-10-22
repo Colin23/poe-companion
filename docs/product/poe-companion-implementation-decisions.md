@@ -1666,3 +1666,14 @@ canonical data and checks AccountContext ownership, without resetting personal q
 attempt records (including recorded zero versus absence) or changed/cleared selections.
 Initial selections are written only when their personal contexts are first seeded.
 No public guest access, new migration, or production fixture startup is introduced.
+---
+
+## 38. Independent Game-Environment Selection Storage (Milestone 5.2 C2A)
+
+**Canonical authority:** V2.1.3 Game Context and Identity amendment. The following are V0.1 persistence/API decisions, not a new product scope.
+
+- Flyway V019 fails explicitly if contexts duplicate `(owner_application_user_id, league_definition_id, ruleset)`, then enforces that unique key. It never merges or discards personal data.
+- Evolve existing per-user `account_evaluation_selection` storage in place: replace its required owned `account_context_id` with `league_definition_id` and `ruleset`, preserving compatibility version, optional patch, current user and missing selections. Retain the historical table and internal persistence names for the narrow transition, without adding a second selection source of truth.
+- `GameEnvironmentSelectionService` validates known curated leagues and the V0.1 Normal ruleset for new selections. Full league lifecycle/version option discovery requires future curated metadata. Do not silently rewrite historical selections.
+- Resolve owned contexts through an authenticated, owner-scoped league/ruleset lookup. Keep `AccountEvaluationService` as a transitional API for existing personal Browser and fixture consumers; game selection remains the sole persisted selection.
+- Public guest access, external sign-in, GGG sync, UI selectors and automatic first-write creation remain outside C2A.
