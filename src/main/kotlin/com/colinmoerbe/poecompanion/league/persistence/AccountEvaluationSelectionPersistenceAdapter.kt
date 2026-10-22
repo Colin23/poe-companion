@@ -1,30 +1,28 @@
 package com.colinmoerbe.poecompanion.league.persistence
 
-import com.colinmoerbe.poecompanion.league.AccountContextId
 import com.colinmoerbe.poecompanion.league.CompatibilityVersion
+import com.colinmoerbe.poecompanion.league.EvaluationContext
 import com.colinmoerbe.poecompanion.league.GamePatch
+import com.colinmoerbe.poecompanion.league.LeagueDefinitionId
 import com.colinmoerbe.poecompanion.security.identity.ApplicationUserId
 import org.springframework.stereotype.Repository
 
-/** Per-user selection persistence, with DB-enforced ownership/foreign-key integrity. */
+/** Per-user game selection, independent of AccountContext ownership and personal storage. */
 @Repository
 internal class AccountEvaluationSelectionPersistenceAdapter(
     private val springDataRepository: SpringDataAccountEvaluationSelectionRepository,
 ) {
-    fun save(
-        userId: ApplicationUserId,
-        accountContextId: AccountContextId,
-        compatibilityVersion: CompatibilityVersion,
-        gamePatch: GamePatch?,
-    ) {
+    fun save(userId: ApplicationUserId, context: EvaluationContext) {
+        val leagueId = requireNotNull(context.leagueDefinitionId)
         springDataRepository.save(
             AccountEvaluationSelectionEntity(
                 applicationUserId = userId.value,
-                accountContextId = accountContextId.value,
-                compatibilityVersionMajor = compatibilityVersion.major,
-                compatibilityVersionMinor = compatibilityVersion.minor,
-                gamePatch = gamePatch?.patch,
-                gamePatchSuffix = gamePatch?.suffix,
+                leagueDefinitionId = leagueId.value,
+                ruleset = context.ruleset,
+                compatibilityVersionMajor = context.compatibilityVersion.major,
+                compatibilityVersionMinor = context.compatibilityVersion.minor,
+                gamePatch = context.gamePatch?.patch,
+                gamePatchSuffix = context.gamePatch?.suffix,
             ),
         )
     }
@@ -37,7 +35,8 @@ internal class AccountEvaluationSelectionPersistenceAdapter(
                 minor = entity.compatibilityVersionMinor,
             )
             AccountEvaluationSettings(
-                accountContextId = AccountContextId(entity.accountContextId),
+                leagueDefinitionId = LeagueDefinitionId(entity.leagueDefinitionId),
+                ruleset = entity.ruleset,
                 compatibilityVersion = compatibilityVersion,
                 gamePatch = entity.gamePatch?.let { patch ->
                     GamePatch(

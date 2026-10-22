@@ -3,6 +3,7 @@ package com.colinmoerbe.poecompanion.league.persistence
 import com.colinmoerbe.poecompanion.league.AccountContext
 import com.colinmoerbe.poecompanion.league.AccountContextId
 import com.colinmoerbe.poecompanion.league.LeagueDefinitionId
+import com.colinmoerbe.poecompanion.league.Ruleset
 import com.colinmoerbe.poecompanion.security.identity.ApplicationUserId
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
@@ -36,14 +37,21 @@ internal class AccountContextPersistenceAdapter(private val springDataRepository
         }
     }
 
-    fun findById(id: AccountContextId): AccountContext? = springDataRepository
-        .findById(id.value)
-        .map { entity ->
-            AccountContext(
-                id = AccountContextId(entity.id),
-                leagueDefinitionId = LeagueDefinitionId(entity.leagueDefinitionId),
-                ruleset = entity.ruleset,
-                ownerApplicationUserId = ApplicationUserId(entity.ownerApplicationUserId),
-            )
-        }.orElse(null)
+    fun findByOwnerAndLeagueAndRuleset(
+        owner: ApplicationUserId,
+        leagueId: LeagueDefinitionId,
+        ruleset: Ruleset,
+    ): AccountContext? = springDataRepository
+        .findByOwnerApplicationUserIdAndLeagueDefinitionIdAndRuleset(owner.value, leagueId.value, ruleset)
+        ?.let(::toDomain)
+
+    fun findById(id: AccountContextId): AccountContext? =
+        springDataRepository.findById(id.value).map(::toDomain).orElse(null)
+
+    private fun toDomain(entity: AccountContextEntity): AccountContext = AccountContext(
+        id = AccountContextId(entity.id),
+        leagueDefinitionId = LeagueDefinitionId(entity.leagueDefinitionId),
+        ruleset = entity.ruleset,
+        ownerApplicationUserId = ApplicationUserId(entity.ownerApplicationUserId),
+    )
 }

@@ -16,6 +16,10 @@ class AccountContextAccessService internal constructor(
 ) {
     fun currentUserId(): ApplicationUserId = currentUser.requireId()
 
+    /** Resolve only the signed-in user's state for an independently selected game environment. */
+    fun findOwned(leagueId: LeagueDefinitionId, ruleset: Ruleset): AccountContext? =
+        accountContexts.findByOwnerAndLeagueAndRuleset(currentUser.requireId(), leagueId, ruleset)
+
     fun requireOwned(id: AccountContextId): AccountContext {
         val user = currentUser.requireId()
         return requireNotNull(accountContexts.findById(id)?.takeIf { it.ownerApplicationUserId == user }) {
