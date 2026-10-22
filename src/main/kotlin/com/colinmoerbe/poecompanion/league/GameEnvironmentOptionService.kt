@@ -42,17 +42,23 @@ class GameEnvironmentOptionService internal constructor(
         }
     }
 
-    @Transactional
-    fun select(choice: GameEnvironmentChoice) {
-        require(choice.ruleset == Ruleset.NORMAL) { "Ruthless is unsupported in V0.1" }
-        val matches = findAll().filter { option ->
+    /** Filters curated choices using only supported dimensions; the league ID is an optional disambiguator. */
+    @Transactional(readOnly = true)
+    fun findMatching(choice: GameEnvironmentChoice): List<GameEnvironmentOption> {
+        if (choice.ruleset != Ruleset.NORMAL) return emptyList()
+        return findAll().filter { option ->
             option.compatibilityVersion == choice.compatibilityVersion &&
                 option.league.type == choice.type &&
                 option.league.mortality == choice.mortality &&
                 option.league.participation == choice.participation &&
                 option.league.realm == GameRealm.PC
         }
-        val resolved = matches.filter {
+    }
+
+    @Transactional
+    fun select(choice: GameEnvironmentChoice) {
+        require(choice.ruleset == Ruleset.NORMAL) { "Ruthless is unsupported in V0.1" }
+        val resolved = findMatching(choice).filter {
             choice.leagueDefinitionId == null || it.league.id == choice.leagueDefinitionId
         }
         require(resolved.size == 1) { "No unique curated game environment matches this choice" }
