@@ -24,7 +24,7 @@ internal data class BuildBrowserSection(val state: BuildBrowserState, val entrie
 internal data class BuildBrowserListPage(
     val totalCount: Int,
     val sections: List<BuildBrowserSection>,
-    val accountSelected: Boolean,
+    val environmentSelected: Boolean,
 )
 
 internal data class BuildBrowserRequirement(

@@ -6,6 +6,7 @@ import com.colinmoerbe.poecompanion.league.GameEnvironmentOption
 import com.colinmoerbe.poecompanion.league.GameEnvironmentOptionService
 import com.colinmoerbe.poecompanion.league.LeagueMortality
 import com.colinmoerbe.poecompanion.league.LeagueParticipation
+import com.colinmoerbe.poecompanion.league.LeagueDefinitionId
 import com.colinmoerbe.poecompanion.league.LeagueType
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Controller
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import java.security.Principal
+import java.util.UUID
 
 /** Game selection is independent of personal collection ownership. */
 @Controller
@@ -23,7 +25,10 @@ internal class GameEnvironmentController(private val environments: GameEnvironme
     fun form(principal: Principal): ModelAndView {
         val options = environments.findAll()
         val current = environments.current()
-        val preferred = options.firstOrNull { it.context == current?.context } ?: options.firstOrNull()
+        val preferred = options.firstOrNull {
+            it.league.id == current?.context?.leagueDefinitionId &&
+                it.compatibilityVersion == current.context.compatibilityVersion
+        } ?: options.firstOrNull()
         return ModelAndView(
             "environment/index",
             mapOf(
@@ -38,7 +43,11 @@ internal class GameEnvironmentController(private val environments: GameEnvironme
                 "selectedMortality" to preferred?.league?.mortality?.name,
                 "selectedParticipation" to preferred?.league?.participation?.name,
                 "currentLabel" to current?.label,
-                "currentRecognized" to options.any { it.context == current?.context },
+                "currentRecognized" to options.any {
+                    it.league.id == current?.context?.leagueDefinitionId &&
+                        it.compatibilityVersion == current.context.compatibilityVersion
+                },
+                "selectedLeagueId" to preferred?.league?.id?.value?.toString(),
             ),
         )
     }
@@ -51,6 +60,7 @@ internal class GameEnvironmentController(private val environments: GameEnvironme
         @RequestParam mortality: String,
         @RequestParam participation: String,
         @RequestParam ruleset: String,
+        @RequestParam(required = false) leagueId: String?,
     ): ModelAndView {
         val pieces = Regex("([0-9]+)\\.([0-9]+)").matchEntire(version)
             ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown compatibility version")
@@ -64,6 +74,9 @@ internal class GameEnvironmentController(private val environments: GameEnvironme
                 mortality = enumValueOf<LeagueMortality>(mortality),
                 participation = enumValueOf<LeagueParticipation>(participation),
                 ruleset = enumValueOf(ruleset),
+                leagueDefinitionId = leagueId?.takeIf { it.isNotBlank() }?.let {
+                    LeagueDefinitionId(UUID.fromString(it))
+                },
             )
         } catch (_: IllegalArgumentException) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid game environment")
@@ -82,6 +95,7 @@ internal class GameEnvironmentController(private val environments: GameEnvironme
         mortality = option.league.mortality.name,
         participation = option.league.participation.name,
         name = option.league.name,
+        leagueId = option.league.id.value.toString(),
     )
 }
 
@@ -91,4 +105,5 @@ internal data class SelectableGameEnvironmentView(
     val mortality: String,
     val participation: String,
     val name: String,
+    val leagueId: String,
 )

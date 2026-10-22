@@ -26,7 +26,7 @@ internal class UniqueBrowserController(
 
         val page = readModel.list(collectionFilter)
         if (!page.accountSelected && collectionFilter != UniqueCollectionFilter.ALL) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Select an account before filtering by ownership")
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Ownership filters require a saved personal collection")
         }
 
         return ModelAndView(
@@ -68,7 +68,7 @@ internal class UniqueBrowserController(
                 id,
                 principal,
                 HttpStatus.CONFLICT,
-                "No account is selected. Select an account before editing ownership. No changes were saved.",
+                "No personal collection is available for this environment. Ownership cannot be saved yet. No changes were made.",
             )
 
             UniqueOwnershipUpdateResult.UNKNOWN_UNIQUE -> ownershipError(

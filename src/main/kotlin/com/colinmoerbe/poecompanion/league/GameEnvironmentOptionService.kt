@@ -22,6 +22,7 @@ data class GameEnvironmentChoice(
     val mortality: LeagueMortality,
     val participation: LeagueParticipation,
     val ruleset: Ruleset = Ruleset.NORMAL,
+    val leagueDefinitionId: LeagueDefinitionId? = null,
 )
 
 /** Resolves structured choices to curated environments without guessing league identities or lifecycles. */
@@ -54,8 +55,9 @@ class GameEnvironmentOptionService internal constructor(
                 option.league.participation == choice.participation &&
                 option.league.realm == GameRealm.PC
         }
-        require(matches.size == 1) { "No unique curated game environment matches this choice" }
-        val option = matches.single()
+        val resolved = matches.filter { choice.leagueDefinitionId == null || it.league.id == choice.leagueDefinitionId }
+        require(resolved.size == 1) { "No unique curated game environment matches this choice" }
+        val option = resolved.single()
         val previous = selections.getSelected()
         val unchanged = previous?.leagueDefinitionId == option.league.id &&
             previous.compatibilityVersion == option.compatibilityVersion && previous.ruleset == Ruleset.NORMAL

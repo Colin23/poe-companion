@@ -27,7 +27,7 @@
         <p class="notice" th:if="${options.isEmpty()}">
             No selectable environments have been curated yet. Existing saved selections are preserved.
         </p>
-        <form th:unless="${options.isEmpty()}" method="post" th:action="@{/environment}" class="environment-form">
+        <form th:unless="${options.isEmpty()}" method="post" th:action="@{/environment}" class="environment-form" th:attr="data-selected-league-id=${selectedLeagueId}">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
             <div class="environment-fields">
                 <label for="environment-version">Compatibility version</label>
@@ -58,14 +58,23 @@
                     <option value="NORMAL">Normal</option>
                 </select>
             </div>
+            <div id="specific-league-field" hidden>
+                <label for="specific-league">Specific league</label>
+                <select id="specific-league" name="leagueId">
+                    <option value="">Choose a league</option>
+                </select>
+            </div>
+            <p id="environment-preview" class="small-muted" aria-live="polite"></p>
             <p class="small-muted">Realm: PC. Only explicitly curated league/version combinations are accepted.
                 Normal is the supported ruleset. Exact patch choices are not yet curated.</p>
-            <button type="submit">Use this environment</button>
+            <button id="environment-submit" type="submit">Use this environment</button>
         </form>
         <section class="upcoming-section" th:unless="${options.isEmpty()}">
             <h2>Recognized choices</h2>
             <ul>
                 <li th:each="option : ${options}"
+                    class="recognized-choice"
+                    th:attr="data-version=${option.version},data-type=${option.type},data-mortality=${option.mortality},data-participation=${option.participation},data-league-id=${option.leagueId},data-league-name=${option.name}"
                     th:text="|${option.version} · ${option.type} · ${option.mortality} · ${option.participation} · ${option.name}|">
                     3.30 · CHALLENGE · SOFTCORE · SSF
                 </li>
@@ -74,5 +83,46 @@
         </section>
     </section>
 </main>
+<script>
+    (() => {
+        const form = document.querySelector('.environment-form');
+        if (!form) return;
+        const recognized = [...document.querySelectorAll('.recognized-choice')].map(row => row.dataset);
+        const specificField = document.getElementById('specific-league-field');
+        const leagueSelect = document.getElementById('specific-league');
+        const preview = document.getElementById('environment-preview');
+        const submit = document.getElementById('environment-submit');
+        function update() {
+            const selected = Object.fromEntries(new FormData(form).entries());
+            const matches = recognized.filter(option =>
+                option.version === selected.version &&
+                option.type === selected.type &&
+                option.mortality === selected.mortality &&
+                option.participation === selected.participation
+            );
+            const previousId = leagueSelect.value || form.dataset.selectedLeagueId;
+            leagueSelect.replaceChildren(new Option('Choose a league', ''));
+            matches.forEach(option => leagueSelect.add(new Option(option.leagueName, option.leagueId)));
+            if (matches.some(option => option.leagueId === previousId)) leagueSelect.value = previousId;
+            specificField.hidden = matches.length <= 1;
+            const chosen = matches.length === 1
+                ? matches[0]
+                : matches.find(option => option.leagueId === leagueSelect.value);
+            submit.disabled = !chosen;
+            if (!chosen) {
+                preview.textContent = matches.length === 0
+                    ? 'This combination is not among the curated environments.'
+                    : 'More than one league matches. Choose the specific league.';
+                return;
+            }
+            const mode = chosen.mortality === 'SOFTCORE' ? 'SC' : 'HC';
+            const ssf = chosen.participation === 'SSF' ? ' SSF' : '';
+            const league = chosen.type === 'STANDARD' ? 'Standard' : chosen.leagueName;
+            preview.textContent = 'Resolved environment: ' + chosen.version + ' ' + mode + ssf + ' ' + league;
+        }
+        form.addEventListener('change', update);
+        update();
+    })();
+</script>
 </body>
 </html>
