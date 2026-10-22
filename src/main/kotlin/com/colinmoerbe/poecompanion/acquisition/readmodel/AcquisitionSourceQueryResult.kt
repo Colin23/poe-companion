@@ -6,6 +6,7 @@ import com.colinmoerbe.poecompanion.acquisition.knowledge.ScopedAcquisitionKnowl
 import com.colinmoerbe.poecompanion.acquisition.relationship.DropRelationship
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.AcquisitionSource
 import com.colinmoerbe.poecompanion.league.AccountEvaluation
+import com.colinmoerbe.poecompanion.league.EvaluationContext
 
 /**
  * Known source identities remain browsable without a selected account or accepted encounter knowledge.
@@ -14,6 +15,7 @@ import com.colinmoerbe.poecompanion.league.AccountEvaluation
 data class AcquisitionSourceBrowseResult(
     val accountEvaluation: AccountEvaluation?,
     val sources: List<AcquisitionSourceSummary>,
+    val evaluationContext: EvaluationContext? = accountEvaluation?.evaluationContext,
 )
 
 data class AcquisitionSourceSummary(
@@ -35,6 +37,7 @@ data class AcquisitionSourceDetailResult(
     val availableAttempts: AvailableAttempts?,
     val previewAttempts: Int?,
     val relationships: List<AcquisitionSourceRelationshipResult>,
+    val evaluationContext: EvaluationContext? = accountEvaluation?.evaluationContext,
 )
 
 /**
@@ -44,4 +47,5 @@ data class AcquisitionSourceDetailResult(
 data class AcquisitionUniqueCandidatesResult(
     val accountEvaluation: AccountEvaluation?,
     val candidates: List<AcquisitionSourceRelationshipResult>,
+    val evaluationContext: EvaluationContext? = accountEvaluation?.evaluationContext,
 )

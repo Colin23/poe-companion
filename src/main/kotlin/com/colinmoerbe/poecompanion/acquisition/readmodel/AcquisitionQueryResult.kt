@@ -2,6 +2,7 @@ package com.colinmoerbe.poecompanion.acquisition.readmodel
 
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
 import com.colinmoerbe.poecompanion.league.AccountEvaluation
+import com.colinmoerbe.poecompanion.league.EvaluationContext
 import java.util.Collections
 
 /**
@@ -11,9 +12,10 @@ sealed interface AcquisitionQueryResult {
     data object NoAccountEvaluationSelected : AcquisitionQueryResult
 
     class Evaluated(
-        val accountEvaluation: AccountEvaluation,
+        val accountEvaluation: AccountEvaluation?,
         val uniqueDefinitionId: UniqueDefinitionId,
         sources: List<AcquisitionSourceAssessment>,
+        val evaluationContext: EvaluationContext,
     ) : AcquisitionQueryResult {
         val sources: List<AcquisitionSourceAssessment> = Collections.unmodifiableList(sources.toList())
     }

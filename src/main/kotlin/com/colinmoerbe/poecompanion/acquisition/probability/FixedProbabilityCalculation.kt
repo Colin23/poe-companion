@@ -33,7 +33,15 @@ data class FixedProbabilityCalculation(
             relationship: DropRelationship,
             model: FixedBernoulliModel,
             availableAttempts: AvailableAttempts?,
+        ): FixedProbabilityCalculation = forCount(relationship, model, availableAttempts?.count)
+
+        /** A preview is pure calculation input and need not belong to a persisted AccountContext. */
+        internal fun forCount(
+            relationship: DropRelationship,
+            model: FixedBernoulliModel,
+            attemptCount: Int?,
         ): FixedProbabilityCalculation {
+            require(attemptCount == null || attemptCount >= 0) { "Attempt count cannot be negative" }
             val expected = model.expectedAttemptsUntilSuccess()
             return FixedProbabilityCalculation(
                 attemptDefinition = CompletedBossEncounterAttempt(relationship.acquisitionSourceId),
@@ -44,7 +52,7 @@ data class FixedProbabilityCalculation(
                 attemptsFor95Percent = attemptsOrNull(model, NINETY_FIVE_PERCENT),
                 attemptsFor99Percent = attemptsOrNull(model, NINETY_NINE_PERCENT),
                 probabilityWithinAvailableAttempts =
-                availableAttempts?.let { model.probabilityOfAtLeastOneSuccessWithin(it.count) },
+                attemptCount?.let(model::probabilityOfAtLeastOneSuccessWithin),
             )
         }
 

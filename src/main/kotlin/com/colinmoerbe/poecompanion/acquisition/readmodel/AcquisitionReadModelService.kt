@@ -20,7 +20,8 @@ import com.colinmoerbe.poecompanion.acquisition.sourceidentity.AcquisitionSource
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.persistence.AcquisitionSourcePersistenceAdapter
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
 import com.colinmoerbe.poecompanion.league.AccountEvaluation
-import com.colinmoerbe.poecompanion.league.AccountEvaluationService
+import com.colinmoerbe.poecompanion.league.AccountContextAccessService
+import com.colinmoerbe.poecompanion.league.GameEnvironmentSelectionService
 import com.colinmoerbe.poecompanion.league.EvaluationContext
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Isolation
@@ -34,7 +35,8 @@ import org.springframework.transaction.annotation.Transactional
  */
 @Service
 class AcquisitionReadModelService internal constructor(
-    private val accountEvaluationService: AccountEvaluationService,
+    private val gameSelection: GameEnvironmentSelectionService,
+    private val access: AccountContextAccessService,
     private val sourcePersistenceAdapter: AcquisitionSourcePersistenceAdapter,
     private val relationshipPersistenceAdapter: DropRelationshipPersistenceAdapter,
     private val bossEncounterKnowledgeService: BossEncounterKnowledgeService,
@@ -45,34 +47,35 @@ class AcquisitionReadModelService internal constructor(
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     fun findForUnique(uniqueDefinitionId: UniqueDefinitionId): AcquisitionQueryResult {
         val candidates = findCandidatesForUnique(uniqueDefinitionId)
-        val account = candidates.accountEvaluation ?: return AcquisitionQueryResult.NoAccountEvaluationSelected
+        val context = candidates.evaluationContext ?: return AcquisitionQueryResult.NoAccountEvaluationSelected
         return AcquisitionQueryResult.Evaluated(
-            account,
+            candidates.accountEvaluation,
             uniqueDefinitionId,
             candidates.candidates.map { requireNotNull(it.assessment) },
+            context,
         )
     }
 
     /** A relationship's identity is discoverable independently of its contextual applicability. */
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     fun findCandidatesForUnique(uniqueDefinitionId: UniqueDefinitionId): AcquisitionUniqueCandidatesResult {
-        val selected = accountEvaluationService.getSelected()
-        val scopes = selected?.let(::scopesFor)
+        val context = gameSelection.getSelected()
+        val selected = personal(context)
+        val scopes = context?.let(::scopesFor)
         val relationships = relationshipPersistenceAdapter.findByUniqueDefinitionId(uniqueDefinitionId)
         val candidates = relationships.map { relationship ->
-            val assessment = if (scopes == null || selected == null) {
+            val assessment = if (scopes == null) {
                 null
             } else {
                 val sourceKnowledge = resolveSource(relationship.acquisitionSourceId, scopes)
-                val attempts = availableAttemptsService.getAvailableAttempts(
-                    selected.accountContextId,
-                    relationship.acquisitionSourceId,
-                )
+                val attempts = selected?.let {
+                    availableAttemptsService.getAvailableAttempts(it.accountContextId, relationship.acquisitionSourceId)
+                }
                 assess(relationship, sourceKnowledge, attempts, scopes)
             }
             AcquisitionSourceRelationshipResult(relationship, assessment)
         }
-        return AcquisitionUniqueCandidatesResult(selected, candidates)
+        return AcquisitionUniqueCandidatesResult(selected, candidates, context)
     }
 
     /** Lists every stable source, including sources with no relationships or no selected account. */
@@ -88,7 +91,7 @@ class AcquisitionReadModelService internal constructor(
                 sourceKnowledge = scopes?.let { resolveSource(source.id, it) },
             )
         }
-        return AcquisitionSourceBrowseResult(selected, sources)
+        return AcquisitionSourceBrowseResult(selected, sources, context)
     }
 
     /**
