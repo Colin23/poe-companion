@@ -4,9 +4,9 @@ import com.colinmoerbe.poecompanion.DevelopmentFixtureIds
 import com.colinmoerbe.poecompanion.DevelopmentFixtureInitializer
 import com.colinmoerbe.poecompanion.SecurityTestActors
 import com.colinmoerbe.poecompanion.TestcontainersConfiguration
+import com.colinmoerbe.poecompanion.acquisition.attempts.AvailableAttemptsService
 import com.colinmoerbe.poecompanion.browser.builds.BuildBrowserDetailPage
 import com.colinmoerbe.poecompanion.browser.builds.BuildBrowserState
-import com.colinmoerbe.poecompanion.acquisition.attempts.AvailableAttemptsService
 import com.colinmoerbe.poecompanion.league.AccountEvaluationService
 import com.colinmoerbe.poecompanion.league.CompatibilityVersion
 import com.colinmoerbe.poecompanion.league.DevelopmentLeagueAccess
@@ -31,8 +31,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.context.annotation.Import
-import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.dao.DataIntegrityViolationException
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user
@@ -104,8 +104,10 @@ internal class GameEnvironmentBrowserIntegrationTests(
         assertThat(build.groups.flatMap { it.requirements }).allMatch { it.ownedQuantity == null }
         assertThat(build.groups.flatMap { it.requirements }).allMatch { it.satisfied == null }
 
-        mvc.perform(get("/acquisitions/${ids.source.value}").param("attempts", "12")
-            .with(user("test-user").roles("USER")))
+        mvc.perform(
+            get("/acquisitions/${ids.source.value}").param("attempts", "12")
+                .with(user("test-user").roles("USER")),
+        )
             .andExpect(status().isOk)
             .andExpect(content().string(containsString("71.8%")))
             .andExpect(content().string(containsString("Personal attempts are unavailable")))
@@ -129,19 +131,25 @@ internal class GameEnvironmentBrowserIntegrationTests(
 
     @Test
     fun `invalid and csrf-free requests cannot alter an existing selection`() {
-        mvc.perform(post("/environment").with(user("test-user").roles("USER"))
-            .param("version", "3.30").param("type", "STANDARD")
-            .param("mortality", "SOFTCORE").param("participation", "SSF").param("ruleset", "NORMAL"))
+        mvc.perform(
+            post("/environment").with(user("test-user").roles("USER"))
+                .param("version", "3.30").param("type", "STANDARD")
+                .param("mortality", "SOFTCORE").param("participation", "SSF").param("ruleset", "NORMAL"),
+        )
             .andExpect(status().isForbidden)
 
-        mvc.perform(post("/environment").with(user("test-user").roles("USER")).with(csrf())
-            .param("version", "3.29").param("type", "STANDARD")
-            .param("mortality", "SOFTCORE").param("participation", "SSF").param("ruleset", "NORMAL"))
+        mvc.perform(
+            post("/environment").with(user("test-user").roles("USER")).with(csrf())
+                .param("version", "3.29").param("type", "STANDARD")
+                .param("mortality", "SOFTCORE").param("participation", "SSF").param("ruleset", "NORMAL"),
+        )
             .andExpect(status().isBadRequest)
 
-        mvc.perform(post("/environment").with(user("test-user").roles("USER")).with(csrf())
-            .param("version", "3.30").param("type", "STANDARD")
-            .param("mortality", "SOFTCORE").param("participation", "SSF").param("ruleset", "RUTHLESS"))
+        mvc.perform(
+            post("/environment").with(user("test-user").roles("USER")).with(csrf())
+                .param("version", "3.30").param("type", "STANDARD")
+                .param("mortality", "SOFTCORE").param("participation", "SSF").param("ruleset", "RUTHLESS"),
+        )
             .andExpect(status().isBadRequest)
 
         mvc.perform(get("/environment").with(user("test-user").roles("USER")))
@@ -216,22 +224,26 @@ internal class GameEnvironmentBrowserIntegrationTests(
         leagues.recognizeVersion(second.id, CompatibilityVersion(3, 30))
         val initial = selections.getSelected()
 
-        mvc.perform(post("/environment").with(user("test-user").roles("USER")).with(csrf())
-            .param("version", "3.30")
-            .param("type", "CHALLENGE")
-            .param("mortality", "SOFTCORE")
-            .param("participation", "SSF")
-            .param("ruleset", "NORMAL"))
+        mvc.perform(
+            post("/environment").with(user("test-user").roles("USER")).with(csrf())
+                .param("version", "3.30")
+                .param("type", "CHALLENGE")
+                .param("mortality", "SOFTCORE")
+                .param("participation", "SSF")
+                .param("ruleset", "NORMAL"),
+        )
             .andExpect(status().isBadRequest)
         assertThat(selections.getSelected()).isEqualTo(initial)
 
-        mvc.perform(post("/environment").with(user("test-user").roles("USER")).with(csrf())
-            .param("version", "3.30")
-            .param("type", "CHALLENGE")
-            .param("mortality", "SOFTCORE")
-            .param("participation", "SSF")
-            .param("ruleset", "NORMAL")
-            .param("leagueId", second.id.value.toString()))
+        mvc.perform(
+            post("/environment").with(user("test-user").roles("USER")).with(csrf())
+                .param("version", "3.30")
+                .param("type", "CHALLENGE")
+                .param("mortality", "SOFTCORE")
+                .param("participation", "SSF")
+                .param("ruleset", "NORMAL")
+                .param("leagueId", second.id.value.toString()),
+        )
             .andExpect(status().is3xxRedirection)
         assertThat(selections.getSelected()?.leagueDefinitionId).isEqualTo(second.id)
         assertThat(countContexts()).isEqualTo(3L)
@@ -244,8 +256,10 @@ internal class GameEnvironmentBrowserIntegrationTests(
 
         mvc.perform(get("/acquisitions/${ids.source.value}").with(user("test-user").roles("USER")))
             .andExpect(content().string(containsString("Not recorded")))
-        mvc.perform(get("/acquisitions/${ids.source.value}").param("attempts", "0")
-            .with(user("test-user").roles("USER")))
+        mvc.perform(
+            get("/acquisitions/${ids.source.value}").param("attempts", "0")
+                .with(user("test-user").roles("USER")),
+        )
             .andExpect(content().string(containsString("0.0%")))
         assertThat(countContexts()).isEqualTo(originalCount)
 
@@ -295,12 +309,14 @@ internal class GameEnvironmentBrowserIntegrationTests(
     }
 
     private fun select(type: String) {
-        mvc.perform(post("/environment").with(user("test-user").roles("USER")).with(csrf())
-            .param("version", "3.30")
-            .param("type", type)
-            .param("mortality", "SOFTCORE")
-            .param("participation", "SSF")
-            .param("ruleset", "NORMAL"))
+        mvc.perform(
+            post("/environment").with(user("test-user").roles("USER")).with(csrf())
+                .param("version", "3.30")
+                .param("type", type)
+                .param("mortality", "SOFTCORE")
+                .param("participation", "SSF")
+                .param("ruleset", "NORMAL"),
+        )
             .andExpect(status().is3xxRedirection)
     }
 

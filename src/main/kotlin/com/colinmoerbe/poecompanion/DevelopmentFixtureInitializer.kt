@@ -227,8 +227,7 @@ internal class DevelopmentFixtureInitializer(
 
         val probability = estimates.findAcceptedTimeline(ids.relationship, scope)
         check(
-            probability?.snapshots == listOf(estimateSnapshot()) &&
-                probability?.withdrawals?.isEmpty() == true,
+            probability?.snapshots == listOf(estimateSnapshot()) && probability.withdrawals.isEmpty(),
         ) {
             "Development fixture accepted probability was modified or withdrawn"
         }

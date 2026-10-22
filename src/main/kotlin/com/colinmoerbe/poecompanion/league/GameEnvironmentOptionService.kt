@@ -6,10 +6,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 /** A curator-recognized pairing, not a statement that the league is active today. */
-data class GameEnvironmentOption(
-    val league: LeagueDefinition,
-    val compatibilityVersion: CompatibilityVersion,
-) {
+data class GameEnvironmentOption(val league: LeagueDefinition, val compatibilityVersion: CompatibilityVersion) {
     val context: EvaluationContext
         get() = EvaluationContext(compatibilityVersion, Ruleset.NORMAL, leagueDefinitionId = league.id)
 }

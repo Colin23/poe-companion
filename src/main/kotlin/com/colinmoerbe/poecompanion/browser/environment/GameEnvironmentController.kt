@@ -4,9 +4,9 @@ import com.colinmoerbe.poecompanion.league.CompatibilityVersion
 import com.colinmoerbe.poecompanion.league.GameEnvironmentChoice
 import com.colinmoerbe.poecompanion.league.GameEnvironmentOption
 import com.colinmoerbe.poecompanion.league.GameEnvironmentOptionService
+import com.colinmoerbe.poecompanion.league.LeagueDefinitionId
 import com.colinmoerbe.poecompanion.league.LeagueMortality
 import com.colinmoerbe.poecompanion.league.LeagueParticipation
-import com.colinmoerbe.poecompanion.league.LeagueDefinitionId
 import com.colinmoerbe.poecompanion.league.LeagueType
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Controller
@@ -27,7 +27,7 @@ internal class GameEnvironmentController(private val environments: GameEnvironme
         val current = environments.current()
         val preferred = options.firstOrNull {
             it.league.id == current?.context?.leagueDefinitionId &&
-                it.compatibilityVersion == current?.context?.compatibilityVersion
+                it.compatibilityVersion == current.context.compatibilityVersion
         } ?: options.firstOrNull()
         return ModelAndView(
             "environment/index",
@@ -45,7 +45,7 @@ internal class GameEnvironmentController(private val environments: GameEnvironme
                 "currentLabel" to current?.label,
                 "currentRecognized" to options.any {
                     it.league.id == current?.context?.leagueDefinitionId &&
-                        it.compatibilityVersion == current?.context?.compatibilityVersion
+                        it.compatibilityVersion == current.context.compatibilityVersion
                 },
                 "selectedLeagueId" to preferred?.league?.id?.value?.toString(),
             ),

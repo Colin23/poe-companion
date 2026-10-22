@@ -319,8 +319,7 @@ internal class ExpandedDevelopmentFixture(
     private fun verifyEstimate(relationshipId: DropRelationshipId, id: DropEstimateId, chance: Double, label: String) {
         val timeline = estimates.findAcceptedTimeline(relationshipId, scope)
         check(
-            timeline?.snapshots == listOf(definitions.estimate(id, chance, label)) &&
-                timeline?.withdrawals?.isEmpty() == true,
+            timeline?.snapshots == listOf(definitions.estimate(id, chance, label)) && timeline.withdrawals.isEmpty(),
         ) { "Partial expanded development fixture: estimate for $label" }
     }
 

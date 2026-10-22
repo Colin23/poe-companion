@@ -130,23 +130,23 @@ internal class BuildBrowserReadModelService(
 
     private fun groupToView(group: RequirementGroup, catalogIds: Set<UniqueDefinitionId>): BuildBrowserGroup =
         BuildBrowserGroup(
-        importance = group.importance.name,
-        logic = group.logic.name,
-        satisfied = null,
-        requirements = group.requirements.map { requirement ->
-            val id = requirement.uniqueDefinitionId
-            val label = UniqueDisplayLabels.forId(id)
-            BuildBrowserRequirement(
-                id = id.value,
-                displayName = label.name,
-                syntheticLabel = label.synthetic,
-                catalogKnown = id in catalogIds,
-                ownedQuantity = null,
-                requiredQuantity = requirement.requiredQuantity,
-                satisfied = null,
-            )
-        },
-    )
+            importance = group.importance.name,
+            logic = group.logic.name,
+            satisfied = null,
+            requirements = group.requirements.map { requirement ->
+                val id = requirement.uniqueDefinitionId
+                val label = UniqueDisplayLabels.forId(id)
+                BuildBrowserRequirement(
+                    id = id.value,
+                    displayName = label.name,
+                    syntheticLabel = label.synthetic,
+                    catalogKnown = id in catalogIds,
+                    ownedQuantity = null,
+                    requiredQuantity = requirement.requiredQuantity,
+                    satisfied = null,
+                )
+            },
+        )
 
     private fun groupToView(
         evaluated: RequirementGroupEvaluation,

@@ -235,14 +235,14 @@ internal class DevelopmentFixtureIntegrationTests(
         val relationship = negative.assessment?.relationshipKnowledge as ScopedAcquisitionKnowledge.Selected
         assertThat((relationship.resolution as DropRelationshipResolution.Resolved).snapshot.state)
             .isEqualTo(DropRelationshipState.CANNOT_DROP)
-        assertThat(negative.assessment?.calculation).isNull()
+        assertThat(negative.assessment.calculation).isNull()
 
         val noEstimate = acquisitionReadModel.findForSource(ids.sourceQ)!!.relationships.single()
         assertThat(noEstimate.assessment?.calculation).isNull()
         val unavailable = acquisitionReadModel.findForSource(ids.sourceR)!!.relationships.single()
         val accepted = unavailable.assessment?.probabilityKnowledge as ScopedAcquisitionKnowledge.Selected
         assertThat(accepted.resolution).isInstanceOf(FixedDropEstimateResolution.Resolved::class.java)
-        assertThat(unavailable.assessment?.calculation).isNull()
+        assertThat(unavailable.assessment.calculation).isNull()
 
         assertThat(count("unique_definition")).isEqualTo(12)
         assertThat(count("league_definition")).isEqualTo(2)

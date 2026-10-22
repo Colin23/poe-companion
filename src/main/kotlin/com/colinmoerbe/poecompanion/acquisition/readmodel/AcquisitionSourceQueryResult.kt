@@ -29,7 +29,9 @@ data class AcquisitionSourceRelationshipResult(
     val assessment: AcquisitionSourceAssessment?,
 )
 
-/** No game environment means relationship identities are known but their contextual knowledge cannot yet be evaluated. */
+/** No game environment means relationship identities are known,
+ * but their contextual knowledge cannot yet be evaluated.
+ */
 data class AcquisitionSourceDetailResult(
     val source: AcquisitionSource,
     val accountEvaluation: AccountEvaluation?,
@@ -41,7 +43,8 @@ data class AcquisitionSourceDetailResult(
 )
 
 /**
- * Stable relationships are discoverable without a personal account; contextual assessments require a selected game environment.
+ * Stable relationships are discoverable without a personal account;
+ * contextual assessments require a selected game environment.
  * Each candidate's null assessment means unevaluated, not CANNOT_DROP or an unavailable source.
  */
 data class AcquisitionUniqueCandidatesResult(
