@@ -14,6 +14,8 @@ data class GameEnvironmentOption(
         get() = EvaluationContext(compatibilityVersion, Ruleset.NORMAL, leagueDefinitionId = league.id)
 }
 
+data class CurrentGameEnvironment(val context: EvaluationContext, val label: String)
+
 data class GameEnvironmentChoice(
     val compatibilityVersion: CompatibilityVersion,
     val type: LeagueType,
@@ -34,6 +36,14 @@ class GameEnvironmentOptionService internal constructor(
         leagues.findById(id)?.let { GameEnvironmentOption(it, version) }
     }
 
+    @Transactional(readOnly = true)
+    fun current(): CurrentGameEnvironment? {
+        val context = selections.getSelected() ?: return null
+        val league = context.leagueDefinitionId?.let(leagues::findById) ?: return null
+        val precise = context.gamePatch?.let { " · $it" } ?: ""
+        return CurrentGameEnvironment(context, GameEnvironmentLabels.compact(context, league) + precise)
+    }
+
     @Transactional
     fun select(choice: GameEnvironmentChoice) {
         require(choice.ruleset == Ruleset.NORMAL) { "Ruthless is unsupported in V0.1" }
@@ -45,6 +55,10 @@ class GameEnvironmentOptionService internal constructor(
                 option.league.realm == GameRealm.PC
         }
         require(matches.size == 1) { "No unique curated game environment matches this choice" }
-        selections.select(matches.single().context)
+        val option = matches.single()
+        val previous = selections.getSelected()
+        val unchanged = previous?.leagueDefinitionId == option.league.id &&
+            previous.compatibilityVersion == option.compatibilityVersion && previous.ruleset == Ruleset.NORMAL
+        selections.select(if (unchanged) requireNotNull(previous) else option.context)
     }
 }

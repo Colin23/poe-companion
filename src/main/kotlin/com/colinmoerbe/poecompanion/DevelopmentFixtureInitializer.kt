@@ -108,6 +108,9 @@ internal class DevelopmentFixtureInitializer(
         } else {
             expansion.create()
         }
+        // Recognized environments are reference data, not replacement personal state.
+        leagueAccess.recognizeVersion(ids.league, compatibilityVersion)
+        leagueAccess.recognizeVersion(ids.standardLeague, compatibilityVersion)
     }
 
     private fun createCatalogAndAccount() {

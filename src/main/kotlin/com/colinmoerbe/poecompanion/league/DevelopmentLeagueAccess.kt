@@ -2,6 +2,7 @@ package com.colinmoerbe.poecompanion.league
 
 import com.colinmoerbe.poecompanion.league.persistence.AccountContextPersistenceAdapter
 import com.colinmoerbe.poecompanion.league.persistence.LeagueDefinitionPersistenceAdapter
+import com.colinmoerbe.poecompanion.league.persistence.SelectableLeagueVersionPersistenceAdapter
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 
@@ -19,10 +20,13 @@ import org.springframework.stereotype.Component
 internal class DevelopmentLeagueAccess(
     private val leagues: LeagueDefinitionPersistenceAdapter,
     private val accounts: AccountContextPersistenceAdapter,
+    private val versions: SelectableLeagueVersionPersistenceAdapter,
 ) {
     fun saveLeague(league: LeagueDefinition) = leagues.save(league)
 
     fun findLeagueById(id: LeagueDefinitionId): LeagueDefinition? = leagues.findById(id)
+
+    fun recognizeVersion(id: LeagueDefinitionId, version: CompatibilityVersion) = versions.saveIfAbsent(id, version)
 
     fun saveAccount(account: AccountContext) = accounts.save(account)
 
