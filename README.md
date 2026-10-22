@@ -4,11 +4,6 @@ Path of Exile Companion is a server-rendered companion application for Path of E
 compare current item ownership with build requirements and understand acquisition options without making the final
 decision for them.
 
-> [!NOTE]
-> The repository currently contains the application foundation and the canonical V2.1.1 product specification. Product
-functionality is implemented incrementally through vertical slices; the current application is not yet the complete V0.1
-product.
-
 ## Stack
 
 The application uses:
