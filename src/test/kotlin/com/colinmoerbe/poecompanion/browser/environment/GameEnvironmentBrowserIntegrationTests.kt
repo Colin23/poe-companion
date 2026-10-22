@@ -175,7 +175,7 @@ internal class GameEnvironmentBrowserIntegrationTests(
         assertThat(page["selectedVersion"]).isEqualTo("3.30")
 
         select("CHALLENGE")
-        assertThat(selections.getSelected()?.gamePatch).isEqualTo(patch)
+        assertThat(SecurityTestActors.asUser { selections.getSelected()?.gamePatch }).isEqualTo(patch)
 
         // Historical persisted selections are not rewritten, but unsupported rulesets are not selectable.
         jdbc.update(
@@ -199,7 +199,7 @@ internal class GameEnvironmentBrowserIntegrationTests(
         mvc.perform(get("/environment").with(user("test-user").roles("USER")))
             .andExpect(content().string(containsString("not among currently curated choices")))
         fixture.initialize()
-        assertThat(selections.getSelected()?.compatibilityVersion).isEqualTo(unknownVersion)
+        assertThat(SecurityTestActors.asUser { selections.getSelected()?.compatibilityVersion }).isEqualTo(unknownVersion)
         assertThat(optionCount()).isEqualTo(2L)
     }
 
@@ -219,7 +219,7 @@ internal class GameEnvironmentBrowserIntegrationTests(
             options.select(standard29.copy(compatibilityVersion = CompatibilityVersion(3, 30)))
             assertThat(accountEvaluation.getSelected()?.accountContextId).isEqualTo(ids.adminStandardAccount)
         }
-        assertThat(selections.getSelected()?.leagueDefinitionId).isEqualTo(ids.league)
+        assertThat(SecurityTestActors.asUser { selections.getSelected()?.leagueDefinitionId }).isEqualTo(ids.league)
         assertThat(countContexts()).isEqualTo(originalCount)
         fixture.initialize()
         assertThat(optionCount()).isEqualTo(3L)
@@ -237,7 +237,7 @@ internal class GameEnvironmentBrowserIntegrationTests(
         )
         SecurityTestActors.asAdmin { leagues.saveLeague(second) }
         leagues.recognizeVersion(second.id, CompatibilityVersion(3, 30))
-        val initial = selections.getSelected()
+        val initial = SecurityTestActors.asUser { selections.getSelected() }
 
         mvc.perform(
             post("/environment").with(user("test-user").roles("USER")).with(csrf())
@@ -248,7 +248,7 @@ internal class GameEnvironmentBrowserIntegrationTests(
                 .param("ruleset", "NORMAL"),
         )
             .andExpect(status().isBadRequest)
-        assertThat(selections.getSelected()).isEqualTo(initial)
+        assertThat(SecurityTestActors.asUser { selections.getSelected() }).isEqualTo(initial)
 
         mvc.perform(
             post("/environment").with(user("test-user").roles("USER")).with(csrf())
@@ -260,7 +260,7 @@ internal class GameEnvironmentBrowserIntegrationTests(
                 .param("leagueId", second.id.value.toString()),
         )
             .andExpect(status().is3xxRedirection)
-        assertThat(selections.getSelected()?.leagueDefinitionId).isEqualTo(second.id)
+        assertThat(SecurityTestActors.asUser { selections.getSelected()?.leagueDefinitionId }).isEqualTo(second.id)
         assertThat(countContexts()).isEqualTo(3L)
     }
 

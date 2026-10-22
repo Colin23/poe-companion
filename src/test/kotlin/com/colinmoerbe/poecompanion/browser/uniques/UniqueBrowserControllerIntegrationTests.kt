@@ -163,7 +163,7 @@ internal class UniqueBrowserControllerIntegrationTests(
 
         mockMvc.perform(get("/uniques").with(user("test-user")))
             .andExpect(status().isOk)
-            .andExpect(content().string(containsString("ownership is unknown")))
+            .andExpect(content().string(containsString("No environment selected.")))
             .andExpect(content().string(containsString("Ownership unknown")))
             .andExpect(content().string(not(containsString("Missing · 0"))))
 
