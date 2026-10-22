@@ -12,6 +12,7 @@ internal data class AcquisitionBrowserSourceEntry(
 internal data class AcquisitionBrowserListPage(
     val sources: List<AcquisitionBrowserSourceEntry>,
     val accountSelected: Boolean,
+    val environmentSelected: Boolean,
     val selectionLabel: String?,
 )
 

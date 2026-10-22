@@ -16,9 +16,13 @@
     </nav>
     <section class="panel">
         <h1>Acquisition Sources</h1>
-        <p class="muted" th:if="${page.accountSelected}" th:text="${page.selectionLabel}">Selected account</p>
-        <p class="notice" th:unless="${page.accountSelected}">
-            No account selected. Sources remain browsable, but contextual availability and probability are unknown.
+        <p class="muted" th:if="${page.environmentSelected}" th:text="${page.selectionLabel}">Selected environment</p>
+        <p class="notice" th:unless="${page.environmentSelected}">
+            No environment selected. Sources remain browsable, but contextual applicability is unknown.
+            <a th:href="@{/environment}">Select a game environment</a>.
+        </p>
+        <p class="small-muted" th:if="${page.environmentSelected and !page.accountSelected}">
+            No saved personal attempts exist for this environment. Applicable game knowledge remains available.
         </p>
         <p class="notice" th:if="${page.sources.isEmpty()}">
             No acquisition sources are known yet. No development fixture is loaded automatically.

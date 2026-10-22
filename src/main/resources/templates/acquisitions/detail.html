@@ -19,9 +19,13 @@
     <section class="panel">
         <h1 th:text="${page.displayName}">Boss Y</h1>
         <p class="readiness-status" th:text="${page.availability}">AVAILABLE</p>
-        <p class="muted" th:if="${page.accountSelected}" th:text="${page.selectionLabel}">Selected context</p>
-        <p class="notice" th:unless="${page.accountSelected}">
-            No account selected. Known relationships are shown, but their current eligibility and odds are unknown.
+        <p class="muted" th:if="${page.environmentSelected}" th:text="${page.selectionLabel}">Selected environment</p>
+        <p class="notice" th:unless="${page.environmentSelected}">
+            No environment selected. Known relationships are listed without contextual eligibility.
+            <a th:href="@{/environment}">Select a game environment</a>.
+        </p>
+        <p class="small-muted" th:if="${page.environmentSelected and !page.accountSelected}">
+            Personal attempts are unavailable for this environment; read-only probability previews are still supported.
         </p>
         <dl class="detail-facts">
             <div>
@@ -35,7 +39,7 @@
             </div>
         </dl>
 
-        <section class="attempt-preview">
+        <section class="attempt-preview" th:if="${page.environmentSelected}">
             <h2>Probability preview</h2>
             <p class="small-muted">
                 For supported fixed estimates, one attempt is one completed boss encounter.

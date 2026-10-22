@@ -7,8 +7,8 @@ import com.colinmoerbe.poecompanion.browser.shared.AcquisitionBrowserKnowledgeLa
 import com.colinmoerbe.poecompanion.browser.shared.UniqueDisplayLabels
 import com.colinmoerbe.poecompanion.catalog.UniqueCatalogQueryService
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
-import com.colinmoerbe.poecompanion.league.AccountEvaluation
 import com.colinmoerbe.poecompanion.league.AccountEvaluationService
+import com.colinmoerbe.poecompanion.league.GameEnvironmentOptionService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Transactional
@@ -23,6 +23,7 @@ internal class UniqueBrowserReadModelService(
     private val accountEvaluation: AccountEvaluationService,
     private val currentOwnership: CurrentOwnershipService,
     private val acquisition: AcquisitionReadModelService,
+    private val environments: GameEnvironmentOptionService,
 ) {
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     fun list(filter: UniqueCollectionFilter): UniqueCollectionPage {
@@ -40,7 +41,8 @@ internal class UniqueBrowserReadModelService(
         return UniqueCollectionPage(
             items = visibleItems,
             accountSelected = selected != null,
-            selectionLabel = selected?.let(::describeSelection),
+            environmentSelected = environments.current() != null,
+            selectionLabel = environments.current()?.label,
             totalCount = allItems.size,
             ownedCount = ownership?.let { allItems.count { item -> (item.ownedQuantity ?: 0) > 0 } },
             missingCount = ownership?.let { allItems.count { item -> item.ownedQuantity == 0 } },
@@ -87,10 +89,4 @@ internal class UniqueBrowserReadModelService(
         )
     }
 
-    private fun describeSelection(selection: AccountEvaluation): String {
-        val context = selection.evaluationContext
-        return "Account ${selection.accountContextId.value} · " +
-            "${context.compatibilityVersion.major}.${context.compatibilityVersion.minor} · " +
-            context.ruleset.name
-    }
 }
