@@ -169,7 +169,7 @@ internal class UniqueBrowserControllerIntegrationTests(
 
         mockMvc.perform(get("/uniques/${ids.uniqueC.value}").with(user("test-user")))
             .andExpect(status().isOk)
-            .andExpect(content().string(containsString("Unknown — select an account")))
+            .andExpect(content().string(containsString("Unknown — no personal collection")))
 
         mockMvc.perform(get("/uniques").param("filter", "missing").with(user("test-user")))
             .andExpect(status().isBadRequest)
@@ -248,15 +248,15 @@ internal class UniqueBrowserControllerIntegrationTests(
 
         mockMvc.perform(get(uri).with(user("test-user")))
             .andExpect(status().isOk)
-            .andExpect(content().string(containsString("Ownership cannot be edited until an account is selected")))
+            .andExpect(content().string(containsString("Ownership cannot be saved because there is no personal collection")))
             .andExpect(content().string(not(containsString("Save ownership"))))
 
         mockMvc.perform(post("$uri/ownership").param("quantity", "1").with(user("test-user")).with(csrf()))
             .andExpect(status().isConflict)
             .andExpect(view().name("uniques/ownership-error"))
             .andExpect(content().string(containsString("Ownership could not be saved")))
-            .andExpect(content().string(containsString("No account is selected")))
-            .andExpect(content().string(containsString("No changes were saved")))
+            .andExpect(content().string(containsString("No personal collection is available for this environment")))
+            .andExpect(content().string(containsString("No changes were made")))
         assertThat(
             fixtureActor.asLegacyUser { currentOwnership.getCurrentOwnership(ids.account) }.quantityOf(ids.uniqueC),
         ).isZero()

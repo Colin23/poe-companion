@@ -2,6 +2,7 @@ package com.colinmoerbe.poecompanion.browser.environment
 
 import com.colinmoerbe.poecompanion.DevelopmentFixtureIds
 import com.colinmoerbe.poecompanion.DevelopmentFixtureInitializer
+import com.colinmoerbe.poecompanion.security.identity.ConfiguredApplicationUsers
 import com.colinmoerbe.poecompanion.SecurityTestActors
 import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.acquisition.attempts.AvailableAttemptsService
@@ -34,6 +35,7 @@ import org.springframework.context.annotation.Import
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.security.test.context.support.WithMockUser
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.anonymous
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user
 import org.springframework.test.web.servlet.MockMvc
@@ -87,7 +89,7 @@ internal class GameEnvironmentBrowserIntegrationTests(
             .andExpect(content().string(containsString("Standard")))
             .andExpect(content().string(containsString("3.30")))
             .andExpect(content().string(containsString("Development")))
-        mvc.perform(get("/environment"))
+        mvc.perform(get("/environment").with(anonymous()))
             .andExpect(status().is3xxRedirection)
     }
 
@@ -174,6 +176,19 @@ internal class GameEnvironmentBrowserIntegrationTests(
 
         select("CHALLENGE")
         assertThat(selections.getSelected()?.gamePatch).isEqualTo(patch)
+
+        // Historical persisted selections are not rewritten, but unsupported rulesets are not selectable.
+        jdbc.update(
+            """
+            UPDATE poe_companion.account_evaluation_selection SET ruleset = 'RUTHLESS'
+            WHERE application_user_id = ?
+            """.trimIndent(),
+            ConfiguredApplicationUsers.USER.value,
+        )
+        val historical = mvc.perform(get("/environment").with(user("test-user").roles("USER")))
+            .andExpect(status().isOk)
+            .andReturn().modelAndView!!.model
+        assertThat(historical["currentRecognized"]).isEqualTo(false)
     }
 
     @Test
@@ -329,8 +344,9 @@ internal class GameEnvironmentBrowserIntegrationTests(
     private fun clear() {
         jdbc.execute(
             """
-            TRUNCATE TABLE poe_companion.unique_definition, poe_companion.league_definition,
-                poe_companion.build_archetype, poe_companion.acquisition_source CASCADE
+            TRUNCATE TABLE poe_companion.boss_definition, poe_companion.unique_definition,
+                poe_companion.league_definition, poe_companion.build_archetype,
+                poe_companion.acquisition_source CASCADE
             """.trimIndent(),
         )
     }

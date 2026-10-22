@@ -71,7 +71,7 @@ internal class UniqueBrowserController(
                 id,
                 principal,
                 HttpStatus.CONFLICT,
-                "No personal collection is available for this environment. Ownership cannot be saved yet." +
+                "No personal collection is available for this environment. Ownership cannot be saved yet. " +
                     "No changes were made.",
             )
 

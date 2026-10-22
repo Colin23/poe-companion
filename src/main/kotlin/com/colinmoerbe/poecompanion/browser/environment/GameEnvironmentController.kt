@@ -8,6 +8,7 @@ import com.colinmoerbe.poecompanion.league.LeagueDefinitionId
 import com.colinmoerbe.poecompanion.league.LeagueMortality
 import com.colinmoerbe.poecompanion.league.LeagueParticipation
 import com.colinmoerbe.poecompanion.league.LeagueType
+import com.colinmoerbe.poecompanion.league.Ruleset
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
@@ -27,6 +28,7 @@ internal class GameEnvironmentController(private val environments: GameEnvironme
         val current = environments.current()
         val preferred = options.firstOrNull {
             it.league.id == current?.context?.leagueDefinitionId &&
+                current.context.ruleset == Ruleset.NORMAL &&
                 it.compatibilityVersion == current.context.compatibilityVersion
         } ?: options.firstOrNull()
         return ModelAndView(
@@ -45,6 +47,7 @@ internal class GameEnvironmentController(private val environments: GameEnvironme
                 "currentLabel" to current?.label,
                 "currentRecognized" to options.any {
                     it.league.id == current?.context?.leagueDefinitionId &&
+                        current.context.ruleset == Ruleset.NORMAL &&
                         it.compatibilityVersion == current.context.compatibilityVersion
                 },
                 "selectedLeagueId" to preferred?.league?.id?.value?.toString(),
