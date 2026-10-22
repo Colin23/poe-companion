@@ -10,12 +10,9 @@ import com.colinmoerbe.poecompanion.browser.acquisitions.AcquisitionBrowserDetai
 import com.colinmoerbe.poecompanion.browser.builds.BuildBrowserDetailPage
 import com.colinmoerbe.poecompanion.browser.builds.BuildBrowserState
 import com.colinmoerbe.poecompanion.browser.uniques.UniqueDetailPage
-import com.colinmoerbe.poecompanion.league.AccountContext
 import com.colinmoerbe.poecompanion.league.AccountContextId
 import com.colinmoerbe.poecompanion.league.AccountEvaluationService
 import com.colinmoerbe.poecompanion.league.CompatibilityVersion
-import com.colinmoerbe.poecompanion.league.DevelopmentLeagueAccess
-import com.colinmoerbe.poecompanion.league.Ruleset
 import com.colinmoerbe.poecompanion.security.identity.ConfiguredApplicationUsers
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -55,7 +52,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 internal class TwoUserBrowserIsolationIntegrationTests(
     @Autowired private val mockMvc: MockMvc,
     @Autowired private val fixture: DevelopmentFixtureInitializer,
-    @Autowired private val league: DevelopmentLeagueAccess,
     @Autowired private val selection: AccountEvaluationService,
     @Autowired private val ownership: ManualOwnershipService,
     @Autowired private val currentOwnership: CurrentOwnershipService,
@@ -63,7 +59,7 @@ internal class TwoUserBrowserIsolationIntegrationTests(
     @Autowired private val jdbc: JdbcTemplate,
 ) {
     private val ids = DevelopmentFixtureIds
-    private val adminContextId = AccountContextId.generate()
+    private val adminContextId = ids.adminChallengeAccount
 
     @BeforeEach
     fun prepareFixture() {
@@ -165,7 +161,6 @@ internal class TwoUserBrowserIsolationIntegrationTests(
     }
 
     private fun prepareAdminContext() {
-        league.saveAccount(AccountContext(adminContextId, ids.league, Ruleset.NORMAL, ConfiguredApplicationUsers.ADMIN))
         asActor("test-admin", "ADMIN") {
             selection.select(adminContextId, CompatibilityVersion(3, 30))
             listOf(ids.uniqueA, ids.uniqueB, ids.uniqueC).forEach { ownership.setOwnedQuantity(adminContextId, it, 1) }

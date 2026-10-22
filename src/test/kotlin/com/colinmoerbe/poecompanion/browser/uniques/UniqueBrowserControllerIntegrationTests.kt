@@ -221,7 +221,7 @@ internal class UniqueBrowserControllerIntegrationTests(
 
         val other = AccountContext(
             AccountContextId.generate(),
-            ids.league,
+            ids.standardLeague,
             Ruleset.NORMAL,
             ConfiguredApplicationUsers.USER,
         )

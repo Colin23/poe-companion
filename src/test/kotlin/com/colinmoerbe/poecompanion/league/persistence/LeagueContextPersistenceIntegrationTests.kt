@@ -192,35 +192,51 @@ internal class LeagueContextPersistenceIntegrationTests(
     }
 
     @Test
-    fun `database rejects a selection referencing somebody else's context`() {
-        val league = LeagueDefinition(
-            id = LeagueDefinitionId.generate(),
-            name = "Ownership FK test",
-            type = LeagueType.CHALLENGE,
-            participation = LeagueParticipation.SSF,
-            mortality = LeagueMortality.SOFTCORE,
-            realm = GameRealm.PC,
-        )
-        leagueDefinitionPersistenceAdapter.save(league)
-        val id = AccountContextId.generate()
-        accountContextPersistenceAdapter.save(
-            AccountContext(id, league.id, Ruleset.NORMAL, ConfiguredApplicationUsers.USER),
-        )
-
+    fun `database rejects game selection referencing unknown canonical league`() {
         assertThatThrownBy {
             jdbcTemplate.update(
                 """
                 INSERT INTO poe_companion.account_evaluation_selection
-                    (application_user_id, account_context_id,
+                    (application_user_id, league_definition_id, ruleset,
                      compatibility_version_major, compatibility_version_minor)
-                VALUES (?, ?, ?, ?)
+                VALUES (?, ?, 'NORMAL', 3, 30)
                 """.trimIndent(),
-                ConfiguredApplicationUsers.ADMIN.value,
-                id.value,
-                3,
-                30,
+                ConfiguredApplicationUsers.USER.value,
+                LeagueDefinitionId.generate().value,
             )
         }.isInstanceOf(DataIntegrityViolationException::class.java)
+    }
+
+    @Test
+    fun `database enforces one owner league ruleset context but allows different users`() {
+        val league = LeagueDefinition(
+            LeagueDefinitionId.generate(),
+            "Shared League",
+            LeagueType.CHALLENGE,
+            LeagueParticipation.SSF,
+            LeagueMortality.SOFTCORE,
+            GameRealm.PC,
+        )
+        leagueDefinitionPersistenceAdapter.save(league)
+        accountContextPersistenceAdapter.save(
+            AccountContext(AccountContextId.generate(), league.id, Ruleset.NORMAL, ConfiguredApplicationUsers.USER),
+        )
+        assertThatThrownBy {
+            jdbcTemplate.update(
+                """
+                INSERT INTO poe_companion.account_context
+                    (id, league_definition_id, ruleset, owner_application_user_id)
+                VALUES (?, ?, 'NORMAL', ?)
+                """.trimIndent(),
+                AccountContextId.generate().value,
+                league.id.value,
+                ConfiguredApplicationUsers.USER.value,
+            )
+        }.isInstanceOf(DataIntegrityViolationException::class.java)
+        accountContextPersistenceAdapter.save(
+            AccountContext(AccountContextId.generate(), league.id, Ruleset.NORMAL, ConfiguredApplicationUsers.ADMIN),
+        )
+        assertThat(accountContextRepository.count()).isEqualTo(2L)
     }
 
     @Test

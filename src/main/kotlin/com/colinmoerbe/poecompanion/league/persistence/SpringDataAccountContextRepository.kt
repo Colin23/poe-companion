@@ -1,5 +1,6 @@
 package com.colinmoerbe.poecompanion.league.persistence
 
+import com.colinmoerbe.poecompanion.league.Ruleset
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
@@ -7,6 +8,12 @@ import org.springframework.data.repository.query.Param
 import java.util.UUID
 
 internal interface SpringDataAccountContextRepository : JpaRepository<AccountContextEntity, UUID> {
+
+    fun findByOwnerApplicationUserIdAndLeagueDefinitionIdAndRuleset(
+        ownerApplicationUserId: UUID,
+        leagueDefinitionId: UUID,
+        ruleset: Ruleset,
+    ): AccountContextEntity?
 
     @Modifying
     @Query(
