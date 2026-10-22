@@ -243,20 +243,15 @@ internal class UniqueBrowserControllerIntegrationTests(
     }
 
     @Test
-    fun `missing account selection prevents editing and explains the conflict`() {
+    fun `missing environment selection prevents editing and explains the conflict`() {
         initializer.initialize()
         selectionRepository.deleteAllInBatch()
         val uri = "/uniques/${ids.uniqueC.value}"
 
         mockMvc.perform(get(uri).with(user("test-user")))
             .andExpect(status().isOk)
-            .andExpect(
-                content().string(
-                    containsString(
-                        "Ownership cannot be saved because there is no personal collection",
-                    ),
-                ),
-            )
+            .andExpect(content().string(containsString("Select an environment")))
+            .andExpect(content().string(not(containsString("Change game environment"))))
             .andExpect(content().string(not(containsString("Save ownership"))))
 
         mockMvc.perform(post("$uri/ownership").param("quantity", "1").with(user("test-user")).with(csrf()))
