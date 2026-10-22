@@ -1,95 +1,82 @@
 package com.colinmoerbe.poecompanion.browser.environment
 
-import com.colinmoerbe.poecompanion.league.CompatibilityVersion
-import com.colinmoerbe.poecompanion.league.GameEnvironmentChoice
 import com.colinmoerbe.poecompanion.league.GameEnvironmentOption
 import com.colinmoerbe.poecompanion.league.GameEnvironmentOptionService
-import com.colinmoerbe.poecompanion.league.LeagueDefinitionId
-import com.colinmoerbe.poecompanion.league.LeagueMortality
-import com.colinmoerbe.poecompanion.league.LeagueParticipation
-import com.colinmoerbe.poecompanion.league.LeagueType
 import com.colinmoerbe.poecompanion.league.Ruleset
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import java.security.Principal
-import java.util.UUID
 
-/** Game selection is independent of personal collection ownership. */
+/** Handles environment form HTTP navigation; parsing and curated resolution live in dedicated collaborators. */
 @Controller
 internal class GameEnvironmentController(private val environments: GameEnvironmentOptionService) {
     @GetMapping("/environment")
-    fun form(principal: Principal): ModelAndView {
-        val options = environments.findAll()
-        val current = environments.current()
-        val preferred = options.firstOrNull {
-            it.league.id == current?.context?.leagueDefinitionId &&
-                current.context.ruleset == Ruleset.NORMAL &&
-                it.compatibilityVersion == current.context.compatibilityVersion
-        } ?: options.firstOrNull()
-        return ModelAndView(
-            "environment/index",
-            mapOf(
-                "username" to principal.name,
-                "options" to options.map(::toView),
-                "versions" to options.map { it.compatibilityVersion.toString() }.distinct(),
-                "types" to options.map { it.league.type.name }.distinct(),
-                "mortalities" to options.map { it.league.mortality.name }.distinct(),
-                "participations" to options.map { it.league.participation.name }.distinct(),
-                "selectedVersion" to preferred?.compatibilityVersion?.toString(),
-                "selectedType" to preferred?.league?.type?.name,
-                "selectedMortality" to preferred?.league?.mortality?.name,
-                "selectedParticipation" to preferred?.league?.participation?.name,
-                "currentLabel" to current?.label,
-                "currentRecognized" to options.any {
-                    it.league.id == current?.context?.leagueDefinitionId &&
-                        current.context.ruleset == Ruleset.NORMAL &&
-                        it.compatibilityVersion == current.context.compatibilityVersion
-                },
-                "selectedLeagueId" to preferred?.league?.id?.value?.toString(),
-            ),
-        )
+    fun form(principal: Principal): ModelAndView = renderForm(principal)
+
+    @PostMapping("/environment")
+    fun select(@ModelAttribute input: GameEnvironmentFormInput, principal: Principal): ModelAndView {
+        val choice = GameEnvironmentFormParser.parse(input)
+            ?: return renderForm(principal, input, "Enter a valid game environment.")
+
+        return try {
+            environments.select(choice)
+            ModelAndView("redirect:/environment")
+        } catch (_: IllegalArgumentException) {
+            val candidates = environments.findMatching(choice)
+            val explanation = when {
+                candidates.isEmpty() -> "This combination is not among the curated game environments."
+                candidates.size > 1 && choice.leagueDefinitionId == null ->
+                    "Several leagues match these settings. Choose a specific league and submit again."
+                else -> "The selected league does not match a curated game environment."
+            }
+            renderForm(principal, input, explanation)
+        }
     }
 
-    @Suppress("ThrowsCount")
-    @PostMapping("/environment")
-    fun select(
-        @RequestParam version: String,
-        @RequestParam type: String,
-        @RequestParam mortality: String,
-        @RequestParam participation: String,
-        @RequestParam ruleset: String,
-        @RequestParam(required = false) leagueId: String?,
+    private fun renderForm(
+        principal: Principal,
+        submitted: GameEnvironmentFormInput? = null,
+        error: String? = null,
     ): ModelAndView {
-        val pieces = Regex("([0-9]+)\\.([0-9]+)").matchEntire(version)
-            ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown compatibility version")
-        val choice = try {
-            GameEnvironmentChoice(
-                compatibilityVersion = CompatibilityVersion(
-                    pieces.groupValues[1].toInt(),
-                    pieces.groupValues[2].toInt(),
-                ),
-                type = enumValueOf<LeagueType>(type),
-                mortality = enumValueOf<LeagueMortality>(mortality),
-                participation = enumValueOf<LeagueParticipation>(participation),
-                ruleset = enumValueOf(ruleset),
-                leagueDefinitionId = leagueId?.takeIf { it.isNotBlank() }?.let {
-                    LeagueDefinitionId(UUID.fromString(it))
-                },
-            )
-        } catch (_: IllegalArgumentException) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid game environment")
+        val options = environments.findAll()
+        val current = environments.current()
+        val saved = current?.context?.takeIf { it.ruleset == Ruleset.NORMAL }
+        val preferred = options.firstOrNull {
+            it.league.id == saved?.leagueDefinitionId &&
+                it.compatibilityVersion == saved.compatibilityVersion
         }
-        try {
-            environments.select(choice)
-        } catch (_: IllegalArgumentException) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown or ambiguous curated game environment")
+        val initial = preferred ?: options.firstOrNull()
+        val input = submitted ?: GameEnvironmentFormInput(
+            version = initial?.compatibilityVersion?.toString().orEmpty(),
+            type = initial?.league?.type?.name.orEmpty(),
+            mortality = initial?.league?.mortality?.name.orEmpty(),
+            participation = initial?.league?.participation?.name.orEmpty(),
+        )
+        val matches = GameEnvironmentFormParser.parse(input)?.let(environments::findMatching).orEmpty()
+        val model = mapOf(
+            "username" to principal.name,
+            "options" to options.map(::toView),
+            "versions" to options.map { it.compatibilityVersion.toString() }.distinct(),
+            "types" to options.map { it.league.type.name }.distinct(),
+            "mortalities" to options.map { it.league.mortality.name }.distinct(),
+            "participations" to options.map { it.league.participation.name }.distinct(),
+            "selectedVersion" to input.version,
+            "selectedType" to input.type,
+            "selectedMortality" to input.mortality,
+            "selectedParticipation" to input.participation,
+            "currentLabel" to current?.label,
+            "currentRecognized" to (preferred != null),
+            "selectedLeagueId" to (submitted?.leagueId ?: preferred?.league?.id?.value?.toString().orEmpty()),
+            "ambiguousOptions" to if (matches.size > 1) matches.map(::toView) else emptyList(),
+            "errorMessage" to error,
+        )
+        return ModelAndView("environment/index", model).apply {
+            if (error != null) setStatus(HttpStatus.BAD_REQUEST)
         }
-        return ModelAndView("redirect:/environment")
     }
 
     private fun toView(option: GameEnvironmentOption): SelectableGameEnvironmentView = SelectableGameEnvironmentView(
