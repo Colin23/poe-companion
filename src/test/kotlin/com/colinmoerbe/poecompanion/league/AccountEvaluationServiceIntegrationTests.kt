@@ -163,6 +163,22 @@ internal class AccountEvaluationServiceIntegrationTests(
     }
 
     @Test
+    fun `owned Ruthless context cannot bypass unsupported game-selection ruleset`() {
+        val normalAccount = createPersistedAccountContext()
+        val ruthlessAccount = createPersistedAccountContext(ruleset = Ruleset.RUTHLESS)
+        val version = CompatibilityVersion(3, 30)
+
+        accountEvaluationService.select(normalAccount.id, version)
+
+        assertThatThrownBy {
+            accountEvaluationService.select(ruthlessAccount.id, version)
+        }.isInstanceOf(IllegalArgumentException::class.java)
+            .hasMessage("Ruthless is unsupported in V0.1")
+
+        assertThat(accountEvaluationService.getSelected()?.accountContextId).isEqualTo(normalAccount.id)
+    }
+
+    @Test
     fun `game patch from another compatibility version should be rejected`() {
         val accountContext = createPersistedAccountContext()
 
@@ -177,6 +193,7 @@ internal class AccountEvaluationServiceIntegrationTests(
 
     private fun createPersistedAccountContext(
         owner: ApplicationUserId = ConfiguredApplicationUsers.USER,
+        ruleset: Ruleset = Ruleset.NORMAL,
     ): AccountContext {
         val leagueDefinition =
             LeagueDefinition(
@@ -190,7 +207,7 @@ internal class AccountEvaluationServiceIntegrationTests(
         return AccountContext(
             id = AccountContextId.generate(),
             leagueDefinitionId = leagueDefinition.id,
-            ruleset = Ruleset.NORMAL,
+            ruleset = ruleset,
             ownerApplicationUserId = owner,
         ).also(accountContextPersistenceAdapter::save)
     }
