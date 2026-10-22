@@ -16,9 +16,9 @@
     </nav>
     <section class="panel">
         <h1>Builds</h1>
-        <p class="muted">Browse known Build variants and their Unique readiness for the selected account.</p>
+        <p class="muted">Browse known Build variants, version-specific requirements, and personal Unique readiness where available.</p>
         <p class="notice" th:unless="${page.accountSelected}">
-            No account selected. Build definitions remain browsable, but Unique readiness is unknown.
+            No environment selected. Build definitions remain browsable. <a th:href="@{/environment}">Select a game environment</a> to inspect compatible requirements.
         </p>
         <p class="notice" th:if="${page.totalCount == 0}">
             No Build variants are known yet. No development fixture is loaded automatically.
