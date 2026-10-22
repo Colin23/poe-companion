@@ -84,6 +84,7 @@ internal class CurrentOwnershipServiceIntegrationTests(
     @Test
     fun `current ownership should remain isolated by account context`() {
         val leagueDefinition = createPersistedLeagueDefinition()
+        val otherLeagueDefinition = createPersistedLeagueDefinition()
         val contextA =
             AccountContext(
                 id = AccountContextId.generate(),
@@ -94,7 +95,7 @@ internal class CurrentOwnershipServiceIntegrationTests(
         val contextB =
             AccountContext(
                 id = AccountContextId.generate(),
-                leagueDefinitionId = leagueDefinition.id,
+                leagueDefinitionId = otherLeagueDefinition.id,
                 ruleset = Ruleset.NORMAL,
                 ownerApplicationUserId = ConfiguredApplicationUsers.USER,
             ).also(accountContextPersistenceAdapter::save)

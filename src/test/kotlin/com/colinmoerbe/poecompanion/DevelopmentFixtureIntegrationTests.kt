@@ -131,7 +131,7 @@ internal class DevelopmentFixtureIntegrationTests(
         // A separately selected account must remain selected after another initializer run.
         val otherAccount = AccountContext(
             AccountContextId.generate(),
-            ids.league,
+            ids.standardLeague,
             Ruleset.NORMAL,
             ConfiguredApplicationUsers.USER,
         )

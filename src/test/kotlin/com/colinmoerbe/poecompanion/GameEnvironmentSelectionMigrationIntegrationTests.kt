@@ -76,7 +76,7 @@ internal class GameEnvironmentSelectionMigrationIntegrationTests {
         seedAccount(jdbc, league, UUID.randomUUID())
 
         assertThatThrownBy { migrate(source, "019") }
-            .hasMessageContaining("Migration")
+            .hasStackTraceContaining("Duplicate account contexts for one owner/league/ruleset")
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM poe_companion.account_context", Long::class.java))
             .isEqualTo(2L)
     }
