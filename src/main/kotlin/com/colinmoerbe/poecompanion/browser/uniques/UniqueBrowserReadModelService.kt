@@ -89,5 +89,4 @@ internal class UniqueBrowserReadModelService(
             ownedQuantity = ownership?.quantityOf(id),
         )
     }
-
 }

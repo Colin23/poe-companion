@@ -151,7 +151,7 @@ internal class BuildBrowserControllerIntegrationTests(
         fixtureActor.asLegacyUser { ownership.setOwnedQuantity(ids.account, ids.uniqueC, 1) }
 
         assertThat(detailPage(ids.variant).state).isEqualTo(BuildBrowserState.UNIQUE_READY)
-        assertThat(detailPage(ids.variant).groups).allMatch { it.satisfied }
+        assertThat(detailPage(ids.variant).groups).allMatch { it.satisfied == true }
 
         val page = listPage()
         val buildX = page.sections.flatMap { it.entries }.single { it.id == ids.variant.value }
@@ -227,7 +227,7 @@ internal class BuildBrowserControllerIntegrationTests(
         assertThat(detailPage(ids.variant).state).isEqualTo(BuildBrowserState.NO_ACCOUNT)
         assertThat(detailPage(ids.variant).hasRequiredUniqueGroups).isNull()
         val listing = listPage()
-        assertThat(listing.accountSelected).isFalse()
+        assertThat(listing.environmentSelected).isFalse()
         assertThat(listing.sections.single().state).isEqualTo(BuildBrowserState.NO_ACCOUNT)
     }
 
@@ -250,7 +250,7 @@ internal class BuildBrowserControllerIntegrationTests(
     fun `empty catalogue and invalid identities have explicit HTTP states`() {
         val page = listPage()
         assertThat(page.totalCount).isZero()
-        assertThat(page.accountSelected).isFalse()
+        assertThat(page.environmentSelected).isFalse()
         mockMvc.perform(get("/builds").with(user("test-user")))
             .andExpect(content().string(containsString("No Build variants are known yet")))
 

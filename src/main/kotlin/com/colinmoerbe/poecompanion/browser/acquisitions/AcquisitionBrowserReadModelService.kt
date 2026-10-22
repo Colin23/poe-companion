@@ -124,5 +124,4 @@ internal class AcquisitionBrowserReadModelService(
         const val CUMULATIVE_DECIMALS = 1
         const val PERCENT_MULTIPLIER = 100.0
     }
-
 }

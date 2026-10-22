@@ -4,11 +4,11 @@ import com.colinmoerbe.poecompanion.browser.shared.UniqueDisplayLabels
 import com.colinmoerbe.poecompanion.build.identity.BuildVariantId
 import com.colinmoerbe.poecompanion.build.readiness.RequirementGroupEvaluation
 import com.colinmoerbe.poecompanion.build.readiness.UniqueReadiness
-import com.colinmoerbe.poecompanion.build.requirements.RequirementGroup
-import com.colinmoerbe.poecompanion.build.requirements.RequirementImportance
 import com.colinmoerbe.poecompanion.build.readmodel.BuildCatalogQueryService
 import com.colinmoerbe.poecompanion.build.readmodel.BuildReadinessQueryResult
 import com.colinmoerbe.poecompanion.build.readmodel.BuildReadinessService
+import com.colinmoerbe.poecompanion.build.requirements.RequirementGroup
+import com.colinmoerbe.poecompanion.build.requirements.RequirementImportance
 import com.colinmoerbe.poecompanion.catalog.UniqueCatalogQueryService
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
 import com.colinmoerbe.poecompanion.league.GameEnvironmentSelectionService
@@ -34,6 +34,7 @@ internal class BuildBrowserReadModelService(
             val explanation = when {
                 result is BuildReadinessQueryResult.Evaluated && !result.readiness.hasRequiredUniqueGroups ->
                     "No required Uniques"
+
                 result is BuildReadinessQueryResult.PersonalOwnershipUnavailable &&
                     result.revision.requirementGroups.none { it.importance != RequirementImportance.UPGRADE } ->
                     "No required Uniques"
@@ -54,7 +55,7 @@ internal class BuildBrowserReadModelService(
                 val matching = entries.filter { it.state == state }
                 if (matching.isEmpty()) null else BuildBrowserSection(state, matching)
             },
-            accountSelected = gameSelection.getSelected() != null,
+            environmentSelected = gameSelection.getSelected() != null,
         )
     }
 
@@ -127,10 +128,8 @@ internal class BuildBrowserReadModelService(
         }
     }
 
-    private fun groupToView(
-        group: RequirementGroup,
-        catalogIds: Set<UniqueDefinitionId>,
-    ): BuildBrowserGroup = BuildBrowserGroup(
+    private fun groupToView(group: RequirementGroup, catalogIds: Set<UniqueDefinitionId>): BuildBrowserGroup =
+        BuildBrowserGroup(
         importance = group.importance.name,
         logic = group.logic.name,
         satisfied = null,

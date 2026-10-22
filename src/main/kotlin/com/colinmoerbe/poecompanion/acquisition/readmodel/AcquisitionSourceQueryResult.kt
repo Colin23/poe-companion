@@ -10,7 +10,7 @@ import com.colinmoerbe.poecompanion.league.EvaluationContext
 
 /**
  * Known source identities remain browsable without a selected account or accepted encounter knowledge.
- * A null sourceKnowledge means no account was selected; Missing/Unknown/Ambiguous remain distinct otherwise.
+ * A null sourceKnowledge means no game environment was selected; Missing/Unknown/Ambiguous remain distinct otherwise.
  */
 data class AcquisitionSourceBrowseResult(
     val accountEvaluation: AccountEvaluation?,
@@ -29,7 +29,7 @@ data class AcquisitionSourceRelationshipResult(
     val assessment: AcquisitionSourceAssessment?,
 )
 
-/** No account means relationship identities are known but their contextual knowledge cannot yet be evaluated. */
+/** No game environment means relationship identities are known but their contextual knowledge cannot yet be evaluated. */
 data class AcquisitionSourceDetailResult(
     val source: AcquisitionSource,
     val accountEvaluation: AccountEvaluation?,
@@ -41,7 +41,7 @@ data class AcquisitionSourceDetailResult(
 )
 
 /**
- * Stable relationships are discoverable without an account; contextual assessments require a selected account.
+ * Stable relationships are discoverable without a personal account; contextual assessments require a selected game environment.
  * Each candidate's null assessment means unevaluated, not CANNOT_DROP or an unavailable source.
  */
 data class AcquisitionUniqueCandidatesResult(

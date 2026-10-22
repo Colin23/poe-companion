@@ -149,8 +149,7 @@ internal class BuildReadinessServiceIntegrationTests(
         val result = buildReadinessService.evaluate(variant.id)
 
         val unavailable = result as BuildReadinessQueryResult.NoCompatibleActiveRevision
-        assertThat(unavailable.accountEvaluation.accountContextId).isEqualTo(accountContext.id)
-        assertThat(unavailable.accountEvaluation.evaluationContext.compatibilityVersion)
+        assertThat(unavailable.evaluationContext.compatibilityVersion)
             .isEqualTo(CompatibilityVersion(3, 30))
     }
 
