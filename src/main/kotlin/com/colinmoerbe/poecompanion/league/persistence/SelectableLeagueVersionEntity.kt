@@ -13,7 +13,11 @@ internal data class SelectableLeagueVersionKey(
     var leagueDefinitionId: UUID = UUID(0L, 0L),
     var compatibilityVersionMajor: Int = 0,
     var compatibilityVersionMinor: Int = 0,
-) : Serializable
+) : Serializable {
+    companion object {
+        private const val serialVersionUID: Long = 1L
+    }
+}
 
 /** A supported selector option; it does not express whether a Challenge League is active. */
 @Entity
