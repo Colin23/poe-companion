@@ -58,6 +58,7 @@ internal class BuildBrowserReadModelService(
         )
     }
 
+    @Suppress("LongMethod")
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     fun detail(id: BuildVariantId): BuildBrowserDetailPage? {
         val build = builds.findById(id) ?: return null

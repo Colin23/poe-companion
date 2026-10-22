@@ -55,6 +55,7 @@ internal class AcquisitionBrowserReadModelService(
             displayName = AcquisitionBrowserKnowledgeLabels.sourceLabel(result.sourceKnowledge),
             availability = AcquisitionBrowserKnowledgeLabels.sourceAvailability(result.sourceKnowledge),
             accountSelected = result.accountEvaluation != null,
+            environmentSelected = result.evaluationContext != null,
             selectionLabel = environments.current()?.label,
             savedAttempts = result.availableAttempts?.count,
             previewAttempts = previewAttempts,

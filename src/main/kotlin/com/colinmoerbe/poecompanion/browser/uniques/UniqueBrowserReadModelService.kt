@@ -74,6 +74,7 @@ internal class UniqueBrowserReadModelService(
         return UniqueDetailPage(
             item = entry(unique.id, ownership),
             accountSelected = selected != null,
+            environmentSelected = environments.current() != null,
             selectionLabel = environments.current()?.label,
             acquisitionSources = candidates,
         )
