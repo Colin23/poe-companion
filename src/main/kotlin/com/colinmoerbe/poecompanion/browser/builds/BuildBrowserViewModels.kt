@@ -8,7 +8,8 @@ internal enum class BuildBrowserState(val title: String, val explanation: String
     PARTIAL("Partial", "Enabling requirements are satisfied; some core requirements are incomplete."),
     BLOCKED("Blocked", "At least one enabling requirement group is incomplete."),
     NO_ACTIVE_REVISION("No compatible revision", "No active revision matches the selected compatibility version."),
-    NO_ACCOUNT("No account selected", "Select an account to evaluate Unique readiness."),
+    NO_ACCOUNT("No environment selected", "Select a game environment to inspect compatible requirements."),
+    NO_PERSONAL("Ownership unavailable", "Compatible requirements are known; personal readiness is not evaluated."),
 }
 
 internal data class BuildBrowserListEntry(
@@ -31,9 +32,9 @@ internal data class BuildBrowserRequirement(
     val displayName: String,
     val syntheticLabel: Boolean,
     val catalogKnown: Boolean,
-    val ownedQuantity: Int,
+    val ownedQuantity: Int?,
     val requiredQuantity: Int,
-    val satisfied: Boolean,
+    val satisfied: Boolean?,
 )
 
 internal data class BuildBrowserGroup(

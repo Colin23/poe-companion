@@ -4,12 +4,14 @@ import com.colinmoerbe.poecompanion.browser.shared.UniqueDisplayLabels
 import com.colinmoerbe.poecompanion.build.identity.BuildVariantId
 import com.colinmoerbe.poecompanion.build.readiness.RequirementGroupEvaluation
 import com.colinmoerbe.poecompanion.build.readiness.UniqueReadiness
+import com.colinmoerbe.poecompanion.build.requirements.RequirementGroup
+import com.colinmoerbe.poecompanion.build.requirements.RequirementImportance
 import com.colinmoerbe.poecompanion.build.readmodel.BuildCatalogQueryService
 import com.colinmoerbe.poecompanion.build.readmodel.BuildReadinessQueryResult
 import com.colinmoerbe.poecompanion.build.readmodel.BuildReadinessService
 import com.colinmoerbe.poecompanion.catalog.UniqueCatalogQueryService
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
-import com.colinmoerbe.poecompanion.league.AccountEvaluationService
+import com.colinmoerbe.poecompanion.league.GameEnvironmentSelectionService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Transactional
@@ -20,7 +22,7 @@ internal class BuildBrowserReadModelService(
     private val builds: BuildCatalogQueryService,
     private val readiness: BuildReadinessService,
     private val catalog: UniqueCatalogQueryService,
-    private val accountEvaluation: AccountEvaluationService,
+    private val gameSelection: GameEnvironmentSelectionService,
 ) {
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     fun list(): BuildBrowserListPage {
@@ -31,6 +33,9 @@ internal class BuildBrowserReadModelService(
             val state = stateOf(result)
             val explanation = when {
                 result is BuildReadinessQueryResult.Evaluated && !result.readiness.hasRequiredUniqueGroups ->
+                    "No required Uniques"
+                result is BuildReadinessQueryResult.PersonalOwnershipUnavailable &&
+                    result.revision.requirementGroups.none { it.importance != RequirementImportance.UPGRADE } ->
                     "No required Uniques"
 
                 else -> state.explanation
@@ -49,7 +54,7 @@ internal class BuildBrowserReadModelService(
                 val matching = entries.filter { it.state == state }
                 if (matching.isEmpty()) null else BuildBrowserSection(state, matching)
             },
-            accountSelected = accountEvaluation.getSelected() != null,
+            accountSelected = gameSelection.getSelected() != null,
         )
     }
 
@@ -78,12 +83,27 @@ internal class BuildBrowserReadModelService(
                 )
             }
 
+            is BuildReadinessQueryResult.PersonalOwnershipUnavailable -> {
+                val catalogIds = catalog.findAll().mapTo(hashSetOf()) { it.id }
+                val hasRequired = result.revision.requirementGroups.any { it.importance != RequirementImportance.UPGRADE }
+                BuildBrowserDetailPage(
+                    id = id.value,
+                    displayName = build.displayName,
+                    state = state,
+                    explanation = if (hasRequired) state.explanation else "No required Uniques",
+                    compatibilityVersion = result.evaluationContext.compatibilityVersion.toString(),
+                    revisionStatus = "Active revision",
+                    groups = result.revision.requirementGroups.map { group -> groupToView(group, catalogIds) },
+                    hasRequiredUniqueGroups = hasRequired,
+                )
+            }
+
             is BuildReadinessQueryResult.NoCompatibleActiveRevision -> BuildBrowserDetailPage(
                 id = id.value,
                 displayName = build.displayName,
                 state = state,
                 explanation = state.explanation,
-                compatibilityVersion = result.accountEvaluation.evaluationContext.compatibilityVersion.let {
+                compatibilityVersion = result.evaluationContext.compatibilityVersion.let {
                     "${it.major}.${it.minor}"
                 },
                 revisionStatus = "No compatible active revision",
@@ -103,6 +123,28 @@ internal class BuildBrowserReadModelService(
             )
         }
     }
+
+    private fun groupToView(
+        group: RequirementGroup,
+        catalogIds: Set<UniqueDefinitionId>,
+    ): BuildBrowserGroup = BuildBrowserGroup(
+        importance = group.importance.name,
+        logic = group.logic.name,
+        satisfied = null,
+        requirements = group.requirements.map { requirement ->
+            val id = requirement.uniqueDefinitionId
+            val label = UniqueDisplayLabels.forId(id)
+            BuildBrowserRequirement(
+                id = id.value,
+                displayName = label.name,
+                syntheticLabel = label.synthetic,
+                catalogKnown = id in catalogIds,
+                ownedQuantity = null,
+                requiredQuantity = requirement.requiredQuantity,
+                satisfied = null,
+            )
+        },
+    )
 
     private fun groupToView(
         evaluated: RequirementGroupEvaluation,
@@ -130,6 +172,8 @@ internal class BuildBrowserReadModelService(
         BuildReadinessQueryResult.NoAccountEvaluationSelected -> BuildBrowserState.NO_ACCOUNT
 
         is BuildReadinessQueryResult.NoCompatibleActiveRevision -> BuildBrowserState.NO_ACTIVE_REVISION
+
+        is BuildReadinessQueryResult.PersonalOwnershipUnavailable -> BuildBrowserState.NO_PERSONAL
 
         is BuildReadinessQueryResult.Evaluated -> when (result.readiness.readiness) {
             UniqueReadiness.UNIQUE_READY -> BuildBrowserState.UNIQUE_READY

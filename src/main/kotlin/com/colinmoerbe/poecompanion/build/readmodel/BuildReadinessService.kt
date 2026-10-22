@@ -5,60 +5,51 @@ import com.colinmoerbe.poecompanion.account.CurrentOwnershipService
 import com.colinmoerbe.poecompanion.build.identity.BuildVariantId
 import com.colinmoerbe.poecompanion.build.readiness.UniqueReadinessEvaluator
 import com.colinmoerbe.poecompanion.build.revision.internal.BuildVariantRevisionPersistencePort
+import com.colinmoerbe.poecompanion.league.AccountContextAccessService
 import com.colinmoerbe.poecompanion.league.AccountEvaluation
-import com.colinmoerbe.poecompanion.league.AccountEvaluationService
+import com.colinmoerbe.poecompanion.league.EvaluationContext
+import com.colinmoerbe.poecompanion.league.GameEnvironmentSelectionService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
-/**
- * Composes the current account selection, ownership, active build revision, and pure readiness evaluator.
- */
+/** Resolves canonical revisions independently of personal ownership. */
 @Service
 class BuildReadinessService internal constructor(
-    private val accountEvaluationService: AccountEvaluationService,
+    private val gameSelection: GameEnvironmentSelectionService,
+    private val access: AccountContextAccessService,
     private val currentOwnershipService: CurrentOwnershipService,
-    private val revisionPersistencePort: BuildVariantRevisionPersistencePort,
+    private val revisions: BuildVariantRevisionPersistencePort,
 ) {
-    private val readinessEvaluator = UniqueReadinessEvaluator()
+    private val evaluator = UniqueReadinessEvaluator()
 
-    /** Single-build entry point retained for existing callers. */
     @Transactional(readOnly = true)
     fun evaluate(buildVariantId: BuildVariantId): BuildReadinessQueryResult =
         evaluateAll(listOf(buildVariantId)).getValue(buildVariantId)
 
-    /**
-     * Evaluates multiple variants against one selected context and one ownership snapshot.
-     * The caller owns the wider read transaction when composing a browser page.
-     */
-    @Suppress("ReturnCount")
     @Transactional(readOnly = true)
     fun evaluateAll(buildVariantIds: Collection<BuildVariantId>): Map<BuildVariantId, BuildReadinessQueryResult> {
         if (buildVariantIds.isEmpty()) return emptyMap()
-
-        val accountEvaluation =
-            accountEvaluationService.getSelected()
-                ?: return buildVariantIds.associateWith { BuildReadinessQueryResult.NoAccountEvaluationSelected }
-
-        val ownership = currentOwnershipService.getCurrentOwnership(accountEvaluation.accountContextId)
-        return buildVariantIds.associateWith { variantId ->
-            evaluateFor(variantId, accountEvaluation, ownership)
-        }
+        val context = gameSelection.getSelected()
+            ?: return buildVariantIds.associateWith { BuildReadinessQueryResult.NoAccountEvaluationSelected }
+        val leagueId = requireNotNull(context.leagueDefinitionId)
+        val account = access.findOwned(leagueId, context.ruleset)
+        val ownership = account?.let { currentOwnershipService.getCurrentOwnership(it.id) }
+        val personal = account?.let { AccountEvaluation(it.id, context) }
+        return buildVariantIds.associateWith { id -> evaluateFor(id, context, personal, ownership) }
     }
 
     private fun evaluateFor(
-        variantId: BuildVariantId,
-        selected: AccountEvaluation,
-        ownership: CurrentOwnership,
+        id: BuildVariantId,
+        context: EvaluationContext,
+        personal: AccountEvaluation?,
+        ownership: CurrentOwnership?,
     ): BuildReadinessQueryResult {
-        val revision = revisionPersistencePort.findActiveBy(
-            buildVariantId = variantId,
-            compatibilityVersion = selected.evaluationContext.compatibilityVersion,
-        ) ?: return BuildReadinessQueryResult.NoCompatibleActiveRevision(selected)
-
-        return BuildReadinessQueryResult.Evaluated(
-            accountEvaluation = selected,
-            revision = revision,
-            readiness = readinessEvaluator.evaluate(revision, ownership),
-        )
+        val revision = revisions.findActiveBy(id, context.compatibilityVersion)
+            ?: return BuildReadinessQueryResult.NoCompatibleActiveRevision(context)
+        return if (personal == null || ownership == null) {
+            BuildReadinessQueryResult.PersonalOwnershipUnavailable(context, revision)
+        } else {
+            BuildReadinessQueryResult.Evaluated(personal, revision, evaluator.evaluate(revision, ownership))
+        }
     }
 }
