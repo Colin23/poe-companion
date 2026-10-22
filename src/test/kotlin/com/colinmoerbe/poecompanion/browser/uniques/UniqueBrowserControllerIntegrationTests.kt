@@ -248,7 +248,13 @@ internal class UniqueBrowserControllerIntegrationTests(
 
         mockMvc.perform(get(uri).with(user("test-user")))
             .andExpect(status().isOk)
-            .andExpect(content().string(containsString("Ownership cannot be saved because there is no personal collection")))
+            .andExpect(
+                content().string(
+                    containsString(
+                        "Ownership cannot be saved because there is no personal collection",
+                    ),
+                ),
+            )
             .andExpect(content().string(not(containsString("Save ownership"))))
 
         mockMvc.perform(post("$uri/ownership").param("quantity", "1").with(user("test-user")).with(csrf()))
