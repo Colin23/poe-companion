@@ -21,6 +21,8 @@ internal data class GameEnvironmentFormInput(
 
 /** Converts HTTP form values safely; the League service remains the authority for curated validity. */
 internal object GameEnvironmentFormParser {
+    // Guard clauses make malformed HTTP values explicit without exceptions or partially constructed commands.
+    @Suppress("ReturnCount")
     fun parse(input: GameEnvironmentFormInput): GameEnvironmentChoice? {
         val parts = input.version.split('.')
         if (parts.size != 2) return null

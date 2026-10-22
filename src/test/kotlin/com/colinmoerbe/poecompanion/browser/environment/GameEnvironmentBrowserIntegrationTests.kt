@@ -89,6 +89,9 @@ internal class GameEnvironmentBrowserIntegrationTests(
             .andExpect(content().string(containsString("Standard")))
             .andExpect(content().string(containsString("3.30")))
             .andExpect(content().string(containsString("Development")))
+            .andExpect(content().string(containsString("id=\"environment-version\"")))
+            .andExpect(content().string(containsString("id=\"environment-mortality\"")))
+            .andExpect(content().string(containsString("id=\"environment-participation\"")))
         mvc.perform(get("/environment").with(anonymous()))
             .andExpect(status().is3xxRedirection)
     }
@@ -146,6 +149,11 @@ internal class GameEnvironmentBrowserIntegrationTests(
                 .param("mortality", "SOFTCORE").param("participation", "SSF").param("ruleset", "NORMAL"),
         )
             .andExpect(status().isBadRequest)
+            .andExpect(view().name("environment/index"))
+            .andExpect(content().string(containsString("not among the curated game environments")))
+            .andExpect(content().string(containsString("League type")))
+            .andExpect(content().string(containsString("Softcore")))
+            .andExpect(content().string(containsString("SSF")))
 
         mvc.perform(
             post("/environment").with(user("test-user").roles("USER")).with(csrf())
@@ -168,7 +176,7 @@ internal class GameEnvironmentBrowserIntegrationTests(
         mvc.perform(get("/environment").with(user("test-user").roles("USER")))
             .andExpect(status().isOk)
             .andExpect(content().string(containsString("3.30.2b")))
-            .andExpect(content().string(containsString("Resolved environment")))
+            .andExpect(content().string(containsString("Game environment")))
         val page = mvc.perform(get("/environment").with(user("test-user").roles("USER")))
             .andReturn().modelAndView!!.model
         assertThat(page["currentRecognized"]).isEqualTo(true)
@@ -189,6 +197,24 @@ internal class GameEnvironmentBrowserIntegrationTests(
             .andExpect(status().isOk)
             .andReturn().modelAndView!!.model
         assertThat(historical["currentRecognized"]).isEqualTo(false)
+    }
+
+    @Test
+    fun `a malformed numeric version returns a form validation error instead of an exception`() {
+        mvc.perform(
+            post("/environment").with(user("test-user").roles("USER")).with(csrf())
+                .param("version", "999999999999999999999.30")
+                .param("type", "CHALLENGE")
+                .param("mortality", "SOFTCORE")
+                .param("participation", "SSF")
+                .param("ruleset", "NORMAL"),
+        )
+            .andExpect(status().isBadRequest)
+            .andExpect(view().name("environment/index"))
+            .andExpect(content().string(containsString("Enter a valid game environment")))
+        assertThat(
+            SecurityTestActors.asUser { selections.getSelected()?.leagueDefinitionId },
+        ).isEqualTo(ids.league)
     }
 
     @Test
@@ -252,6 +278,9 @@ internal class GameEnvironmentBrowserIntegrationTests(
                 .param("ruleset", "NORMAL"),
         )
             .andExpect(status().isBadRequest)
+            .andExpect(view().name("environment/index"))
+            .andExpect(content().string(containsString("Specific league")))
+            .andExpect(content().string(containsString("Another curated challenge")))
         assertThat(SecurityTestActors.asUser { selections.getSelected() }).isEqualTo(initial)
 
         mvc.perform(
