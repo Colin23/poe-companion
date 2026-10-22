@@ -2,10 +2,27 @@ package com.colinmoerbe.poecompanion.browser.environment
 
 import com.colinmoerbe.poecompanion.DevelopmentFixtureIds
 import com.colinmoerbe.poecompanion.DevelopmentFixtureInitializer
+import com.colinmoerbe.poecompanion.SecurityTestActors
 import com.colinmoerbe.poecompanion.TestcontainersConfiguration
 import com.colinmoerbe.poecompanion.browser.builds.BuildBrowserDetailPage
 import com.colinmoerbe.poecompanion.browser.builds.BuildBrowserState
+import com.colinmoerbe.poecompanion.acquisition.attempts.AvailableAttemptsService
+import com.colinmoerbe.poecompanion.league.AccountEvaluationService
+import com.colinmoerbe.poecompanion.league.CompatibilityVersion
+import com.colinmoerbe.poecompanion.league.DevelopmentLeagueAccess
+import com.colinmoerbe.poecompanion.league.GameEnvironmentChoice
+import com.colinmoerbe.poecompanion.league.GameEnvironmentOptionService
+import com.colinmoerbe.poecompanion.league.GameEnvironmentSelectionService
+import com.colinmoerbe.poecompanion.league.GamePatch
+import com.colinmoerbe.poecompanion.league.GameRealm
+import com.colinmoerbe.poecompanion.league.LeagueDefinition
+import com.colinmoerbe.poecompanion.league.LeagueDefinitionId
+import com.colinmoerbe.poecompanion.league.LeagueMortality
+import com.colinmoerbe.poecompanion.league.LeagueParticipation
+import com.colinmoerbe.poecompanion.league.LeagueType
+import com.colinmoerbe.poecompanion.league.Ruleset
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -15,6 +32,8 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.context.annotation.Import
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.dao.DataIntegrityViolationException
+import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user
 import org.springframework.test.web.servlet.MockMvc
@@ -23,10 +42,12 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.view
+import java.util.UUID
 
 /** Real MVC/DB verification of the selected environment and the optional personal-data join. */
 @Import(TestcontainersConfiguration::class)
 @AutoConfigureMockMvc
+@WithMockUser(username = "test-user", roles = ["USER"])
 @SpringBootTest(
     properties = [
         "poe-companion.dev-fixture.enabled=true",
@@ -40,6 +61,11 @@ internal class GameEnvironmentBrowserIntegrationTests(
     @Autowired private val mvc: MockMvc,
     @Autowired private val fixture: DevelopmentFixtureInitializer,
     @Autowired private val jdbc: JdbcTemplate,
+    @Autowired private val accountEvaluation: AccountEvaluationService,
+    @Autowired private val selections: GameEnvironmentSelectionService,
+    @Autowired private val options: GameEnvironmentOptionService,
+    @Autowired private val leagues: DevelopmentLeagueAccess,
+    @Autowired private val attempts: AvailableAttemptsService,
 ) {
     private val ids = DevelopmentFixtureIds
 
@@ -123,6 +149,143 @@ internal class GameEnvironmentBrowserIntegrationTests(
             .andExpect(content().string(containsString("Development SSF league")))
     }
 
+    @Test
+    fun `precise saved patch remains recognized and survives selecting the same environment`() {
+        val version = CompatibilityVersion(3, 30)
+        val patch = GamePatch(version, 2, "b")
+        accountEvaluation.select(ids.account, version, patch)
+
+        mvc.perform(get("/environment").with(user("test-user").roles("USER")))
+            .andExpect(status().isOk)
+            .andExpect(content().string(containsString("3.30.2b")))
+            .andExpect(content().string(containsString("Resolved environment")))
+        val page = mvc.perform(get("/environment").with(user("test-user").roles("USER")))
+            .andReturn().modelAndView!!.model
+        assertThat(page["currentRecognized"]).isEqualTo(true)
+        assertThat(page["selectedVersion"]).isEqualTo("3.30")
+
+        select("CHALLENGE")
+        assertThat(selections.getSelected()?.gamePatch).isEqualTo(patch)
+    }
+
+    @Test
+    fun `unregistered selection survives reopening and reinitializing fixtures`() {
+        val unknownVersion = CompatibilityVersion(3, 28)
+        accountEvaluation.select(ids.account, unknownVersion)
+
+        mvc.perform(get("/environment").with(user("test-user").roles("USER")))
+            .andExpect(content().string(containsString("not among currently curated choices")))
+        fixture.initialize()
+        assertThat(selections.getSelected()?.compatibilityVersion).isEqualTo(unknownVersion)
+        assertThat(optionCount()).isEqualTo(2L)
+    }
+
+    @Test
+    fun `Standard across curated versions keeps the same admin personal context`() {
+        leagues.recognizeVersion(ids.standardLeague, CompatibilityVersion(3, 29))
+        val originalCount = countContexts()
+        SecurityTestActors.asAdmin {
+            val standard29 = GameEnvironmentChoice(
+                CompatibilityVersion(3, 29),
+                LeagueType.STANDARD,
+                LeagueMortality.SOFTCORE,
+                LeagueParticipation.SSF,
+            )
+            options.select(standard29)
+            assertThat(accountEvaluation.getSelected()?.accountContextId).isEqualTo(ids.adminStandardAccount)
+            options.select(standard29.copy(compatibilityVersion = CompatibilityVersion(3, 30)))
+            assertThat(accountEvaluation.getSelected()?.accountContextId).isEqualTo(ids.adminStandardAccount)
+        }
+        assertThat(selections.getSelected()?.leagueDefinitionId).isEqualTo(ids.league)
+        assertThat(countContexts()).isEqualTo(originalCount)
+        fixture.initialize()
+        assertThat(optionCount()).isEqualTo(3L)
+    }
+
+    @Test
+    fun `ambiguous challenge combinations need an explicit curated league identity`() {
+        val second = LeagueDefinition(
+            LeagueDefinitionId(UUID.randomUUID()),
+            "Another curated challenge",
+            LeagueType.CHALLENGE,
+            LeagueParticipation.SSF,
+            LeagueMortality.SOFTCORE,
+            GameRealm.PC,
+        )
+        SecurityTestActors.asAdmin { leagues.saveLeague(second) }
+        leagues.recognizeVersion(second.id, CompatibilityVersion(3, 30))
+        val initial = selections.getSelected()
+
+        mvc.perform(post("/environment").with(user("test-user").roles("USER")).with(csrf())
+            .param("version", "3.30")
+            .param("type", "CHALLENGE")
+            .param("mortality", "SOFTCORE")
+            .param("participation", "SSF")
+            .param("ruleset", "NORMAL"))
+            .andExpect(status().isBadRequest)
+        assertThat(selections.getSelected()).isEqualTo(initial)
+
+        mvc.perform(post("/environment").with(user("test-user").roles("USER")).with(csrf())
+            .param("version", "3.30")
+            .param("type", "CHALLENGE")
+            .param("mortality", "SOFTCORE")
+            .param("participation", "SSF")
+            .param("ruleset", "NORMAL")
+            .param("leagueId", second.id.value.toString()))
+            .andExpect(status().is3xxRedirection)
+        assertThat(selections.getSelected()?.leagueDefinitionId).isEqualTo(second.id)
+        assertThat(countContexts()).isEqualTo(3L)
+    }
+
+    @Test
+    fun `preview zero is distinct from missing personal attempts and recorded zero`() {
+        val originalCount = countContexts()
+        select("STANDARD")
+
+        mvc.perform(get("/acquisitions/${ids.source.value}").with(user("test-user").roles("USER")))
+            .andExpect(content().string(containsString("Not recorded")))
+        mvc.perform(get("/acquisitions/${ids.source.value}").param("attempts", "0")
+            .with(user("test-user").roles("USER")))
+            .andExpect(content().string(containsString("0.0%")))
+        assertThat(countContexts()).isEqualTo(originalCount)
+
+        SecurityTestActors.asAdmin {
+            attempts.setAvailableAttempts(ids.adminStandardAccount, ids.source, 0)
+        }
+        mvc.perform(get("/acquisitions/${ids.source.value}").with(user("test-admin").roles("ADMIN")))
+            .andExpect(content().string(containsString("0.0%")))
+    }
+
+    @Test
+    fun `zero-required revision remains canonical without personal ownership`() {
+        select("STANDARD")
+        val page = mvc.perform(get("/builds/${ids.variantR.value}").with(user("test-user").roles("USER")))
+            .andExpect(status().isOk)
+            .andExpect(content().string(containsString("No required Uniques")))
+            .andReturn().modelAndView!!.model["page"] as BuildBrowserDetailPage
+        assertThat(page.state).isEqualTo(BuildBrowserState.NO_PERSONAL)
+        assertThat(page.hasRequiredUniqueGroups).isFalse()
+    }
+
+    @Test
+    fun `version registry rejects unknown foreign keys and restarts do not duplicate entries`() {
+        assertThat(optionCount()).isEqualTo(2L)
+        assertThatThrownBy {
+            jdbc.update(
+                """
+                INSERT INTO poe_companion.selectable_league_version
+                    (league_definition_id, compatibility_version_major, compatibility_version_minor)
+                VALUES (?, 3, 30)
+                """.trimIndent(),
+                UUID.randomUUID(),
+            )
+        }.isInstanceOf(DataIntegrityViolationException::class.java)
+        fixture.initialize()
+        assertThat(optionCount()).isEqualTo(2L)
+        mvc.perform(get("/builds").with(user("test-user").roles("USER")))
+            .andExpect(content().string(containsString("3.30 SC SSF")))
+    }
+
     private fun select(type: String) {
         mvc.perform(post("/environment").with(user("test-user").roles("USER")).with(csrf())
             .param("version", "3.30")
@@ -132,6 +295,9 @@ internal class GameEnvironmentBrowserIntegrationTests(
             .param("ruleset", "NORMAL"))
             .andExpect(status().is3xxRedirection)
     }
+
+    private fun optionCount(): Long =
+        jdbc.queryForObject("SELECT COUNT(*) FROM poe_companion.selectable_league_version", Long::class.java)!!
 
     private fun countContexts(): Long =
         jdbc.queryForObject("SELECT COUNT(*) FROM poe_companion.account_context", Long::class.java)!!
