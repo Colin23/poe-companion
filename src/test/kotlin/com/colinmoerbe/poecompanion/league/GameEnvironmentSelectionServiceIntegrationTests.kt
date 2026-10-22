@@ -55,7 +55,10 @@ internal class GameEnvironmentSelectionServiceIntegrationTests(
         assertThat(accountRepository.count()).isZero()
 
         val account = AccountContext(
-            AccountContextId.generate(), league.id, Ruleset.NORMAL, ConfiguredApplicationUsers.USER,
+            AccountContextId.generate(),
+            league.id,
+            Ruleset.NORMAL,
+            ConfiguredApplicationUsers.USER,
         ).also(accounts::save)
         assertThat(personal.getSelected()?.accountContextId).isEqualTo(account.id)
         assertThat(personal.getSelected()?.evaluationContext).isEqualTo(chosen)
@@ -65,7 +68,10 @@ internal class GameEnvironmentSelectionServiceIntegrationTests(
     fun `Standard context remains the same across compatibility versions`() {
         val league = league(LeagueType.STANDARD)
         val owned = AccountContext(
-            AccountContextId.generate(), league.id, Ruleset.NORMAL, ConfiguredApplicationUsers.USER,
+            AccountContextId.generate(),
+            league.id,
+            Ruleset.NORMAL,
+            ConfiguredApplicationUsers.USER,
         ).also(accounts::save)
         selection.select(EvaluationContext(CompatibilityVersion(3, 29), Ruleset.NORMAL, leagueDefinitionId = league.id))
         assertThat(personal.getSelected()?.accountContextId).isEqualTo(owned.id)
@@ -79,16 +85,26 @@ internal class GameEnvironmentSelectionServiceIntegrationTests(
         val challenge = league()
         val standard = league(LeagueType.STANDARD)
         val myAccount = AccountContext(
-            AccountContextId.generate(), challenge.id, Ruleset.NORMAL, ConfiguredApplicationUsers.USER,
+            AccountContextId.generate(),
+            challenge.id,
+            Ruleset.NORMAL,
+            ConfiguredApplicationUsers.USER,
         ).also(accounts::save)
         val adminAccount = AccountContext(
-            AccountContextId.generate(), standard.id, Ruleset.NORMAL, ConfiguredApplicationUsers.ADMIN,
+            AccountContextId.generate(),
+            standard.id,
+            Ruleset.NORMAL,
+            ConfiguredApplicationUsers.ADMIN,
         ).also(accounts::save)
         val userChoice = EvaluationContext(
-            CompatibilityVersion(3, 30), Ruleset.NORMAL, leagueDefinitionId = challenge.id,
+            CompatibilityVersion(3, 30),
+            Ruleset.NORMAL,
+            leagueDefinitionId = challenge.id,
         )
         val adminChoice = EvaluationContext(
-            CompatibilityVersion(3, 29), Ruleset.NORMAL, leagueDefinitionId = standard.id,
+            CompatibilityVersion(3, 29),
+            Ruleset.NORMAL,
+            leagueDefinitionId = standard.id,
         )
         selection.select(userChoice)
         SecurityTestActors.asAdmin {
@@ -111,7 +127,8 @@ internal class GameEnvironmentSelectionServiceIntegrationTests(
         assertThatThrownBy {
             selection.select(
                 EvaluationContext(
-                    CompatibilityVersion(3, 30), Ruleset.NORMAL,
+                    CompatibilityVersion(3, 30),
+                    Ruleset.NORMAL,
                     leagueDefinitionId = LeagueDefinitionId.generate(),
                 ),
             )

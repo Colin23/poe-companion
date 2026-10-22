@@ -210,8 +210,12 @@ internal class LeagueContextPersistenceIntegrationTests(
     @Test
     fun `database enforces one owner league ruleset context but allows different users`() {
         val league = LeagueDefinition(
-            LeagueDefinitionId.generate(), "Shared League",
-            LeagueType.CHALLENGE, LeagueParticipation.SSF, LeagueMortality.SOFTCORE, GameRealm.PC,
+            LeagueDefinitionId.generate(),
+            "Shared League",
+            LeagueType.CHALLENGE,
+            LeagueParticipation.SSF,
+            LeagueMortality.SOFTCORE,
+            GameRealm.PC,
         )
         leagueDefinitionPersistenceAdapter.save(league)
         accountContextPersistenceAdapter.save(
@@ -224,7 +228,9 @@ internal class LeagueContextPersistenceIntegrationTests(
                     (id, league_definition_id, ruleset, owner_application_user_id)
                 VALUES (?, ?, 'NORMAL', ?)
                 """.trimIndent(),
-                AccountContextId.generate().value, league.id.value, ConfiguredApplicationUsers.USER.value,
+                AccountContextId.generate().value,
+                league.id.value,
+                ConfiguredApplicationUsers.USER.value,
             )
         }.isInstanceOf(DataIntegrityViolationException::class.java)
         accountContextPersistenceAdapter.save(
