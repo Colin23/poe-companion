@@ -250,6 +250,14 @@ internal class GameEnvironmentBrowserIntegrationTests(
         assertThat(countContexts()).isEqualTo(originalCount)
 
         SecurityTestActors.asAdmin {
+            options.select(
+                GameEnvironmentChoice(
+                    CompatibilityVersion(3, 30),
+                    LeagueType.STANDARD,
+                    LeagueMortality.SOFTCORE,
+                    LeagueParticipation.SSF,
+                ),
+            )
             attempts.setAvailableAttempts(ids.adminStandardAccount, ids.source, 0)
         }
         mvc.perform(get("/acquisitions/${ids.source.value}").with(user("test-admin").roles("ADMIN")))

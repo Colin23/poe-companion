@@ -55,7 +55,9 @@ class GameEnvironmentOptionService internal constructor(
                 option.league.participation == choice.participation &&
                 option.league.realm == GameRealm.PC
         }
-        val resolved = matches.filter { choice.leagueDefinitionId == null || it.league.id == choice.leagueDefinitionId }
+        val resolved = matches.filter {
+            choice.leagueDefinitionId == null || it.league.id == choice.leagueDefinitionId
+        }
         require(resolved.size == 1) { "No unique curated game environment matches this choice" }
         val option = resolved.single()
         val previous = selections.getSelected()
