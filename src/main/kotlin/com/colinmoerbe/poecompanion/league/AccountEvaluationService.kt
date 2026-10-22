@@ -35,7 +35,6 @@ class AccountEvaluationService internal constructor(
     fun getSelected(): AccountEvaluation? {
         val context = gameSelection.getSelected() ?: return null
         val leagueId = requireNotNull(context.leagueDefinitionId)
-        val account = access.findOwned(leagueId, context.ruleset) ?: return null
-        return AccountEvaluation(account.id, context)
+        return access.findOwned(leagueId, context.ruleset)?.let { AccountEvaluation(it.id, context) }
     }
 }

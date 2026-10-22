@@ -84,8 +84,12 @@ internal class GameEnvironmentSelectionServiceIntegrationTests(
         val adminAccount = AccountContext(
             AccountContextId.generate(), standard.id, Ruleset.NORMAL, ConfiguredApplicationUsers.ADMIN,
         ).also(accounts::save)
-        val userChoice = EvaluationContext(CompatibilityVersion(3, 30), Ruleset.NORMAL, leagueDefinitionId = challenge.id)
-        val adminChoice = EvaluationContext(CompatibilityVersion(3, 29), Ruleset.NORMAL, leagueDefinitionId = standard.id)
+        val userChoice = EvaluationContext(
+            CompatibilityVersion(3, 30), Ruleset.NORMAL, leagueDefinitionId = challenge.id,
+        )
+        val adminChoice = EvaluationContext(
+            CompatibilityVersion(3, 29), Ruleset.NORMAL, leagueDefinitionId = standard.id,
+        )
         selection.select(userChoice)
         SecurityTestActors.asAdmin {
             assertThat(selection.getSelected()).isNull()
@@ -106,11 +110,16 @@ internal class GameEnvironmentSelectionServiceIntegrationTests(
         selection.select(chosen)
         assertThatThrownBy {
             selection.select(
-                EvaluationContext(CompatibilityVersion(3, 30), Ruleset.NORMAL, leagueDefinitionId = LeagueDefinitionId.generate()),
+                EvaluationContext(
+                    CompatibilityVersion(3, 30), Ruleset.NORMAL,
+                    leagueDefinitionId = LeagueDefinitionId.generate(),
+                ),
             )
         }.isInstanceOf(IllegalArgumentException::class.java)
         assertThatThrownBy {
-            selection.select(EvaluationContext(CompatibilityVersion(3, 30), Ruleset.RUTHLESS, leagueDefinitionId = league.id))
+            selection.select(
+                EvaluationContext(CompatibilityVersion(3, 30), Ruleset.RUTHLESS, leagueDefinitionId = league.id),
+            )
         }.isInstanceOf(IllegalArgumentException::class.java)
         assertThat(selection.getSelected()).isEqualTo(chosen)
     }

@@ -53,7 +53,9 @@ internal class GameEnvironmentSelectionMigrationIntegrationTests {
         assertThat(row["game_patch"]).isEqualTo(2)
         assertThat(row["game_patch_suffix"]).isEqualTo("b")
         assertThat(row).doesNotContainKey("account_context_id")
-        assertThat(jdbc.queryForObject("SELECT id FROM poe_companion.account_context", UUID::class.java)).isEqualTo(context)
+        assertThat(
+            jdbc.queryForObject("SELECT id FROM poe_companion.account_context", UUID::class.java),
+        ).isEqualTo(context)
         assertThat(
             jdbc.queryForObject(
                 "SELECT COUNT(*) FROM poe_companion.account_evaluation_selection WHERE application_user_id = ?",
