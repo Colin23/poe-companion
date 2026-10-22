@@ -44,6 +44,7 @@ internal data class UniqueAcquisitionCandidate(
 internal data class UniqueDetailPage(
     val item: UniqueBrowserEntry,
     val accountSelected: Boolean,
+    val environmentSelected: Boolean,
     val selectionLabel: String?,
     val acquisitionSources: List<UniqueAcquisitionCandidate>,
 )

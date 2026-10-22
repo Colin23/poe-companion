@@ -40,6 +40,7 @@ internal data class AcquisitionBrowserDetailPage(
     val displayName: String,
     val availability: String,
     val accountSelected: Boolean,
+    val environmentSelected: Boolean,
     val selectionLabel: String?,
     val savedAttempts: Int?,
     val previewAttempts: Int?,

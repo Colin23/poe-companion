@@ -1677,3 +1677,17 @@ No public guest access, new migration, or production fixture startup is introduc
 - `GameEnvironmentSelectionService` validates known curated leagues and the V0.1 Normal ruleset for new selections. Full league lifecycle/version option discovery requires future curated metadata. Do not silently rewrite historical selections.
 - Resolve owned contexts through an authenticated, owner-scoped league/ruleset lookup. Keep `AccountEvaluationService` as a transitional API for existing personal Browser and fixture consumers; game selection remains the sole persisted selection.
 - Public guest access, external sign-in, GGG sync, UI selectors and automatic first-write creation remain outside C2A.
+
+---
+
+## 39. Curated Game Environment Options and Contextual Browser Reads (Milestone 5.2)
+
+**Canonical authority:** V2.1.3 Game Context and Identity amendment. These are implementation-specific choices, not new lifecycle or public-access requirements.
+
+- Flyway V020 stores explicitly recognized `(LeagueDefinitionId, CompatibilityVersion)` choices. The table is an opt-in selector registry only; a row does not assert that a Challenge League is active, that an update launched that league, or that all scoped facts have been verified. No LeagueDefinition is synthesized from a submitted form.
+- The League module resolves the structured browser choice (version, Challenge/Standard, mortality, participation, Normal ruleset, PC realm) against that registry. Exactly one matching league is required; no match and ambiguous matches are rejected without replacing the saved selection. The fixture registers only its actual 3.30 Challenge and Standard choices and does so idempotently.
+- Selection remains a per-authenticated-user environment preference. Existing saved choices not currently in the registry remain visible and unchanged; resaving the same league/version preserves its exact patch, while selecting a different recognized pair does not carry an unrelated patch.
+- Browser routing uses a CSRF-protected POST/Redirect/GET form. A single shared model contributor displays the selected environment in the header, derived from league metadata rather than AccountContext IDs.
+- Build's active revision is selected by EvaluationContext before reading personal ownership. A compatible revision with no matching AccountContext exposes canonical requirement groups but no evaluated ownership or satisfaction. Empty required groups remain meaningful canonical knowledge.
+- Acquisition source/relationship/probability applicability uses EvaluationContext independently of saved attempts. Accepted estimates can produce fixed-model thresholds and read-only probability previews from an input attempt count; this input is not persisted as AvailableAttempts or bound to a fabricated AccountContext.
+- Personal ownership and recorded available attempts remain owner-scoped and are not created during browsing or environment switching. Authenticated first-write context creation belongs to the separately scoped follow-up. Public guest access, external identity providers, league lifecycle curation, and Ruthless are not implemented here.
