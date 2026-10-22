@@ -81,8 +81,9 @@ class AcquisitionReadModelService internal constructor(
     /** Lists every stable source, including sources with no relationships or no selected account. */
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     fun findSources(): AcquisitionSourceBrowseResult {
-        val selected = accountEvaluationService.getSelected()
-        val scopes = selected?.let(::scopesFor)
+        val context = gameSelection.getSelected()
+        val selected = personal(context)
+        val scopes = context?.let(::scopesFor)
         val counts = relationshipPersistenceAdapter.findAll().groupingBy { it.acquisitionSourceId }.eachCount()
         val sources = sourcePersistenceAdapter.findAll().map { source ->
             AcquisitionSourceSummary(
@@ -102,24 +103,21 @@ class AcquisitionReadModelService internal constructor(
     fun findForSource(sourceId: AcquisitionSourceId, previewAttempts: Int? = null): AcquisitionSourceDetailResult? {
         require(previewAttempts == null || previewAttempts >= 0) { "Preview attempts cannot be negative" }
         val source = sourcePersistenceAdapter.findById(sourceId) ?: return null
-        val selected = accountEvaluationService.getSelected()
-        val scopes = selected?.let(::scopesFor)
+        val context = gameSelection.getSelected()
+        val selected = personal(context)
+        val scopes = context?.let(::scopesFor)
         val sourceKnowledge = scopes?.let { resolveSource(source.id, it) }
         val savedAttempts = selected?.let {
             availableAttemptsService.getAvailableAttempts(it.accountContextId, source.id)
         }
-        val effectiveAttempts = if (previewAttempts != null && selected != null) {
-            AvailableAttempts(selected.accountContextId, source.id, previewAttempts)
-        } else {
-            savedAttempts
-        }
+        val effectiveAttemptCount = previewAttempts ?: savedAttempts?.count
         val relationships = relationshipPersistenceAdapter.findByAcquisitionSourceId(source.id).map { relationship ->
             AcquisitionSourceRelationshipResult(
                 relationship = relationship,
                 assessment = if (scopes == null || sourceKnowledge == null) {
                     null
                 } else {
-                    assess(relationship, sourceKnowledge, savedAttempts, scopes, effectiveAttempts)
+                    assess(relationship, sourceKnowledge, savedAttempts, scopes, effectiveAttemptCount)
                 },
             )
         }
@@ -130,6 +128,7 @@ class AcquisitionReadModelService internal constructor(
             availableAttempts = savedAttempts,
             previewAttempts = previewAttempts,
             relationships = relationships,
+            evaluationContext = context,
         )
     }
 
@@ -139,13 +138,18 @@ class AcquisitionReadModelService internal constructor(
         val league: AcquisitionKnowledgeScope,
     )
 
-    private fun scopesFor(account: AccountEvaluation): KnowledgeScopes {
-        val context = account.evaluationContext
+    private fun scopesFor(context: EvaluationContext): KnowledgeScopes {
         val selectedLeague = requireNotNull(context.leagueDefinitionId) {
             "The selected account evaluation must identify its league"
         }
         val general = AcquisitionKnowledgeScope(context.compatibilityVersion, context.ruleset)
         return KnowledgeScopes(context, general, general.copy(leagueDefinitionId = selectedLeague))
+    }
+
+    private fun personal(context: EvaluationContext?): AccountEvaluation? {
+        if (context == null) return null
+        val league = context.leagueDefinitionId ?: return null
+        return access.findOwned(league, context.ruleset)?.let { AccountEvaluation(it.id, context) }
     }
 
     private fun resolveSource(
@@ -161,7 +165,7 @@ class AcquisitionReadModelService internal constructor(
         sourceKnowledge: ScopedAcquisitionKnowledge<BossEncounterKnowledgeResolution>,
         savedAttempts: AvailableAttempts?,
         scopes: KnowledgeScopes,
-        calculationAttempts: AvailableAttempts? = savedAttempts,
+        calculationAttemptCount: Int? = savedAttempts?.count,
     ): AcquisitionSourceAssessment {
         val relationshipKnowledge = resolveScopedAcquisitionKnowledge(
             dropRelationshipKnowledgeService.findTimeline(relationship.id, scopes.general),
@@ -183,7 +187,7 @@ class AcquisitionReadModelService internal constructor(
                 sourceKnowledge,
                 relationshipKnowledge,
                 probabilityKnowledge,
-                calculationAttempts,
+                calculationAttemptCount,
             ),
         )
     }
@@ -194,7 +198,7 @@ class AcquisitionReadModelService internal constructor(
         sourceKnowledge: ScopedAcquisitionKnowledge<BossEncounterKnowledgeResolution>,
         relationshipKnowledge: ScopedAcquisitionKnowledge<DropRelationshipResolution>,
         probabilityKnowledge: ScopedAcquisitionKnowledge<FixedDropEstimateResolution>,
-        availableAttempts: AvailableAttempts?,
+        attemptCount: Int?,
     ): FixedProbabilityCalculation? {
         val sourceResolution = (sourceKnowledge as? ScopedAcquisitionKnowledge.Selected<*>)?.resolution
         val dropResolution = (relationshipKnowledge as? ScopedAcquisitionKnowledge.Selected<*>)?.resolution
@@ -209,7 +213,7 @@ class AcquisitionReadModelService internal constructor(
         val acceptedEstimate = (estimateResolution as? FixedDropEstimateResolution.Resolved)?.snapshot
 
         return if (sourceAvailable && relationshipCanDrop && acceptedEstimate != null) {
-            FixedProbabilityCalculation.from(relationship, acceptedEstimate.model, availableAttempts)
+            FixedProbabilityCalculation.forCount(relationship, acceptedEstimate.model, attemptCount)
         } else {
             null
         }
