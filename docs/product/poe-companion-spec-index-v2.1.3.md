@@ -1,7 +1,7 @@
 # PoE Companion — Specification Index V2.1.3
 
-**Status:** Canonical — Game-context and identity amendment (upon merge)  
-**Date:** 2026-10-22  
+**Status:** Canonical — Game-context and identity amendment (upon merge)
+**Date:** 2026-10-22
 **Purpose:** Publish the authoritative V2.1.3 specification set while preserving the frozen V2.1.1 baseline and the V2.1.2 Acquisition refinement.
 
 V2.1.3 records product, domain and user-journey decisions established during Milestone 5.2 C2 planning. It refines player-facing game-environment selection, the relationship between canonical and personal contexts, and the phased future guest/authentication direction. It is not a general rewrite of existing domain or Acquisition semantics and does not require public features in V0.1.

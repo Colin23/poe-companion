@@ -1,7 +1,7 @@
 # PoE Companion — Game Context, Personal Identity and Public Access Amendment V2.1.3
 
-**Status:** Canonical normative amendment upon merge  
-**Date:** 2026-10-22  
+**Status:** Canonical normative amendment upon merge
+**Date:** 2026-10-22
 **Purpose:** Record the agreed player-facing environment-selection behavior, account-context identity rules, and phased public-access direction discovered during Milestone 5.2 C2 planning.
 
 This amendment is authoritative only for the product, domain and user-journey concepts it explicitly refines. The V2.1.1 baseline and V2.1.2 Acquisition amendment continue to govern everything else. It does not silently make post-MVP features part of V0.1.
