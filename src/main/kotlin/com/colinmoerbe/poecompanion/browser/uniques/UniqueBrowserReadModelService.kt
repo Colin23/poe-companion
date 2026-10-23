@@ -71,11 +71,14 @@ internal class UniqueBrowserReadModelService(
                 actionableChance = rate,
             )
         }.sortedWith(compareBy<UniqueAcquisitionCandidate> { it.displayName.lowercase() }.thenBy { it.sourceId })
+        val environment = environments.current()
+        val recognized = selected == null && environment?.context?.let(environments::isRecognized) == true
         return UniqueDetailPage(
             item = entry(unique.id, ownership),
             accountSelected = selected != null,
-            environmentSelected = environments.current() != null,
-            selectionLabel = environments.current()?.label,
+            environmentSelected = environment != null,
+            ownershipEditable = selected != null || recognized,
+            selectionLabel = environment?.label,
             acquisitionSources = candidates,
         )
     }

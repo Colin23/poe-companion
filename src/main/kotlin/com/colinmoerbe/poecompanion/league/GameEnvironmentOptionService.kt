@@ -34,6 +34,16 @@ class GameEnvironmentOptionService internal constructor(
         leagues.findById(id)?.let { GameEnvironmentOption(it, version) }
     }
 
+    /** Only a recognized Normal-ruleset PC league/version pair can initialize personal data. */
+    @Suppress("ReturnCount")
+    @Transactional(readOnly = true)
+    fun isRecognized(context: EvaluationContext): Boolean {
+        if (context.ruleset != Ruleset.NORMAL) return false
+        val leagueId = context.leagueDefinitionId ?: return false
+        val league = leagues.findById(leagueId) ?: return false
+        return league.realm == GameRealm.PC && versions.isRecognized(leagueId, context.compatibilityVersion)
+    }
+
     @Transactional(readOnly = true)
     fun current(): CurrentGameEnvironment? = selections.getSelected()?.let { context ->
         context.leagueDefinitionId?.let(leagues::findById)?.let { league ->

@@ -258,7 +258,7 @@ internal class UniqueBrowserControllerIntegrationTests(
             .andExpect(status().isConflict)
             .andExpect(view().name("uniques/ownership-error"))
             .andExpect(content().string(containsString("Ownership could not be saved")))
-            .andExpect(content().string(containsString("No personal collection is available for this environment")))
+            .andExpect(content().string(containsString("Select a game environment before saving ownership")))
             .andExpect(content().string(containsString("No changes were made")))
         assertThat(
             fixtureActor.asLegacyUser { currentOwnership.getCurrentOwnership(ids.account) }.quantityOf(ids.uniqueC),

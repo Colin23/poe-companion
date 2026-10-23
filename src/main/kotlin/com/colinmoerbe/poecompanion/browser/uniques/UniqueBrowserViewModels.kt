@@ -45,6 +45,7 @@ internal data class UniqueDetailPage(
     val item: UniqueBrowserEntry,
     val accountSelected: Boolean,
     val environmentSelected: Boolean,
+    val ownershipEditable: Boolean,
     val selectionLabel: String?,
     val acquisitionSources: List<UniqueAcquisitionCandidate>,
 )
