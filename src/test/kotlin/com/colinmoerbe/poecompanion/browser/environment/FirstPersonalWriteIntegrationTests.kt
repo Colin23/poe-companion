@@ -61,6 +61,7 @@ import java.util.concurrent.TimeUnit
         "poe-companion.security.admin.password=test-admin-password",
     ],
 )
+@Suppress("LongParameterList")
 internal class FirstPersonalWriteIntegrationTests(
     @Autowired private val mvc: MockMvc,
     @Autowired private val fixture: DevelopmentFixtureInitializer,

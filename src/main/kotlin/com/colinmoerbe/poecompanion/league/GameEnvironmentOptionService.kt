@@ -35,6 +35,7 @@ class GameEnvironmentOptionService internal constructor(
     }
 
     /** Only a recognized Normal-ruleset PC league/version pair can initialize personal data. */
+    @Suppress("ReturnCount")
     @Transactional(readOnly = true)
     fun isRecognized(context: EvaluationContext): Boolean {
         if (context.ruleset != Ruleset.NORMAL) return false
