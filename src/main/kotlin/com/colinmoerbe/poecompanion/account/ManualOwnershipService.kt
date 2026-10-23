@@ -5,6 +5,7 @@ import com.colinmoerbe.poecompanion.league.AccountContextAccessService
 import com.colinmoerbe.poecompanion.league.AccountContextId
 import com.colinmoerbe.poecompanion.league.GameEnvironmentSelectionService
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Transactional
 
 /**
@@ -20,7 +21,7 @@ class ManualOwnershipService internal constructor(
      * A zero edit on a contextless environment is a no-op; a positive edit
      * creates/reuses the matching owned context in this transaction.
      */
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     fun setOwnedQuantityForSelectedEnvironment(uniqueDefinitionId: UniqueDefinitionId, quantity: Int) {
         require(quantity >= 0) { "Owned quantity must not be negative" }
         if (quantity == 0) {

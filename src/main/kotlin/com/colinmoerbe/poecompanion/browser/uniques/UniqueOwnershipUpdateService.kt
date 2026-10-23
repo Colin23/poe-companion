@@ -6,6 +6,7 @@ import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
 import com.colinmoerbe.poecompanion.league.GameEnvironmentSelectionService
 import com.colinmoerbe.poecompanion.league.UnrecognizedSelectedGameEnvironmentException
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Transactional
 
 /** Coordinates a browser ownership command through the existing Catalog, League, and Account APIs. */
@@ -15,7 +16,7 @@ internal class UniqueOwnershipUpdateService(
     private val gameSelection: GameEnvironmentSelectionService,
     private val ownership: ManualOwnershipService,
 ) {
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     fun update(uniqueId: UniqueDefinitionId, quantity: Int): UniqueOwnershipUpdateResult {
         require(quantity >= 0) { "Owned quantity must not be negative" }
         if (catalog.findById(uniqueId) == null) return UniqueOwnershipUpdateResult.UNKNOWN_UNIQUE

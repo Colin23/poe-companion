@@ -1,7 +1,6 @@
 package com.colinmoerbe.poecompanion.league
 
 import com.colinmoerbe.poecompanion.league.persistence.AccountContextPersistenceAdapter
-import com.colinmoerbe.poecompanion.league.persistence.SelectableLeagueVersionPersistenceAdapter
 import com.colinmoerbe.poecompanion.security.identity.ApplicationUserId
 import com.colinmoerbe.poecompanion.security.identity.CurrentApplicationUser
 import org.springframework.stereotype.Service
@@ -17,7 +16,7 @@ class AccountContextAccessService internal constructor(
     private val currentUser: CurrentApplicationUser,
     private val accountContexts: AccountContextPersistenceAdapter,
     private val selection: GameEnvironmentSelectionService,
-    private val curatedVersions: SelectableLeagueVersionPersistenceAdapter,
+    private val environments: GameEnvironmentOptionService,
 ) {
     fun currentUserId(): ApplicationUserId = currentUser.requireId()
 
@@ -37,7 +36,7 @@ class AccountContextAccessService internal constructor(
 
         accountContexts.findByOwnerAndLeagueAndRuleset(owner, leagueId, selected.ruleset)?.let { return it }
 
-        if (selected.ruleset != Ruleset.NORMAL || !curatedVersions.isRecognized(leagueId, selected.compatibilityVersion)) {
+        if (!environments.isRecognized(selected)) {
             throw UnrecognizedSelectedGameEnvironmentException()
         }
 

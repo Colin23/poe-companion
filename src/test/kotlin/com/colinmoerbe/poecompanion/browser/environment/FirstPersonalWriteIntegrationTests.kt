@@ -8,7 +8,6 @@ import com.colinmoerbe.poecompanion.account.CurrentOwnershipService
 import com.colinmoerbe.poecompanion.account.ManualOwnershipService
 import com.colinmoerbe.poecompanion.acquisition.attempts.AvailableAttemptsService
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.AcquisitionSourceId
-import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
 import com.colinmoerbe.poecompanion.league.AccountEvaluationService
 import com.colinmoerbe.poecompanion.league.CompatibilityVersion
 import com.colinmoerbe.poecompanion.league.DevelopmentLeagueAccess
@@ -118,17 +117,25 @@ internal class FirstPersonalWriteIntegrationTests(
     fun `no-op zero preview and invalid Unique do not initialize a personal context`() {
         selectStandard()
         val before = countContexts()
-        mvc.perform(post("/uniques/${ids.uniqueC.value}/ownership").param("quantity", "0")
-            .with(user("test-user")).with(csrf()))
+        mvc.perform(
+            post("/uniques/${ids.uniqueC.value}/ownership").param("quantity", "0")
+                .with(user("test-user")).with(csrf()),
+        )
             .andExpect(status().is3xxRedirection)
-        mvc.perform(get("/acquisitions/${ids.source.value}").param("attempts", "12")
-            .with(user("test-user")))
+        mvc.perform(
+            get("/acquisitions/${ids.source.value}").param("attempts", "12")
+                .with(user("test-user")),
+        )
             .andExpect(status().isOk)
-        mvc.perform(post("/uniques/${ids.uniqueC.value}/ownership").param("quantity", "-1")
-            .with(user("test-user")).with(csrf()))
+        mvc.perform(
+            post("/uniques/${ids.uniqueC.value}/ownership").param("quantity", "-1")
+                .with(user("test-user")).with(csrf()),
+        )
             .andExpect(status().isBadRequest)
-        mvc.perform(post("/uniques/${UUID.randomUUID()}/ownership").param("quantity", "1")
-            .with(user("test-user")).with(csrf()))
+        mvc.perform(
+            post("/uniques/${UUID.randomUUID()}/ownership").param("quantity", "1")
+                .with(user("test-user")).with(csrf()),
+        )
             .andExpect(status().isNotFound)
         assertThat(countContexts()).isEqualTo(before)
         assertThat(SecurityTestActors.asUser { accounts.getSelected() }).isNull()
@@ -167,27 +174,39 @@ internal class FirstPersonalWriteIntegrationTests(
         selectStandard()
         val before = countContexts()
         SecurityTestActors.asUser {
-            selections.select(EvaluationContext(CompatibilityVersion(3, 28), Ruleset.NORMAL,
-                leagueDefinitionId = ids.standardLeague))
+            selections.select(
+                EvaluationContext(
+                    CompatibilityVersion(3, 28),
+                    Ruleset.NORMAL,
+                    leagueDefinitionId = ids.standardLeague,
+                ),
+            )
         }
         mvc.perform(get("/uniques/${ids.uniqueC.value}").with(user("test-user")))
             .andExpect(content().string(not(containsString("Save ownership"))))
-        mvc.perform(post("/uniques/${ids.uniqueC.value}/ownership").param("quantity", "1")
-            .with(user("test-user")).with(csrf()))
+        mvc.perform(
+            post("/uniques/${ids.uniqueC.value}/ownership").param("quantity", "1")
+                .with(user("test-user")).with(csrf()),
+        )
             .andExpect(status().isConflict)
             .andExpect(content().string(containsString("not recognized for new personal data")))
         assertThat(countContexts()).isEqualTo(before)
 
         // A prior personal context remains usable even if its selected version is not curated.
         SecurityTestActors.asUser {
-            selections.select(EvaluationContext(CompatibilityVersion(3, 28), Ruleset.NORMAL,
-                leagueDefinitionId = ids.league))
+            selections.select(
+                EvaluationContext(
+                    CompatibilityVersion(3, 28),
+                    Ruleset.NORMAL,
+                    leagueDefinitionId = ids.league,
+                ),
+            )
             ownership.setOwnedQuantityForSelectedEnvironment(ids.uniqueC, 1)
         }
         assertThat(countContexts()).isEqualTo(before)
-        assertThat(SecurityTestActors.asUser {
-            currentOwnership.getCurrentOwnership(ids.account).quantityOf(ids.uniqueC)
-        }).isEqualTo(1)
+        assertThat(
+            SecurityTestActors.asUser { currentOwnership.getCurrentOwnership(ids.account).quantityOf(ids.uniqueC) },
+        ).isEqualTo(1)
     }
 
     @Test
@@ -201,8 +220,8 @@ internal class FirstPersonalWriteIntegrationTests(
         SecurityTestActors.asUser { ownership.setOwnedQuantityForSelectedEnvironment(ids.uniqueB, 1) }
         assertThat(SecurityTestActors.asUser { accounts.getSelected()!!.accountContextId }).isEqualTo(id)
         assertThat(countContexts()).isEqualTo(before)
-        assertThat(SecurityTestActors.asUser { currentOwnership.getCurrentOwnership(id) }
-            .quantityOf(ids.uniqueA)).isEqualTo(1)
+        assertThat(SecurityTestActors.asUser { currentOwnership.getCurrentOwnership(id).quantityOf(ids.uniqueA) })
+            .isEqualTo(1)
     }
 
     @Test
@@ -214,8 +233,11 @@ internal class FirstPersonalWriteIntegrationTests(
         SecurityTestActors.asAdmin { leagues.saveLeague(league) }
         leagues.recognizeVersion(league.id, CompatibilityVersion(3, 30))
         val before = countContexts()
-        val chosen = EvaluationContext(CompatibilityVersion(3, 30), Ruleset.NORMAL,
-            leagueDefinitionId = league.id)
+        val chosen = EvaluationContext(
+            CompatibilityVersion(3, 30),
+            Ruleset.NORMAL,
+            leagueDefinitionId = league.id,
+        )
         val userId = SecurityTestActors.asUser {
             selections.select(chosen)
             ownership.setOwnedQuantityForSelectedEnvironment(ids.uniqueA, 1)
@@ -269,8 +291,9 @@ internal class FirstPersonalWriteIntegrationTests(
 
     private fun selectStandard(version: CompatibilityVersion = CompatibilityVersion(3, 30)) {
         SecurityTestActors.asUser {
-            options.select(GameEnvironmentChoice(version, LeagueType.STANDARD,
-                LeagueMortality.SOFTCORE, LeagueParticipation.SSF))
+            options.select(
+                GameEnvironmentChoice(version, LeagueType.STANDARD, LeagueMortality.SOFTCORE, LeagueParticipation.SSF),
+            )
         }
     }
 

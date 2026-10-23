@@ -6,6 +6,7 @@ import com.colinmoerbe.poecompanion.league.AccountContextAccessService
 import com.colinmoerbe.poecompanion.league.AccountContextId
 import com.colinmoerbe.poecompanion.league.GameEnvironmentSelectionService
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Transactional
 
 /**
@@ -18,7 +19,7 @@ class AvailableAttemptsService internal constructor(
     private val selection: GameEnvironmentSelectionService,
 ) {
     /** Explicitly saving zero attempts creates a recorded personal fact. */
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     fun setAvailableAttemptsForSelectedEnvironment(acquisitionSourceId: AcquisitionSourceId, count: Int) {
         require(count >= 0) { "Available attempt count must not be negative" }
         val context = access.getOrCreateForSelectedEnvironment()

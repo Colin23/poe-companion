@@ -72,13 +72,7 @@ internal class UniqueBrowserReadModelService(
             )
         }.sortedWith(compareBy<UniqueAcquisitionCandidate> { it.displayName.lowercase() }.thenBy { it.sourceId })
         val environment = environments.current()
-        val recognized = environment?.context?.let { context ->
-            context.ruleset == com.colinmoerbe.poecompanion.league.Ruleset.NORMAL &&
-                environments.findAll().any { option ->
-                    option.league.id == context.leagueDefinitionId &&
-                        option.compatibilityVersion == context.compatibilityVersion
-                }
-        } == true
+        val recognized = selected == null && environment?.context?.let(environments::isRecognized) == true
         return UniqueDetailPage(
             item = entry(unique.id, ownership),
             accountSelected = selected != null,
