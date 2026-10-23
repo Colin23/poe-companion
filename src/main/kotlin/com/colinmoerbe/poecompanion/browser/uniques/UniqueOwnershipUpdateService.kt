@@ -19,13 +19,14 @@ internal class UniqueOwnershipUpdateService(
     @Transactional(isolation = Isolation.READ_COMMITTED)
     fun update(uniqueId: UniqueDefinitionId, quantity: Int): UniqueOwnershipUpdateResult {
         require(quantity >= 0) { "Owned quantity must not be negative" }
-        if (catalog.findById(uniqueId) == null) return UniqueOwnershipUpdateResult.UNKNOWN_UNIQUE
-
-        if (gameSelection.getSelected() == null) return UniqueOwnershipUpdateResult.NO_ENVIRONMENT_SELECTED
-        return when (ownership.setOwnedQuantityForSelectedEnvironment(uniqueId, quantity)) {
-            SelectedOwnershipWriteResult.ACCEPTED -> UniqueOwnershipUpdateResult.UPDATED
-            SelectedOwnershipWriteResult.UNRECOGNIZED_ENVIRONMENT ->
-                UniqueOwnershipUpdateResult.UNRECOGNIZED_ENVIRONMENT
+        return when {
+            catalog.findById(uniqueId) == null -> UniqueOwnershipUpdateResult.UNKNOWN_UNIQUE
+            gameSelection.getSelected() == null -> UniqueOwnershipUpdateResult.NO_ENVIRONMENT_SELECTED
+            else -> when (ownership.setOwnedQuantityForSelectedEnvironment(uniqueId, quantity)) {
+                SelectedOwnershipWriteResult.ACCEPTED -> UniqueOwnershipUpdateResult.UPDATED
+                SelectedOwnershipWriteResult.UNRECOGNIZED_ENVIRONMENT ->
+                    UniqueOwnershipUpdateResult.UNRECOGNIZED_ENVIRONMENT
+            }
         }
     }
 }

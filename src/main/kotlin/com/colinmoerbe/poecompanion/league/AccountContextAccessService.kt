@@ -34,15 +34,18 @@ class AccountContextAccessService internal constructor(
         val leagueId = requireNotNull(selected.leagueDefinitionId) { "Selected environment has no league" }
         val owner = currentUser.requireId()
 
-        accountContexts.findByOwnerAndLeagueAndRuleset(owner, leagueId, selected.ruleset)?.let { return it }
+        val existing = accountContexts.findByOwnerAndLeagueAndRuleset(owner, leagueId, selected.ruleset)
+        if (existing != null) return existing
 
-        if (!environments.isRecognized(selected)) return null
-
-        accountContexts.insertForOwnerIfAbsent(
-            AccountContext(AccountContextId.generate(), leagueId, selected.ruleset, owner),
-        )
-        return checkNotNull(accountContexts.findByOwnerAndLeagueAndRuleset(owner, leagueId, selected.ruleset)) {
-            "Account context was not available after conflict-safe creation"
+        return if (environments.isRecognized(selected)) {
+            accountContexts.insertForOwnerIfAbsent(
+                AccountContext(AccountContextId.generate(), leagueId, selected.ruleset, owner),
+            )
+            checkNotNull(accountContexts.findByOwnerAndLeagueAndRuleset(owner, leagueId, selected.ruleset)) {
+                "Account context was not available after conflict-safe creation"
+            }
+        } else {
+            null
         }
     }
 

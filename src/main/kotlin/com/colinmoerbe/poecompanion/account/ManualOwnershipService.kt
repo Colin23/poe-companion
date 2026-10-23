@@ -27,19 +27,23 @@ class ManualOwnershipService internal constructor(
         quantity: Int,
     ): SelectedOwnershipWriteResult {
         require(quantity >= 0) { "Owned quantity must not be negative" }
-        if (quantity == 0) {
+        val context = if (quantity == 0) {
             val selected = requireNotNull(selection.getSelected()) { "No game environment selected" }
             val leagueId = requireNotNull(selected.leagueDefinitionId)
-            val existing = access.findOwned(leagueId, selected.ruleset)
-                ?: return SelectedOwnershipWriteResult.ACCEPTED
-            setOwnedQuantity(existing.id, uniqueDefinitionId, quantity)
-            return SelectedOwnershipWriteResult.ACCEPTED
+            access.findOwned(leagueId, selected.ruleset)
+        } else {
+            access.getOrCreateForSelectedEnvironment()
         }
 
-        val context = access.getOrCreateForSelectedEnvironment()
-            ?: return SelectedOwnershipWriteResult.UNRECOGNIZED_ENVIRONMENT
-        setOwnedQuantity(context.id, uniqueDefinitionId, quantity)
-        return SelectedOwnershipWriteResult.ACCEPTED
+        return when {
+            context != null -> {
+                setOwnedQuantity(context.id, uniqueDefinitionId, quantity)
+                SelectedOwnershipWriteResult.ACCEPTED
+            }
+
+            quantity == 0 -> SelectedOwnershipWriteResult.ACCEPTED
+            else -> SelectedOwnershipWriteResult.UNRECOGNIZED_ENVIRONMENT
+        }
     }
 
     @Transactional
