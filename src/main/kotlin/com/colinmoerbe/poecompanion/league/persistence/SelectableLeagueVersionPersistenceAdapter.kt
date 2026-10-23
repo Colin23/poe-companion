@@ -12,13 +12,13 @@ internal class SelectableLeagueVersionPersistenceAdapter(
 ) {
     fun findAll(): List<Pair<LeagueDefinitionId, CompatibilityVersion>> = springDataRepository.findAll(
         Sort.by(
-            Sort.Order.desc("compatibilityVersionMajor"),
-            Sort.Order.desc("compatibilityVersionMinor"),
-            Sort.Order.asc("leagueDefinitionId"),
+            Sort.Order.desc("id.compatibilityVersionMajor"),
+            Sort.Order.desc("id.compatibilityVersionMinor"),
+            Sort.Order.asc("id.leagueDefinitionId"),
         ),
     ).map { entity ->
-        LeagueDefinitionId(entity.leagueDefinitionId) to
-            CompatibilityVersion(entity.compatibilityVersionMajor, entity.compatibilityVersionMinor)
+        LeagueDefinitionId(entity.id.leagueDefinitionId) to
+            CompatibilityVersion(entity.id.compatibilityVersionMajor, entity.id.compatibilityVersionMinor)
     }
 
     fun saveIfAbsent(league: LeagueDefinitionId, version: CompatibilityVersion) {
