@@ -5,6 +5,7 @@ import com.colinmoerbe.poecompanion.acquisition.sourceidentity.AcquisitionSource
 import com.colinmoerbe.poecompanion.league.AccountContextAccessService
 import com.colinmoerbe.poecompanion.league.AccountContextId
 import com.colinmoerbe.poecompanion.league.GameEnvironmentSelectionService
+import com.colinmoerbe.poecompanion.league.UnrecognizedSelectedGameEnvironmentException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Transactional
@@ -23,6 +24,7 @@ class AvailableAttemptsService internal constructor(
     fun setAvailableAttemptsForSelectedEnvironment(acquisitionSourceId: AcquisitionSourceId, count: Int) {
         require(count >= 0) { "Available attempt count must not be negative" }
         val context = access.getOrCreateForSelectedEnvironment()
+            ?: throw UnrecognizedSelectedGameEnvironmentException()
         setAvailableAttempts(context.id, acquisitionSourceId, count)
     }
 

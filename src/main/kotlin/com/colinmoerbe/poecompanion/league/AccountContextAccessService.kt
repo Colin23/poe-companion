@@ -29,16 +29,14 @@ class AccountContextAccessService internal constructor(
      * an existing personal context, but cannot create a new one.
      */
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    fun getOrCreateForSelectedEnvironment(): AccountContext {
+    fun getOrCreateForSelectedEnvironment(): AccountContext? {
         val selected = requireNotNull(selection.getSelected()) { "No game environment selected" }
         val leagueId = requireNotNull(selected.leagueDefinitionId) { "Selected environment has no league" }
         val owner = currentUser.requireId()
 
         accountContexts.findByOwnerAndLeagueAndRuleset(owner, leagueId, selected.ruleset)?.let { return it }
 
-        if (!environments.isRecognized(selected)) {
-            throw UnrecognizedSelectedGameEnvironmentException()
-        }
+        if (!environments.isRecognized(selected)) return null
 
         accountContexts.insertForOwnerIfAbsent(
             AccountContext(AccountContextId.generate(), leagueId, selected.ruleset, owner),

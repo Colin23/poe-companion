@@ -22,18 +22,24 @@ class ManualOwnershipService internal constructor(
      * creates/reuses the matching owned context in this transaction.
      */
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    fun setOwnedQuantityForSelectedEnvironment(uniqueDefinitionId: UniqueDefinitionId, quantity: Int) {
+    fun setOwnedQuantityForSelectedEnvironment(
+        uniqueDefinitionId: UniqueDefinitionId,
+        quantity: Int,
+    ): SelectedOwnershipWriteResult {
         require(quantity >= 0) { "Owned quantity must not be negative" }
         if (quantity == 0) {
             val selected = requireNotNull(selection.getSelected()) { "No game environment selected" }
             val leagueId = requireNotNull(selected.leagueDefinitionId)
-            val existing = access.findOwned(leagueId, selected.ruleset) ?: return
+            val existing = access.findOwned(leagueId, selected.ruleset)
+                ?: return SelectedOwnershipWriteResult.ACCEPTED
             setOwnedQuantity(existing.id, uniqueDefinitionId, quantity)
-            return
+            return SelectedOwnershipWriteResult.ACCEPTED
         }
 
         val context = access.getOrCreateForSelectedEnvironment()
+            ?: return SelectedOwnershipWriteResult.UNRECOGNIZED_ENVIRONMENT
         setOwnedQuantity(context.id, uniqueDefinitionId, quantity)
+        return SelectedOwnershipWriteResult.ACCEPTED
     }
 
     @Transactional
@@ -54,4 +60,10 @@ class ManualOwnershipService internal constructor(
             ),
         )
     }
+}
+
+/** A rejected historical first write is an expected result, not a transaction failure. */
+enum class SelectedOwnershipWriteResult {
+    ACCEPTED,
+    UNRECOGNIZED_ENVIRONMENT,
 }

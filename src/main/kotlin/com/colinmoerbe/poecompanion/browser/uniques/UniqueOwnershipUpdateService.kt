@@ -1,10 +1,10 @@
 package com.colinmoerbe.poecompanion.browser.uniques
 
 import com.colinmoerbe.poecompanion.account.ManualOwnershipService
+import com.colinmoerbe.poecompanion.account.SelectedOwnershipWriteResult
 import com.colinmoerbe.poecompanion.catalog.UniqueCatalogQueryService
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
 import com.colinmoerbe.poecompanion.league.GameEnvironmentSelectionService
-import com.colinmoerbe.poecompanion.league.UnrecognizedSelectedGameEnvironmentException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Transactional
@@ -22,11 +22,10 @@ internal class UniqueOwnershipUpdateService(
         if (catalog.findById(uniqueId) == null) return UniqueOwnershipUpdateResult.UNKNOWN_UNIQUE
 
         if (gameSelection.getSelected() == null) return UniqueOwnershipUpdateResult.NO_ENVIRONMENT_SELECTED
-        return try {
-            ownership.setOwnedQuantityForSelectedEnvironment(uniqueId, quantity)
-            UniqueOwnershipUpdateResult.UPDATED
-        } catch (_: UnrecognizedSelectedGameEnvironmentException) {
-            UniqueOwnershipUpdateResult.UNRECOGNIZED_ENVIRONMENT
+        return when (ownership.setOwnedQuantityForSelectedEnvironment(uniqueId, quantity)) {
+            SelectedOwnershipWriteResult.ACCEPTED -> UniqueOwnershipUpdateResult.UPDATED
+            SelectedOwnershipWriteResult.UNRECOGNIZED_ENVIRONMENT ->
+                UniqueOwnershipUpdateResult.UNRECOGNIZED_ENVIRONMENT
         }
     }
 }
