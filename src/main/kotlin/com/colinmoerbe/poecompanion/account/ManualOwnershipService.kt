@@ -42,6 +42,7 @@ class ManualOwnershipService internal constructor(
             }
 
             quantity == 0 -> SelectedOwnershipWriteResult.ACCEPTED
+
             else -> SelectedOwnershipWriteResult.UNRECOGNIZED_ENVIRONMENT
         }
     }

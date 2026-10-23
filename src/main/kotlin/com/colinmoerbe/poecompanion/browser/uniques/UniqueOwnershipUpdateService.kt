@@ -21,9 +21,12 @@ internal class UniqueOwnershipUpdateService(
         require(quantity >= 0) { "Owned quantity must not be negative" }
         return when {
             catalog.findById(uniqueId) == null -> UniqueOwnershipUpdateResult.UNKNOWN_UNIQUE
+
             gameSelection.getSelected() == null -> UniqueOwnershipUpdateResult.NO_ENVIRONMENT_SELECTED
+
             else -> when (ownership.setOwnedQuantityForSelectedEnvironment(uniqueId, quantity)) {
                 SelectedOwnershipWriteResult.ACCEPTED -> UniqueOwnershipUpdateResult.UPDATED
+
                 SelectedOwnershipWriteResult.UNRECOGNIZED_ENVIRONMENT ->
                     UniqueOwnershipUpdateResult.UNRECOGNIZED_ENVIRONMENT
             }

@@ -228,8 +228,12 @@ internal class FirstPersonalWriteIntegrationTests(
     @Test
     fun `USER and ADMIN initialize independent contexts for the same curated league`() {
         val league = LeagueDefinition(
-            LeagueDefinitionId.generate(), "New shared challenge", LeagueType.CHALLENGE,
-            LeagueParticipation.SSF, LeagueMortality.SOFTCORE, GameRealm.PC,
+            LeagueDefinitionId.generate(),
+            "New shared challenge",
+            LeagueType.CHALLENGE,
+            LeagueParticipation.SSF,
+            LeagueMortality.SOFTCORE,
+            GameRealm.PC,
         )
         SecurityTestActors.asAdmin { leagues.saveLeague(league) }
         leagues.recognizeVersion(league.id, CompatibilityVersion(3, 30))
@@ -268,13 +272,15 @@ internal class FirstPersonalWriteIntegrationTests(
         val start = CountDownLatch(1)
         try {
             val futures = listOf(ids.uniqueA, ids.uniqueB).map { unique ->
-                executor.submit(Callable {
-                    SecurityTestActors.asUser {
-                        ready.countDown()
-                        check(start.await(10, TimeUnit.SECONDS))
-                        ownership.setOwnedQuantityForSelectedEnvironment(unique, 1)
-                    }
-                })
+                executor.submit(
+                    Callable {
+                        SecurityTestActors.asUser {
+                            ready.countDown()
+                            check(start.await(10, TimeUnit.SECONDS))
+                            ownership.setOwnedQuantityForSelectedEnvironment(unique, 1)
+                        }
+                    },
+                )
             }
             assertThat(ready.await(10, TimeUnit.SECONDS)).isTrue()
             start.countDown()
