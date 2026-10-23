@@ -71,11 +71,20 @@ internal class UniqueBrowserReadModelService(
                 actionableChance = rate,
             )
         }.sortedWith(compareBy<UniqueAcquisitionCandidate> { it.displayName.lowercase() }.thenBy { it.sourceId })
+        val environment = environments.current()
+        val recognized = environment?.context?.let { context ->
+            context.ruleset == com.colinmoerbe.poecompanion.league.Ruleset.NORMAL &&
+                environments.findAll().any { option ->
+                    option.league.id == context.leagueDefinitionId &&
+                        option.compatibilityVersion == context.compatibilityVersion
+                }
+        } == true
         return UniqueDetailPage(
             item = entry(unique.id, ownership),
             accountSelected = selected != null,
-            environmentSelected = environments.current() != null,
-            selectionLabel = environments.current()?.label,
+            environmentSelected = environment != null,
+            ownershipEditable = selected != null || recognized,
+            selectionLabel = environment?.label,
             acquisitionSources = candidates,
         )
     }
