@@ -29,8 +29,10 @@ internal class GameEnvironmentController(private val environments: GameEnvironme
             val candidates = environments.findMatching(choice)
             val explanation = when {
                 candidates.isEmpty() -> "This combination is not among the curated game environments."
+
                 candidates.size > 1 && choice.leagueDefinitionId == null ->
                     "Several leagues match these settings. Choose a specific league and submit again."
+
                 else -> "The selected league does not match a curated game environment."
             }
             renderForm(principal, input, explanation)

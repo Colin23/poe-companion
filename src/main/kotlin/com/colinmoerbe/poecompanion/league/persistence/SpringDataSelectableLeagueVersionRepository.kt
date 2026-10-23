@@ -21,9 +21,5 @@ internal interface SpringDataSelectableLeagueVersionRepository :
         """,
         nativeQuery = true,
     )
-    fun insertIfAbsent(
-        @Param("leagueId") leagueId: UUID,
-        @Param("major") major: Int,
-        @Param("minor") minor: Int,
-    ): Int
+    fun insertIfAbsent(@Param("leagueId") leagueId: UUID, @Param("major") major: Int, @Param("minor") minor: Int): Int
 }
