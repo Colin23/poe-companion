@@ -24,6 +24,7 @@ internal data class UniqueBrowserEntry(
 internal data class UniqueCollectionPage(
     val items: List<UniqueBrowserEntry>,
     val accountSelected: Boolean,
+    val environmentSelected: Boolean,
     val selectionLabel: String?,
     val totalCount: Int,
     val ownedCount: Int?,
@@ -43,6 +44,7 @@ internal data class UniqueAcquisitionCandidate(
 internal data class UniqueDetailPage(
     val item: UniqueBrowserEntry,
     val accountSelected: Boolean,
+    val environmentSelected: Boolean,
     val selectionLabel: String?,
     val acquisitionSources: List<UniqueAcquisitionCandidate>,
 )

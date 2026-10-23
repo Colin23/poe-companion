@@ -3,19 +3,23 @@ package com.colinmoerbe.poecompanion.build.readmodel
 import com.colinmoerbe.poecompanion.build.readiness.UniqueReadinessResult
 import com.colinmoerbe.poecompanion.build.revision.BuildVariantRevision
 import com.colinmoerbe.poecompanion.league.AccountEvaluation
+import com.colinmoerbe.poecompanion.league.EvaluationContext
 
-/**
- * Application-level outcome of evaluating one known build variant against the current account selection.
- */
+/** Canonical build applicability and personal Unique readiness are independent results. */
 sealed interface BuildReadinessQueryResult {
-
-    /** No account/evaluation context is currently selected. */
+    /** There is no selected game environment from which to resolve a compatible revision. */
     data object NoAccountEvaluationSelected : BuildReadinessQueryResult
 
-    /** The selected evaluation has no active revision for this build variant's compatibility version. */
-    data class NoCompatibleActiveRevision(val accountEvaluation: AccountEvaluation) : BuildReadinessQueryResult
+    /** A game environment exists, but no active revision is compatible with its version. */
+    data class NoCompatibleActiveRevision(val evaluationContext: EvaluationContext) : BuildReadinessQueryResult
 
-    /** Successful readiness evaluation using the selected account and one compatible active revision. */
+    /** Requirements are known, but no owned personal context is available for readiness. */
+    data class PersonalOwnershipUnavailable(
+        val evaluationContext: EvaluationContext,
+        val revision: BuildVariantRevision,
+    ) : BuildReadinessQueryResult
+
+    /** The compatible revision was evaluated using real personal ownership. */
     data class Evaluated(
         val accountEvaluation: AccountEvaluation,
         val revision: BuildVariantRevision,

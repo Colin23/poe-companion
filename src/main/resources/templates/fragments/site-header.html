@@ -13,6 +13,11 @@
                th:attr="aria-current=${activeSection == 'uniques'} ? 'page' : null">Uniques</a>
             <a th:href="@{/acquisitions}" th:classappend="${activeSection == 'acquisitions'} ? ' is-active' : ''"
                th:attr="aria-current=${activeSection == 'acquisitions'} ? 'page' : null">Acquisition</a>
+            <a th:href="@{/environment}" th:classappend="${activeSection == 'environment'} ? ' is-active' : ''"
+               th:attr="aria-current=${activeSection == 'environment'} ? 'page' : null"
+               th:text="${environmentLabel != null ? environmentLabel : 'Select game environment'}">
+                Select game environment
+            </a>
         </nav>
     </div>
     <div class="session-actions">

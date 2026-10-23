@@ -9,7 +9,7 @@ import com.colinmoerbe.poecompanion.browser.shared.AcquisitionBrowserKnowledgeLa
 import com.colinmoerbe.poecompanion.browser.shared.UniqueDisplayLabels
 import com.colinmoerbe.poecompanion.catalog.UniqueCatalogQueryService
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
-import com.colinmoerbe.poecompanion.league.AccountEvaluation
+import com.colinmoerbe.poecompanion.league.GameEnvironmentOptionService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Transactional
@@ -20,6 +20,7 @@ import java.util.Locale
 internal class AcquisitionBrowserReadModelService(
     private val acquisition: AcquisitionReadModelService,
     private val catalog: UniqueCatalogQueryService,
+    private val environments: GameEnvironmentOptionService,
 ) {
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     fun list(): AcquisitionBrowserListPage {
@@ -35,7 +36,8 @@ internal class AcquisitionBrowserReadModelService(
         return AcquisitionBrowserListPage(
             sources = sources,
             accountSelected = result.accountEvaluation != null,
-            selectionLabel = result.accountEvaluation?.let(::describeSelection),
+            environmentSelected = result.evaluationContext != null,
+            selectionLabel = environments.current()?.label,
         )
     }
 
@@ -53,10 +55,11 @@ internal class AcquisitionBrowserReadModelService(
             displayName = AcquisitionBrowserKnowledgeLabels.sourceLabel(result.sourceKnowledge),
             availability = AcquisitionBrowserKnowledgeLabels.sourceAvailability(result.sourceKnowledge),
             accountSelected = result.accountEvaluation != null,
-            selectionLabel = result.accountEvaluation?.let(::describeSelection),
+            environmentSelected = result.evaluationContext != null,
+            selectionLabel = environments.current()?.label,
             savedAttempts = result.availableAttempts?.count,
             previewAttempts = previewAttempts,
-            effectiveAttempts = if (result.accountEvaluation == null) {
+            effectiveAttempts = if (result.evaluationContext == null) {
                 null
             } else {
                 previewAttempts ?: result.availableAttempts?.count
@@ -120,11 +123,5 @@ internal class AcquisitionBrowserReadModelService(
     private companion object {
         const val CUMULATIVE_DECIMALS = 1
         const val PERCENT_MULTIPLIER = 100.0
-    }
-
-    private fun describeSelection(selection: AccountEvaluation): String {
-        val context = selection.evaluationContext
-        return "Account ${selection.accountContextId.value} · " +
-            "${context.compatibilityVersion.major}.${context.compatibilityVersion.minor} · ${context.ruleset.name}"
     }
 }

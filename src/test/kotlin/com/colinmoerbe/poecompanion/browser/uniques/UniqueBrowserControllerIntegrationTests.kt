@@ -157,19 +157,21 @@ internal class UniqueBrowserControllerIntegrationTests(
     }
 
     @Test
-    fun `without an account selection ownership is unknown not zero`() {
+    fun `without a game environment selection ownership is unknown not zero`() {
         initializer.initialize()
         selectionRepository.deleteAllInBatch()
 
         mockMvc.perform(get("/uniques").with(user("test-user")))
             .andExpect(status().isOk)
-            .andExpect(content().string(containsString("ownership is unknown")))
+            .andExpect(content().string(containsString("No environment selected.")))
             .andExpect(content().string(containsString("Ownership unknown")))
             .andExpect(content().string(not(containsString("Missing · 0"))))
 
         mockMvc.perform(get("/uniques/${ids.uniqueC.value}").with(user("test-user")))
             .andExpect(status().isOk)
-            .andExpect(content().string(containsString("Unknown — select an account")))
+            .andExpect(content().string(containsString("Select an environment")))
+            .andExpect(content().string(containsString("Unknown — no personal collection")))
+            .andExpect(content().string(not(containsString("Change game environment"))))
 
         mockMvc.perform(get("/uniques").param("filter", "missing").with(user("test-user")))
             .andExpect(status().isBadRequest)
@@ -241,22 +243,23 @@ internal class UniqueBrowserControllerIntegrationTests(
     }
 
     @Test
-    fun `missing account selection prevents editing and explains the conflict`() {
+    fun `missing environment selection prevents editing and explains the conflict`() {
         initializer.initialize()
         selectionRepository.deleteAllInBatch()
         val uri = "/uniques/${ids.uniqueC.value}"
 
         mockMvc.perform(get(uri).with(user("test-user")))
             .andExpect(status().isOk)
-            .andExpect(content().string(containsString("Ownership cannot be edited until an account is selected")))
+            .andExpect(content().string(containsString("Select an environment")))
+            .andExpect(content().string(not(containsString("Change game environment"))))
             .andExpect(content().string(not(containsString("Save ownership"))))
 
         mockMvc.perform(post("$uri/ownership").param("quantity", "1").with(user("test-user")).with(csrf()))
             .andExpect(status().isConflict)
             .andExpect(view().name("uniques/ownership-error"))
             .andExpect(content().string(containsString("Ownership could not be saved")))
-            .andExpect(content().string(containsString("No account is selected")))
-            .andExpect(content().string(containsString("No changes were saved")))
+            .andExpect(content().string(containsString("No personal collection is available for this environment")))
+            .andExpect(content().string(containsString("No changes were made")))
         assertThat(
             fixtureActor.asLegacyUser { currentOwnership.getCurrentOwnership(ids.account) }.quantityOf(ids.uniqueC),
         ).isZero()

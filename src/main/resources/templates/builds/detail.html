@@ -27,7 +27,7 @@
             </div>
             <div>
                 <dt>Compatibility version</dt>
-                <dd th:text="${page.compatibilityVersion ?: 'No account evaluation selected'}">3.30</dd>
+                <dd th:text="${page.compatibilityVersion ?: 'No environment selected'}">3.30</dd>
             </div>
             <div>
                 <dt>Revision verification</dt>
@@ -48,7 +48,7 @@
                 <div class="group-heading">
                     <h3><span th:text="${group.importance}">CORE</span> — <span th:text="${group.logic}">ALL</span></h3>
                     <span class="readiness-status"
-                          th:text="${group.satisfied} ? 'Group satisfied' : 'Group incomplete'">Group incomplete</span>
+                          th:text="${group.satisfied == null} ? 'Not evaluated' : (${group.satisfied} ? 'Group satisfied' : 'Group incomplete')">Group incomplete</span>
                 </div>
                 <p class="small-muted" th:if="${group.logic == 'ANY'}">
                     Any one of the alternatives can satisfy this group.
@@ -70,10 +70,10 @@
                                   th:text="${requirement.id}">UUID</span>
                         </div>
                         <span class="requirement-quantity">
-                            <span th:text="${requirement.ownedQuantity}">0</span>
+                            <span th:text="${requirement.ownedQuantity != null ? requirement.ownedQuantity : '—'}">0</span>
                             /
                             <span th:text="${requirement.requiredQuantity}">1</span>
-                            <span th:text="${requirement.satisfied} ? ' · satisfied' : ' · missing copies'">
+                            <span th:text="${requirement.satisfied == null} ? ' · not evaluated' : (${requirement.satisfied} ? ' · satisfied' : ' · missing copies')">
                                 · missing copies
                             </span>
                         </span>

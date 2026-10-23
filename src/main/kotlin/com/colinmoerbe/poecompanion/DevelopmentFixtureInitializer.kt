@@ -108,6 +108,9 @@ internal class DevelopmentFixtureInitializer(
         } else {
             expansion.create()
         }
+        // Recognized environments are reference data, not replacement personal state.
+        leagueAccess.recognizeVersion(ids.league, compatibilityVersion)
+        leagueAccess.recognizeVersion(ids.standardLeague, compatibilityVersion)
     }
 
     private fun createCatalogAndAccount() {
@@ -224,8 +227,7 @@ internal class DevelopmentFixtureInitializer(
 
         val probability = estimates.findAcceptedTimeline(ids.relationship, scope)
         check(
-            probability?.snapshots == listOf(estimateSnapshot()) &&
-                probability?.withdrawals?.isEmpty() == true,
+            probability?.snapshots == listOf(estimateSnapshot()) && probability.withdrawals.isEmpty(),
         ) {
             "Development fixture accepted probability was modified or withdrawn"
         }

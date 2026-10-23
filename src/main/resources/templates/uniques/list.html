@@ -16,12 +16,16 @@
     </nav>
     <section class="panel">
         <h1>Unique Collection</h1>
-        <p class="muted" th:if="${page.accountSelected}" th:text="${page.selectionLabel}">
-            Selected account and compatibility version
+        <p class="muted" th:if="${page.environmentSelected}" th:text="${page.selectionLabel}">
+            Selected game environment
         </p>
-        <p class="notice" th:unless="${page.accountSelected}">
-            No account selected. Catalog identities are available, but ownership is unknown.
-            Select an account before using Owned or Missing filters.
+        <p class="notice" th:unless="${page.environmentSelected}">
+            No environment selected. The canonical catalog remains browsable.
+            <a th:href="@{/environment}">Select a game environment</a>.
+        </p>
+        <p class="notice" th:if="${page.environmentSelected and !page.accountSelected}">
+            No personal collection exists for this environment. Ownership is unknown;
+            Owned and Missing filters require saved personal ownership.
         </p>
 
         <div class="collection-totals" aria-label="Collection counts">
@@ -75,7 +79,7 @@
             </li>
         </ul>
         <p class="small-muted">
-            Missing means zero owned copies in the selected account, not that an item is obtainable in this league.
+            Missing means zero owned copies in your recorded collection, not that an item is obtainable in this league.
         </p>
     </section>
 </main>

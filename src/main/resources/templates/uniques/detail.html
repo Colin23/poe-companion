@@ -28,15 +28,13 @@
                 <dd><code th:text="${page.item.id}">UUID</code></dd>
             </div>
             <div>
-                <dt>Selected account</dt>
-                <dd th:if="${page.accountSelected}" th:text="${page.selectionLabel}">
-                    Account context
-                </dd>
-                <dd th:unless="${page.accountSelected}">No account selected</dd>
+                <dt>Game environment</dt>
+                <dd th:if="${page.environmentSelected}" th:text="${page.selectionLabel}">Selected environment</dd>
+                <dd th:unless="${page.environmentSelected}"><a th:href="@{/environment}">Select an environment</a></dd>
             </div>
             <div>
                 <dt>Current ownership</dt>
-                <dd th:if="${page.item.ownedQuantity == null}">Unknown — select an account</dd>
+                <dd th:if="${page.item.ownedQuantity == null}">Unknown — no personal collection</dd>
                 <dd th:if="${page.item.ownedQuantity != null and page.item.ownedQuantity > 0}">
                     Owned · <span th:text="${page.item.ownedQuantity}">1</span> copies
                 </dd>
@@ -55,10 +53,11 @@
                 <button type="submit">Save ownership</button>
             </form>
             <p class="small-muted" th:if="${page.accountSelected}">
-                Set the quantity to 0 to mark this Unique as missing in the selected account.
+                Set the quantity to 0 to mark this Unique as missing in your personal collection for this environment.
             </p>
-            <p class="notice" th:unless="${page.accountSelected}">
-                No account selected. Ownership cannot be edited until an account is selected.
+            <p class="notice" th:if="${page.environmentSelected and !page.accountSelected}">
+                Ownership cannot be saved because there is no personal collection for the selected environment.
+                <a th:href="@{/environment}">Change game environment</a>.
             </p>
         </section>
         <section class="upcoming-section">
