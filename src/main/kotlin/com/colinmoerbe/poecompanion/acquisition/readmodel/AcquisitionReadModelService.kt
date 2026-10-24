@@ -78,6 +78,10 @@ class AcquisitionReadModelService internal constructor(
         return AcquisitionUniqueCandidatesResult(selected, candidates, context)
     }
 
+    /** Validate a canonical source identity without requiring contextual knowledge or personal data. */
+    @Transactional(readOnly = true)
+    fun sourceExists(id: AcquisitionSourceId): Boolean = sourcePersistenceAdapter.findById(id) != null
+
     /** Lists every stable source, including sources with no relationships or no selected account. */
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     fun findSources(): AcquisitionSourceBrowseResult {
