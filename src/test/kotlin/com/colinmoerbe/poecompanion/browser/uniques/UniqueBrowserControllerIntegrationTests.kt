@@ -370,7 +370,7 @@ internal class UniqueBrowserControllerIntegrationTests(
     }
 
     @Test
-    fun `recorded relationships remain visible without selected account`() {
+    fun `recorded relationships remain visible without selected game environment`() {
         initializer.initialize()
         selectionRepository.deleteAllInBatch()
         val expectedLink = "/acquisitions/${ids.source.value}#unique-${ids.uniqueC.value}"
@@ -378,7 +378,7 @@ internal class UniqueBrowserControllerIntegrationTests(
         mockMvc.perform(get("/uniques/${ids.uniqueC.value}").with(user("test-user")))
             .andExpect(status().isOk)
             .andExpect(content().string(containsString(expectedLink)))
-            .andExpect(content().string(containsString("Unknown — no account selected")))
+            .andExpect(content().string(containsString("Unknown — no game environment selected")))
             .andExpect(content().string(containsString("Acquisition source (name unavailable)")))
             .andExpect(content().string(not(containsString("10.000%"))))
     }
