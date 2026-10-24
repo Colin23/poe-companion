@@ -67,12 +67,19 @@ internal class UniqueBrowserController(
         return when (ownershipUpdates.update(UniqueDefinitionId(id), ownedQuantity)) {
             UniqueOwnershipUpdateResult.UPDATED -> ModelAndView("redirect:/uniques/$id")
 
-            UniqueOwnershipUpdateResult.NO_ACCOUNT_SELECTED -> ownershipError(
+            UniqueOwnershipUpdateResult.NO_ENVIRONMENT_SELECTED -> ownershipError(
                 id,
                 principal,
                 HttpStatus.CONFLICT,
-                "No personal collection is available for this environment. Ownership cannot be saved yet. " +
-                    "No changes were made.",
+                "Select a game environment before saving ownership. No changes were made.",
+            )
+
+            UniqueOwnershipUpdateResult.UNRECOGNIZED_ENVIRONMENT -> ownershipError(
+                id,
+                principal,
+                HttpStatus.CONFLICT,
+                "This saved environment is not recognized for new personal data. " +
+                    "Choose a curated environment before saving. No changes were made.",
             )
 
             UniqueOwnershipUpdateResult.UNKNOWN_UNIQUE -> ownershipError(

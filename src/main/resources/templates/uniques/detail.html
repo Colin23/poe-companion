@@ -45,19 +45,20 @@
         </dl>
         <section class="upcoming-section" aria-labelledby="ownership-edit-heading">
             <h2 id="ownership-edit-heading">Edit owned quantity</h2>
-            <form class="ownership-form" th:if="${page.accountSelected}"
+            <form class="ownership-form" th:if="${page.ownershipEditable}"
                   th:action="@{/uniques/{id}/ownership(id=${page.item.id})}" method="post">
                 <label for="owned-quantity">Owned quantity</label>
                 <input id="owned-quantity" name="quantity" type="number" min="0" step="1" required
                        th:value="${page.item.ownedQuantity}">
                 <button type="submit">Save ownership</button>
             </form>
-            <p class="small-muted" th:if="${page.accountSelected}">
-                Set the quantity to 0 to mark this Unique as missing in your personal collection for this environment.
+            <p class="small-muted" th:if="${page.ownershipEditable}">
+                Saving a positive quantity starts a personal collection if needed.
+                Set the quantity to 0 to mark this Unique as missing in an existing collection.
             </p>
-            <p class="notice" th:if="${page.environmentSelected and !page.accountSelected}">
-                Ownership cannot be saved because there is no personal collection for the selected environment.
-                <a th:href="@{/environment}">Change game environment</a>.
+            <p class="notice" th:if="${page.environmentSelected and !page.ownershipEditable}">
+                This saved environment is no longer among the recognized choices for creating personal data.
+                <a th:href="@{/environment}">Choose a curated environment</a>.
             </p>
         </section>
         <section class="upcoming-section">

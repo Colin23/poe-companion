@@ -21,6 +21,11 @@ internal class SelectableLeagueVersionPersistenceAdapter(
             CompatibilityVersion(entity.id.compatibilityVersionMajor, entity.id.compatibilityVersionMinor)
     }
 
+    fun isRecognized(league: LeagueDefinitionId, version: CompatibilityVersion): Boolean =
+        springDataRepository.existsById(
+            SelectableLeagueVersionEntityId(league.value, version.major, version.minor),
+        )
+
     fun saveIfAbsent(league: LeagueDefinitionId, version: CompatibilityVersion) {
         springDataRepository.insertIfAbsent(league.value, version.major, version.minor)
     }

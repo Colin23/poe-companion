@@ -37,6 +37,16 @@ internal class AccountContextPersistenceAdapter(private val springDataRepository
         }
     }
 
+    /** Create a new owner/league/ruleset identity only if none already exists. */
+    fun insertForOwnerIfAbsent(accountContext: AccountContext) {
+        springDataRepository.insertForOwnerIfAbsent(
+            id = accountContext.id.value,
+            leagueDefinitionId = accountContext.leagueDefinitionId.value,
+            ruleset = accountContext.ruleset.name,
+            ownerApplicationUserId = accountContext.ownerApplicationUserId.value,
+        )
+    }
+
     fun findByOwnerAndLeagueAndRuleset(
         owner: ApplicationUserId,
         leagueId: LeagueDefinitionId,

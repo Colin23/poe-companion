@@ -9,6 +9,27 @@ import java.util.UUID
 
 internal interface SpringDataAccountContextRepository : JpaRepository<AccountContextEntity, UUID> {
 
+    /**
+     * Resolve simultaneous first writes using the unique owner/league/ruleset key,
+     * not the unrelated generated primary key.
+     */
+    @Modifying
+    @Query(
+        value = """
+            INSERT INTO poe_companion.account_context
+                (id, league_definition_id, ruleset, owner_application_user_id)
+            VALUES (:id, :leagueDefinitionId, :ruleset, :ownerApplicationUserId)
+            ON CONFLICT ON CONSTRAINT uq_account_context_owner_league_ruleset DO NOTHING
+        """,
+        nativeQuery = true,
+    )
+    fun insertForOwnerIfAbsent(
+        @Param("id") id: UUID,
+        @Param("leagueDefinitionId") leagueDefinitionId: UUID,
+        @Param("ruleset") ruleset: String,
+        @Param("ownerApplicationUserId") ownerApplicationUserId: UUID,
+    ): Int
+
     fun findByOwnerApplicationUserIdAndLeagueDefinitionIdAndRuleset(
         ownerApplicationUserId: UUID,
         leagueDefinitionId: UUID,
