@@ -21,7 +21,7 @@ internal object AcquisitionBrowserKnowledgeLabels {
 
     fun sourceAvailability(knowledge: ScopedAcquisitionKnowledge<BossEncounterKnowledgeResolution>?): String =
         when (knowledge) {
-            null -> "Unknown — no account selected"
+            null -> "Unknown — no game environment selected"
 
             ScopedAcquisitionKnowledge.Missing -> "Unknown — no accepted encounter knowledge"
 
@@ -40,7 +40,7 @@ internal object AcquisitionBrowserKnowledgeLabels {
         }
 
     fun relationship(knowledge: ScopedAcquisitionKnowledge<DropRelationshipResolution>?): String = when (knowledge) {
-        null -> "Unknown — no account selected"
+        null -> "Unknown — no game environment selected"
 
         ScopedAcquisitionKnowledge.Missing -> "Unknown — no accepted relationship knowledge"
 
@@ -59,7 +59,7 @@ internal object AcquisitionBrowserKnowledgeLabels {
     }
 
     fun estimate(knowledge: ScopedAcquisitionKnowledge<FixedDropEstimateResolution>?): String = when (knowledge) {
-        null -> "Unknown — no account selected"
+        null -> "Unknown — no game environment selected"
 
         ScopedAcquisitionKnowledge.Missing -> "No accepted fixed estimate"
 

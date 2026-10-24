@@ -1713,3 +1713,10 @@ No public guest access, new migration, or production fixture startup is introduc
 - Browser validates a known canonical AcquisitionSource before issuing a selected-environment write, avoiding unintended AccountContext creation for an unknown source. The first save delegates to C2C's transactional creation/reuse logic. Historical unrecognized selections can update an existing personal context but cannot initialize a new one.
 - Clearing deletes only the source's saved attempt fact; if no context exists it is a no-op. USER and ADMIN personal data remain isolated. Accepted acquisition source/relationship/estimate knowledge does not control whether a personal count can be entered.
 - Server-side validation rejects missing, malformed, negative and overflowing counts. CSRF protects POST actions, and the Browser returns explicit missing-selection, unrecognized-environment, and unknown-source errors without modifying personal facts. No schema, probability model or generalized curator UI changes are needed.
+
+
+## 42. Acquisition Browser Without a Selected Game Environment (Milestone 5.2)
+
+- Without a selected game environment, canonical Acquisition source identities and relationships remain browsable, but contextual eligibility and calculations stay unknown. Browser knowledge labels refer to the missing game environment, not a missing personal account.
+- The Acquisition source detail hides the recorded-attempt field and both saved-attempt and probability-preview forms until an environment is selected. Once selected, absent saved attempts and explicit saved zero remain distinct.
+- An explicit non-negative probability preview query with no environment returns HTTP 409 and a link to the environment selector on the source detail page. Browsing without a preview query remains read-only and successful; no AccountContext is created. Acquisition's knowledge, probability and persistence behavior remains unchanged.
