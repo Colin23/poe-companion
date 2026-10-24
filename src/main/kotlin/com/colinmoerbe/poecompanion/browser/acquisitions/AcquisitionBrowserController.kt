@@ -36,7 +36,17 @@ internal class AcquisitionBrowserController(
         }
         val page = readModel.detail(AcquisitionSourceId(id), preview)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown acquisition source")
-        return ModelAndView("acquisitions/detail", mapOf("page" to page, "username" to principal.name))
+        val previewUnavailable = preview != null && !page.environmentSelected
+        return ModelAndView(
+            "acquisitions/detail",
+            mapOf(
+                "page" to page,
+                "username" to principal.name,
+                "previewUnavailable" to previewUnavailable,
+            ),
+        ).apply {
+            if (previewUnavailable) setStatus(HttpStatus.CONFLICT)
+        }
     }
 
     @PostMapping("/acquisitions/{id}/attempts")

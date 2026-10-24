@@ -24,6 +24,7 @@ import com.colinmoerbe.poecompanion.league.persistence.SpringDataAccountEvaluati
 import com.colinmoerbe.poecompanion.security.identity.DevelopmentFixtureActor
 import org.assertj.core.api.Assertions.assertThat
 import org.hamcrest.Matchers.containsString
+import org.hamcrest.Matchers.not
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -159,7 +160,7 @@ internal class AcquisitionBrowserControllerIntegrationTests(
     }
 
     @Test
-    fun `sources remain browsable without selected account or relationships`() {
+    fun `sources remain browsable without selected game environment or relationships`() {
         initializer.initialize()
         val orphan = AcquisitionSourceId.generate()
         sourceAccess.saveSource(AcquisitionSource(orphan))
@@ -167,18 +168,60 @@ internal class AcquisitionBrowserControllerIntegrationTests(
 
         val list = listPage()
         assertThat(list.accountSelected).isFalse()
+        assertThat(list.environmentSelected).isFalse()
         assertThat(list.sources).hasSize(5)
         assertThat(list.sources.single { it.id == orphan.value }.relationshipCount).isZero()
-        assertThat(list.sources).allMatch { it.availability.contains("no account selected") }
+        assertThat(list.sources).allMatch { it.availability.contains("no game environment selected") }
 
         val known = detailPage()
         assertThat(known.accountSelected).isFalse()
         assertThat(known.relationships.single().actionable).isFalse()
-        assertThat(known.relationships.single().relationshipStatus).contains("no account selected")
+        assertThat(known.relationships.single().relationshipStatus).contains("no game environment selected")
 
         val noRelationships = detailPage(id = orphan)
         assertThat(noRelationships.relationships).isEmpty()
         assertThat(noRelationships.displayName).contains("name unavailable")
+    }
+
+    @Test
+    fun `no selected environment hides personal counts and previews and rejects explicit preview requests`() {
+        initializer.initialize()
+        val contextCountBefore = jdbc.queryForObject(
+            "SELECT COUNT(*) FROM poe_companion.account_context",
+            Long::class.java,
+        )
+        selection.deleteAllInBatch()
+
+        mockMvc.perform(get("/acquisitions").with(user("test-user")))
+            .andExpect(status().isOk)
+            .andExpect(content().string(containsString("Select a game environment")))
+
+        val page = detailPage()
+        assertThat(page.environmentSelected).isFalse()
+        assertThat(page.attemptsEditable).isFalse()
+        assertThat(page.savedAttempts).isNull()
+        assertThat(page.relationships.single().actionable).isFalse()
+        assertThat(page.relationships.single().probabilityStatus)
+            .isEqualTo("Unknown — no game environment selected")
+
+        mockMvc.perform(get("/acquisitions/${ids.source.value}").with(user("test-user")))
+            .andExpect(status().isOk)
+            .andExpect(content().string(containsString("Select a game environment")))
+            .andExpect(content().string(not(containsString("Recorded available attempts"))))
+            .andExpect(content().string(not(containsString("Save available attempts"))))
+            .andExpect(content().string(not(containsString("Remove saved count"))))
+            .andExpect(content().string(not(containsString("Preview probability"))))
+
+        mockMvc.perform(
+            get("/acquisitions/${ids.source.value}").param("attempts", "12").with(user("test-user")),
+        )
+            .andExpect(status().isConflict)
+            .andExpect(view().name("acquisitions/detail"))
+            .andExpect(content().string(containsString("Select a game environment before previewing probability.")))
+            .andExpect(content().string(not(containsString("Preview probability"))))
+
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM poe_companion.account_context", Long::class.java))
+            .isEqualTo(contextCountBefore)
     }
 
     @Test

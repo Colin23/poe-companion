@@ -21,6 +21,7 @@
         <p class="readiness-status" th:text="${page.availability}">AVAILABLE</p>
         <p class="muted" th:if="${page.environmentSelected}" th:text="${page.selectionLabel}">Selected environment</p>
         <p class="notice" th:unless="${page.environmentSelected}">
+            <span th:if="${previewUnavailable}">Select a game environment before previewing probability. </span>
             No environment selected. Known relationships are listed without contextual eligibility.
             <a th:href="@{/environment}">Select a game environment</a>.
         </p>
@@ -36,7 +37,7 @@
                 <dt>Acquisition source ID</dt>
                 <dd><code th:text="${page.id}">UUID</code></dd>
             </div>
-            <div>
+            <div th:if="${page.environmentSelected}">
                 <dt>Recorded available attempts</dt>
                 <dd th:if="${page.savedAttempts == null}">Not recorded</dd>
                 <dd th:unless="${page.savedAttempts == null}" th:text="${page.savedAttempts}">12</dd>
