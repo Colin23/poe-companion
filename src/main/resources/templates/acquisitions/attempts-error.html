@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Available attempts not saved — PoE Companion</title>
+    <link rel="stylesheet" th:href="@{/css/application.css}">
+</head>
+<body>
+<header th:replace="~{fragments/site-header :: siteHeader('acquisitions', ${username})}"></header>
+<main>
+    <section class="panel">
+        <h1>Available attempts could not be changed</h1>
+        <p class="notice" th:text="${message}">No changes were saved.</p>
+        <p th:if="${sourceKnown}">
+            <a th:href="@{/acquisitions/{id}(id=${sourceId})}">Return to Acquisition Detail</a>
+        </p>
+        <p><a th:href="@{/acquisitions}">Back to Acquisition Sources</a></p>
+    </section>
+</main>
+</body>
+</html>

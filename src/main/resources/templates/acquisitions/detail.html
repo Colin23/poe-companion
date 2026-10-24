@@ -24,8 +24,12 @@
             No environment selected. Known relationships are listed without contextual eligibility.
             <a th:href="@{/environment}">Select a game environment</a>.
         </p>
-        <p class="small-muted" th:if="${page.environmentSelected and !page.accountSelected}">
-            Personal attempts are unavailable for this environment; read-only probability previews are still supported.
+        <p class="small-muted" th:if="${page.environmentSelected and !page.accountSelected and page.attemptsEditable}">
+            No personal attempts have been recorded for this environment yet.
+        </p>
+        <p class="notice" th:if="${page.environmentSelected and !page.attemptsEditable}">
+            This historical game environment is not recognized for new personal data.
+            <a th:href="@{/environment}">Choose a curated environment</a>.
         </p>
         <dl class="detail-facts">
             <div>
@@ -38,6 +42,23 @@
                 <dd th:unless="${page.savedAttempts == null}" th:text="${page.savedAttempts}">12</dd>
             </div>
         </dl>
+
+        <section class="attempt-preview" th:if="${page.attemptsEditable}">
+            <h2>Your available attempts</h2>
+            <form method="post" th:action="@{/acquisitions/{id}/attempts(id=${page.id})}" class="attempt-form">
+                <label for="saved-attempts">Available attempts</label>
+                <input id="saved-attempts" name="count" type="number" min="0" max="2147483647"
+                       step="1" required th:value="${page.savedAttempts}">
+                <button type="submit">Save available attempts</button>
+            </form>
+            <form th:if="${page.savedAttempts != null}" method="post"
+                  th:action="@{/acquisitions/{id}/attempts/remove(id=${page.id})}" class="attempt-form">
+                <button type="submit">Remove saved count</button>
+            </form>
+            <p class="small-muted">
+                0 means none available. Removing the saved count means no number is recorded.
+            </p>
+        </section>
 
         <section class="attempt-preview" th:if="${page.environmentSelected}">
             <h2>Probability preview</h2>

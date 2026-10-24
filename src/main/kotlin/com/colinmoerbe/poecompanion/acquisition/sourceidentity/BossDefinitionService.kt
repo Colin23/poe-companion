@@ -28,8 +28,11 @@ class BossDefinitionService internal constructor(
         }
 
         val candidateKey = normalizedName(bossDefinition.displayName)
+        // A concurrent insert with this same ID belongs to the idempotent identity path below.
         val collision =
-            persistencePort.findAll().firstOrNull { normalizedName(it.displayName) == candidateKey }
+            persistencePort.findAll().firstOrNull { existing ->
+                existing.id != bossDefinition.id && normalizedName(existing.displayName) == candidateKey
+            }
         if (collision != null) {
             throw BossDefinitionCreationConflictException(
                 "Likely duplicate boss name; review the existing boss identity: ${collision.id}",

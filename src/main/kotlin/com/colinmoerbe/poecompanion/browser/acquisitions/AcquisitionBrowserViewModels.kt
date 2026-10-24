@@ -41,6 +41,7 @@ internal data class AcquisitionBrowserDetailPage(
     val availability: String,
     val accountSelected: Boolean,
     val environmentSelected: Boolean,
+    val attemptsEditable: Boolean,
     val selectionLabel: String?,
     val savedAttempts: Int?,
     val previewAttempts: Int?,

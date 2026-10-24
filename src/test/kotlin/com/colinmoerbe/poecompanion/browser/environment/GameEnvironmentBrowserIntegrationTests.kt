@@ -115,7 +115,8 @@ internal class GameEnvironmentBrowserIntegrationTests(
         )
             .andExpect(status().isOk)
             .andExpect(content().string(containsString("71.8%")))
-            .andExpect(content().string(containsString("Personal attempts are unavailable")))
+            .andExpect(content().string(containsString("No personal attempts have been recorded")))
+            .andExpect(content().string(containsString("Save available attempts")))
 
         mvc.perform(get("/uniques/${ids.uniqueC.value}").with(user("test-user").roles("USER")))
             .andExpect(content().string(containsString("Unknown — no personal collection")))

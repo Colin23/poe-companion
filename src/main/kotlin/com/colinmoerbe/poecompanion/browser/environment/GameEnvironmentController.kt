@@ -49,7 +49,7 @@ internal class GameEnvironmentController(private val environments: GameEnvironme
         val saved = current?.context?.takeIf { it.ruleset == Ruleset.NORMAL }
         val preferred = options.firstOrNull {
             it.league.id == saved?.leagueDefinitionId &&
-                it.compatibilityVersion == saved?.compatibilityVersion
+                it.compatibilityVersion == saved.compatibilityVersion
         }
         val initial = preferred ?: options.firstOrNull()
         val input = submitted ?: GameEnvironmentFormInput(

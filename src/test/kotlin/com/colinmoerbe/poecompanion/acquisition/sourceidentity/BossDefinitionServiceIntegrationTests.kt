@@ -187,7 +187,7 @@ internal class BossDefinitionServiceIntegrationTests(
             { service.create(BossDefinition(boss.id, boss.displayName)) },
         )
 
-        assertThat(results.all { it.isSuccess }).isTrue()
+        assertThat(results.mapNotNull { it.exceptionOrNull() }).isEmpty()
         assertThat(repository.count()).isEqualTo(1L)
     }
 
