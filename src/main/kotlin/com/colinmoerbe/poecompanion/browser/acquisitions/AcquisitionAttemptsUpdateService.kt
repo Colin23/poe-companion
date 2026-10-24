@@ -18,7 +18,9 @@ internal class AcquisitionAttemptsUpdateService(
         require(count >= 0) { "Available attempts must not be negative" }
         return when {
             !sources.sourceExists(sourceId) -> AcquisitionAttemptsUpdateResult.UNKNOWN_SOURCE
+
             selection.getSelected() == null -> AcquisitionAttemptsUpdateResult.NO_ENVIRONMENT_SELECTED
+
             else -> {
                 // Acquisition's transactional method rolls back before this expected rejection is handled.
                 try {
@@ -33,7 +35,9 @@ internal class AcquisitionAttemptsUpdateService(
 
     fun remove(sourceId: AcquisitionSourceId): AcquisitionAttemptsUpdateResult = when {
         !sources.sourceExists(sourceId) -> AcquisitionAttemptsUpdateResult.UNKNOWN_SOURCE
+
         selection.getSelected() == null -> AcquisitionAttemptsUpdateResult.NO_ENVIRONMENT_SELECTED
+
         else -> {
             attempts.clearAvailableAttemptsForSelectedEnvironment(sourceId)
             AcquisitionAttemptsUpdateResult.UPDATED

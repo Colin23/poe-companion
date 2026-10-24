@@ -59,36 +59,33 @@ internal class AcquisitionBrowserController(
     fun removeAttempts(@PathVariable id: UUID, principal: Principal): ModelAndView =
         writeResponse(id, principal, attemptsUpdates.remove(AcquisitionSourceId(id)))
 
-    private fun writeResponse(
-        id: UUID,
-        principal: Principal,
-        result: AcquisitionAttemptsUpdateResult,
-    ): ModelAndView = when (result) {
-        AcquisitionAttemptsUpdateResult.UPDATED -> ModelAndView("redirect:/acquisitions/$id")
+    private fun writeResponse(id: UUID, principal: Principal, result: AcquisitionAttemptsUpdateResult): ModelAndView =
+        when (result) {
+            AcquisitionAttemptsUpdateResult.UPDATED -> ModelAndView("redirect:/acquisitions/$id")
 
-        AcquisitionAttemptsUpdateResult.UNKNOWN_SOURCE -> attemptsError(
-            id,
-            principal,
-            HttpStatus.NOT_FOUND,
-            "This acquisition source is no longer available. No changes were saved.",
-            sourceKnown = false,
-        )
+            AcquisitionAttemptsUpdateResult.UNKNOWN_SOURCE -> attemptsError(
+                id,
+                principal,
+                HttpStatus.NOT_FOUND,
+                "This acquisition source is no longer available. No changes were saved.",
+                sourceKnown = false,
+            )
 
-        AcquisitionAttemptsUpdateResult.NO_ENVIRONMENT_SELECTED -> attemptsError(
-            id,
-            principal,
-            HttpStatus.CONFLICT,
-            "Select a game environment before saving available attempts. No changes were made.",
-        )
+            AcquisitionAttemptsUpdateResult.NO_ENVIRONMENT_SELECTED -> attemptsError(
+                id,
+                principal,
+                HttpStatus.CONFLICT,
+                "Select a game environment before saving available attempts. No changes were made.",
+            )
 
-        AcquisitionAttemptsUpdateResult.UNRECOGNIZED_ENVIRONMENT -> attemptsError(
-            id,
-            principal,
-            HttpStatus.CONFLICT,
-            "This saved environment is not recognized for new personal data. " +
-                "Choose a curated environment before saving. No changes were made.",
-        )
-    }
+            AcquisitionAttemptsUpdateResult.UNRECOGNIZED_ENVIRONMENT -> attemptsError(
+                id,
+                principal,
+                HttpStatus.CONFLICT,
+                "This saved environment is not recognized for new personal data. " +
+                    "Choose a curated environment before saving. No changes were made.",
+            )
+        }
 
     private fun attemptsError(
         id: UUID,
