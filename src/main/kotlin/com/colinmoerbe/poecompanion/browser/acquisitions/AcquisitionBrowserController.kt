@@ -38,6 +38,7 @@ internal class AcquisitionBrowserController(
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown acquisition source")
         return ModelAndView("acquisitions/detail", mapOf("page" to page, "username" to principal.name))
     }
+
     @PostMapping("/acquisitions/{id}/attempts")
     fun saveAttempts(
         @PathVariable id: UUID,

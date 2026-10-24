@@ -4,7 +4,9 @@ import com.colinmoerbe.poecompanion.DevelopmentFixtureIds
 import com.colinmoerbe.poecompanion.DevelopmentFixtureInitializer
 import com.colinmoerbe.poecompanion.SecurityTestActors
 import com.colinmoerbe.poecompanion.TestcontainersConfiguration
+import com.colinmoerbe.poecompanion.acquisition.DevelopmentAcquisitionAccess
 import com.colinmoerbe.poecompanion.acquisition.attempts.AvailableAttemptsService
+import com.colinmoerbe.poecompanion.acquisition.sourceidentity.AcquisitionSource
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.AcquisitionSourceId
 import com.colinmoerbe.poecompanion.league.AccountEvaluationService
 import com.colinmoerbe.poecompanion.league.CompatibilityVersion
@@ -17,6 +19,7 @@ import com.colinmoerbe.poecompanion.league.LeagueMortality
 import com.colinmoerbe.poecompanion.league.LeagueParticipation
 import com.colinmoerbe.poecompanion.league.LeagueType
 import com.colinmoerbe.poecompanion.league.Ruleset
+import com.colinmoerbe.poecompanion.security.identity.ConfiguredApplicationUsers
 import org.assertj.core.api.Assertions.assertThat
 import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.not
@@ -62,6 +65,7 @@ internal class AcquisitionSavedAttemptsBrowserIntegrationTests(
     @Autowired private val selections: GameEnvironmentSelectionService,
     @Autowired private val options: GameEnvironmentOptionService,
     @Autowired private val leagues: DevelopmentLeagueAccess,
+    @Autowired private val sources: DevelopmentAcquisitionAccess,
 ) {
     private val ids = DevelopmentFixtureIds
     private val sourceUri get() = "/acquisitions/${ids.source.value}"
@@ -195,6 +199,18 @@ internal class AcquisitionSavedAttemptsBrowserIntegrationTests(
     }
 
     @Test
+    fun `a known source with no accepted probability can still have saved attempts`() {
+        val id = AcquisitionSourceId.generate()
+        sources.saveSource(AcquisitionSource(id))
+        mvc.perform(
+            post("/acquisitions/${id.value}/attempts").with(user("test-user")).with(csrf())
+                .param("count", "6"),
+        ).andExpect(status().is3xxRedirection)
+        val context = SecurityTestActors.asUser { accounts.getSelected()!!.accountContextId }
+        assertThat(SecurityTestActors.asUser { attempts.getAvailableAttempts(context, id)?.count }).isEqualTo(6)
+    }
+
+    @Test
     fun `unknown sources and invalid input do not create a personal context`() {
         selectStandard()
         val before = contextCount()
@@ -221,10 +237,9 @@ internal class AcquisitionSavedAttemptsBrowserIntegrationTests(
             .andExpect(status().isForbidden)
         mvc.perform(post("$sourceUri/attempts/remove").with(user("test-user")))
             .andExpect(status().isForbidden)
-        SecurityTestActors.asUser { selections.getSelected() }
         jdbc.update(
             "DELETE FROM poe_companion.account_evaluation_selection WHERE application_user_id = ?",
-            com.colinmoerbe.poecompanion.security.identity.ConfiguredApplicationUsers.USER.value,
+            ConfiguredApplicationUsers.USER.value,
         )
         mvc.perform(post("$sourceUri/attempts").with(user("test-user")).with(csrf()).param("count", "1"))
             .andExpect(status().isConflict)
@@ -232,6 +247,8 @@ internal class AcquisitionSavedAttemptsBrowserIntegrationTests(
             .andExpect(status().isConflict)
         mvc.perform(get(sourceUri).with(user("test-user")))
             .andExpect(content().string(not(containsString("Save available attempts"))))
+        mvc.perform(post("$sourceUri/attempts").with(csrf()).param("count", "1"))
+            .andExpect(status().is3xxRedirection)
         assertThat(contextCount()).isEqualTo(before)
     }
 
