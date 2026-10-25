@@ -292,7 +292,11 @@ internal class BuildBrowserControllerIntegrationTests(
         val draft = createBuild("Draft Build", emptyList(), activate = false)
         assertThat(detailPage(otherVersion).state).isEqualTo(BuildBrowserState.NO_ACTIVE_REVISION)
         assertThat(detailPage(draft).state).isEqualTo(BuildBrowserState.NO_ACTIVE_REVISION)
-        assertThat(listPage().sections.any { it.category == BuildBrowserListCategory.NO_ACTIVE_REVISION }).isTrue()
+        val incompatible = listPage().sections.single {
+            it.category == BuildBrowserListCategory.NO_ACTIVE_REVISION
+        }
+        assertThat(incompatible.entries.map { it.id })
+            .containsExactlyInAnyOrder(otherVersion.value, draft.value)
 
         selectionRepository.deleteAllInBatch()
         assertThat(detailPage(ids.variant).state).isEqualTo(BuildBrowserState.NO_ACCOUNT)
