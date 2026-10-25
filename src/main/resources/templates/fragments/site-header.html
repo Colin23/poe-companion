@@ -17,7 +17,7 @@
     </div>
     <div class="header-actions">
         <a class="environment-switch" th:href="@{/environment}"
-           th:classappend="${(activeSection == 'environment' ? ' is-active' : '') + (environmentLabel == null ? ' environment-unselected' : '')}"
+           th:classappend="${(activeSection == 'environment' ? 'is-active' : '') + (environmentLabel == null ? ' environment-unselected' : '')}"
            th:attr="aria-current=${activeSection == 'environment'} ? 'page' : null,
                     aria-label=${environmentLabel != null ? 'Game environment: ' + environmentLabel : 'Select game environment'}"
            th:title="${environmentLabel != null ? environmentLabel : 'Select game environment'}">
