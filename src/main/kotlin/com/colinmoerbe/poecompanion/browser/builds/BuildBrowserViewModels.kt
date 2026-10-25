@@ -23,9 +23,15 @@ internal enum class BuildBrowserListCategory(
     UNIQUE_READY("Unique ready", "You own all enabling and core Uniques required for these Builds.", "ready", "✓"),
     PARTIAL("Partial", "Enabling requirements are met, but some core Uniques are still missing.", "partial", "◐"),
     BLOCKED("Blocked", "At least one essential enabling requirement is missing.", "blocked", "!"),
-    NO_PERSONAL("Ownership not evaluated", "Requirements are available, but your personal collection is not.", "unknown", "?"),
-    NO_ACTIVE_REVISION("No compatible requirements", "No active requirements match the selected game version.", "unknown", "?"),
-    NO_ACCOUNT("Select a game environment", "Choose a game environment to see applicable requirements.", "unknown", "?"),
+    NO_PERSONAL(
+        "Ownership not evaluated", "Requirements are available, but your personal collection is not.", "unknown", "?",
+    ),
+    NO_ACTIVE_REVISION(
+        "No compatible requirements", "No active requirements match the selected game version.", "unknown", "?",
+    ),
+    NO_ACCOUNT(
+        "Select a game environment", "Choose a game environment to see applicable requirements.", "unknown", "?",
+    ),
 }
 
 internal data class BuildBrowserListEntry(
@@ -35,7 +41,10 @@ internal data class BuildBrowserListEntry(
     val category: BuildBrowserListCategory,
 )
 
-internal data class BuildBrowserSection(val category: BuildBrowserListCategory, val entries: List<BuildBrowserListEntry>)
+internal data class BuildBrowserSection(
+    val category: BuildBrowserListCategory,
+    val entries: List<BuildBrowserListEntry>,
+)
 
 internal data class BuildBrowserListPage(
     val totalCount: Int,
@@ -93,7 +102,8 @@ internal data class BuildBrowserGroup(
 
     val guidance: String?
         get() = when {
-            logic == "ANY" -> "Owning any one of these Uniques completes this group. You can still collect more than one."
+            logic == "ANY" ->
+                "Owning any one of these Uniques completes this group. You can still collect more than one."
             requirements.size > 1 -> "All listed Uniques are needed to complete this group."
             else -> null
         }
