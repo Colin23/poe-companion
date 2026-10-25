@@ -31,29 +31,19 @@ internal class BuildBrowserReadModelService(
         val entries = knownBuilds.map { build ->
             val result = evaluated.getValue(build.variant.id)
             val state = stateOf(result)
-            val explanation = when {
-                result is BuildReadinessQueryResult.Evaluated && !result.readiness.hasRequiredUniqueGroups ->
-                    "No required Uniques"
-
-                result is BuildReadinessQueryResult.PersonalOwnershipUnavailable &&
-                    result.revision.requirementGroups.none { it.importance != RequirementImportance.UPGRADE } ->
-                    "No required Uniques"
-
-                else -> state.explanation
-            }
             BuildBrowserListEntry(
                 id = build.variant.id.value,
                 displayName = build.displayName,
                 state = state,
-                explanation = explanation,
+                category = categoryOf(result, state),
             )
         }.sortedWith(compareBy<BuildBrowserListEntry> { it.displayName.lowercase() }.thenBy { it.id })
 
         return BuildBrowserListPage(
             totalCount = entries.size,
-            sections = BuildBrowserState.entries.mapNotNull { state ->
-                val matching = entries.filter { it.state == state }
-                if (matching.isEmpty()) null else BuildBrowserSection(state, matching)
+            sections = BuildBrowserListCategory.entries.mapNotNull { category ->
+                val matching = entries.filter { it.category == category }
+                if (matching.isEmpty()) null else BuildBrowserSection(category, matching)
             },
             environmentSelected = gameSelection.getSelected() != null,
         )
@@ -74,12 +64,11 @@ internal class BuildBrowserReadModelService(
                     displayName = build.displayName,
                     state = state,
                     explanation = if (!result.readiness.hasRequiredUniqueGroups) {
-                        "No required Uniques"
+                        "This Build has no mandatory Unique requirements. Optional upgrades do not affect readiness."
                     } else {
                         state.explanation
                     },
                     compatibilityVersion = result.revision.compatibilityVersion.let { "${it.major}.${it.minor}" },
-                    revisionStatus = "Active revision",
                     groups = result.readiness.groups.map { group -> groupToView(group, catalogIds) },
                     hasRequiredUniqueGroups = result.readiness.hasRequiredUniqueGroups,
                 )
@@ -94,9 +83,12 @@ internal class BuildBrowserReadModelService(
                     id = id.value,
                     displayName = build.displayName,
                     state = state,
-                    explanation = if (hasRequired) state.explanation else "No required Uniques",
+                    explanation = if (hasRequired) {
+                        "Requirements are known, but personal Unique ownership has not been recorded for this environment."
+                    } else {
+                        "This Build has no mandatory Unique requirements; personal ownership is not evaluated."
+                    },
                     compatibilityVersion = result.evaluationContext.compatibilityVersion.toString(),
-                    revisionStatus = "Active revision",
                     groups = result.revision.requirementGroups.map { group -> groupToView(group, catalogIds) },
                     hasRequiredUniqueGroups = hasRequired,
                 )
@@ -110,7 +102,6 @@ internal class BuildBrowserReadModelService(
                 compatibilityVersion = result.evaluationContext.compatibilityVersion.let {
                     "${it.major}.${it.minor}"
                 },
-                revisionStatus = "No compatible active revision",
                 groups = emptyList(),
                 hasRequiredUniqueGroups = null,
             )
@@ -121,7 +112,6 @@ internal class BuildBrowserReadModelService(
                 state = state,
                 explanation = state.explanation,
                 compatibilityVersion = null,
-                revisionStatus = "Readiness not evaluated",
                 groups = emptyList(),
                 hasRequiredUniqueGroups = null,
             )
@@ -169,6 +159,28 @@ internal class BuildBrowserReadModelService(
             )
         },
     )
+
+    private fun categoryOf(
+        result: BuildReadinessQueryResult,
+        state: BuildBrowserState,
+    ): BuildBrowserListCategory {
+        val noRequired = when (result) {
+            is BuildReadinessQueryResult.Evaluated -> !result.readiness.hasRequiredUniqueGroups
+            is BuildReadinessQueryResult.PersonalOwnershipUnavailable ->
+                result.revision.requirementGroups.none { it.importance != RequirementImportance.UPGRADE }
+            else -> false
+        }
+        if (noRequired) return BuildBrowserListCategory.NO_REQUIRED
+
+        return when (state) {
+            BuildBrowserState.UNIQUE_READY -> BuildBrowserListCategory.UNIQUE_READY
+            BuildBrowserState.PARTIAL -> BuildBrowserListCategory.PARTIAL
+            BuildBrowserState.BLOCKED -> BuildBrowserListCategory.BLOCKED
+            BuildBrowserState.NO_PERSONAL -> BuildBrowserListCategory.NO_PERSONAL
+            BuildBrowserState.NO_ACTIVE_REVISION -> BuildBrowserListCategory.NO_ACTIVE_REVISION
+            BuildBrowserState.NO_ACCOUNT -> BuildBrowserListCategory.NO_ACCOUNT
+        }
+    }
 
     private fun stateOf(result: BuildReadinessQueryResult): BuildBrowserState = when (result) {
         BuildReadinessQueryResult.NoAccountEvaluationSelected -> BuildBrowserState.NO_ACCOUNT

@@ -14,29 +14,32 @@
         <span aria-hidden="true"> / </span>
         <span aria-current="page">Builds</span>
     </nav>
-    <section class="panel">
+    <section class="panel builds-panel">
         <h1>Builds</h1>
-        <p class="muted">Browse known Build variants, version-specific requirements, and personal Unique readiness where available.</p>
+        <p class="muted">Explore Build requirements and see what your Unique collection makes possible.</p>
         <p class="notice" th:unless="${page.environmentSelected}">
             No environment selected. Build definitions remain browsable. <a th:href="@{/environment}">Select a game environment</a> to inspect compatible requirements.
         </p>
         <p class="notice" th:if="${page.totalCount == 0}">
             No Build variants are known yet. No development fixture is loaded automatically.
         </p>
-        <div th:each="section : ${page.sections}" class="build-section">
-            <h2 th:text="${section.state.title}">Partial</h2>
-            <p class="small-muted" th:text="${section.state.explanation}">Explanation</p>
+        <section th:each="section : ${page.sections}" class="build-section"
+                 th:classappend="| build-section--${section.category.cssClass}|">
+            <div class="build-section-heading">
+                <span class="build-section-marker" aria-hidden="true" th:text="${section.category.symbol}">✓</span>
+                <div>
+                    <h2 th:text="${section.category.title}">Unique ready</h2>
+                    <p class="small-muted" th:text="${section.category.explanation}">Explanation</p>
+                </div>
+            </div>
             <ul class="build-list">
                 <li th:each="build : ${section.entries}">
-                    <div>
-                        <a class="build-name" th:href="@{/builds/{id}(id=${build.id})}"
-                           th:text="${build.displayName}">Build X</a>
-                        <span class="small-muted" th:text="${build.explanation}">Readiness explanation</span>
-                    </div>
-                    <span class="readiness-status" th:text="${build.state.title}">Partial</span>
+                    <a class="build-name" th:href="@{/builds/{id}(id=${build.id})}"
+                       th:text="${build.displayName}">Build X</a>
+                    <span class="build-row-arrow" aria-hidden="true">›</span>
                 </li>
             </ul>
-        </div>
+        </section>
     </section>
 </main>
 </body>
