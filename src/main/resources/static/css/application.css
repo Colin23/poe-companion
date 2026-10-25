@@ -475,6 +475,11 @@ a:focus-visible {
     border-color: #e2b77d;
 }
 
+.environment-switch.is-active {
+    border-color: #e2b77d;
+    background: #383024;
+}
+
 .environment-caption {
     font-size: 0.72rem;
     color: #b9bdc5;

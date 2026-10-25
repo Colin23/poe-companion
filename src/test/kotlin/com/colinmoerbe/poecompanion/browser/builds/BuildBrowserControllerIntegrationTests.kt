@@ -302,6 +302,14 @@ internal class BuildBrowserControllerIntegrationTests(
                 .contains("name=\"_csrf\"")
         }
 
+        val environmentPage =
+            mockMvc.perform(get("/environment").with(user("test-user").roles("USER")))
+                .andExpect(status().isOk)
+                .andReturn().response.contentAsString
+        assertThat(environmentPage)
+            .contains("class=\"environment-switch is-active\"")
+            .contains("aria-current=\"page\"")
+
         selectionRepository.deleteAll()
 
         val withoutSelection =
