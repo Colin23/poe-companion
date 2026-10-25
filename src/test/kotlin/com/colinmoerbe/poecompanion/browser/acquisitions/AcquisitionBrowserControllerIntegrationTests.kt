@@ -326,12 +326,13 @@ internal class AcquisitionBrowserControllerIntegrationTests(
         val listHtml = mockMvc.perform(get("/acquisitions").with(user("test-user")))
             .andExpect(status().isOk)
             .andReturn().response.contentAsString
-        assertThat(listHtml).contains(
-            "No game environment selected",
-            "contextual names",
-            "Name not evaluated",
-            "Acquisition source 1",
-        ).doesNotContain("Acquisition source ID", "Source UUID")
+        assertThat(listHtml)
+            .contains(
+                "No game environment selected",
+                "contextual names",
+                "Name not evaluated",
+                "Acquisition source 1",
+            ).doesNotContain("Acquisition source ID", "Source UUID")
 
         val detailHtml = mockMvc.perform(get("/acquisitions/${ids.source.value}").with(user("test-user")))
             .andExpect(status().isOk)
@@ -364,9 +365,12 @@ internal class AcquisitionBrowserControllerIntegrationTests(
             .andExpect(status().isOk)
             .andReturn().response.contentAsString
         assertThat(html).contains(
-            "<details", "<summary>All probability thresholds</summary>",
+            "<details",
+            "<summary>All probability thresholds</summary>",
             "<summary>Estimate evidence and review details</summary>",
-            "71.8%", "29", "synthetic-development-fixture",
+            "71.8%",
+            "29",
+            "synthetic-development-fixture",
         )
     }
 

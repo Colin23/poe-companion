@@ -91,11 +91,16 @@ internal object AcquisitionBrowserKnowledgeLabels {
     fun sourceNameExplanation(knowledge: ScopedAcquisitionKnowledge<BossEncounterKnowledgeResolution>?): String? =
         when (knowledge) {
             null -> "Name not evaluated"
+
             ScopedAcquisitionKnowledge.Missing -> "No accepted encounter name is recorded for this environment"
+
             ScopedAcquisitionKnowledge.Ambiguous -> "Accepted encounter knowledge is ambiguous for this environment"
+
             is ScopedAcquisitionKnowledge.Selected -> when (knowledge.resolution) {
                 is BossEncounterKnowledgeResolution.Resolved -> null
+
                 BossEncounterKnowledgeResolution.Unknown -> "Encounter name unknown for the selected patch"
+
                 BossEncounterKnowledgeResolution.DoesNotApply -> "No applicable encounter name for this environment"
             }
         }
@@ -107,10 +112,14 @@ internal object AcquisitionBrowserKnowledgeLabels {
                 AcquisitionSourceAvailability.AVAILABLE -> "Available"
                 AcquisitionSourceAvailability.UNAVAILABLE -> "Unavailable"
             }
+
             BossEncounterKnowledgeResolution.DoesNotApply -> "Not applicable"
+
             else -> when (knowledge) {
                 null -> "Not evaluated"
+
                 ScopedAcquisitionKnowledge.Ambiguous -> "Ambiguous"
+
                 else -> "Unknown"
             }
         }
@@ -133,6 +142,7 @@ internal object AcquisitionBrowserKnowledgeLabels {
                 DropRelationshipState.CAN_DROP -> "Can drop"
                 DropRelationshipState.CANNOT_DROP -> "Cannot drop"
             }
+
             else -> relationship(knowledge)
         }
     }

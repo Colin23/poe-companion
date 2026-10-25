@@ -141,7 +141,9 @@ internal class AcquisitionBrowserReadModelService(
 
     private fun nonActionableExplanation(assessment: AcquisitionSourceAssessment?): String? = when {
         assessment == null -> "Select a game environment to evaluate this drop relationship."
+
         assessment.calculation != null -> null
+
         else -> {
             val source = (assessment.sourceKnowledge as? ScopedAcquisitionKnowledge.Selected<*>)?.resolution
             val relationship = (assessment.relationshipKnowledge as? ScopedAcquisitionKnowledge.Selected<*>)?.resolution
@@ -150,12 +152,16 @@ internal class AcquisitionBrowserReadModelService(
             when {
                 availability == AcquisitionSourceAvailability.UNAVAILABLE ->
                     "This source is unavailable in the selected environment. Recorded estimates are not actionable."
+
                 dropState == DropRelationshipState.CANNOT_DROP ->
                     "This source is recorded as unable to drop this Unique in the selected environment."
+
                 availability != AcquisitionSourceAvailability.AVAILABLE ->
                     "Source availability is not verified for the selected environment."
+
                 dropState != DropRelationshipState.CAN_DROP ->
                     "This drop relationship is not verified for the selected environment."
+
                 else -> "No supported applicable fixed-probability estimate is available."
             }
         }
