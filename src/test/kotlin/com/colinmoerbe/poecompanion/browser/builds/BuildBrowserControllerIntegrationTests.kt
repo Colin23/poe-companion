@@ -278,6 +278,57 @@ internal class BuildBrowserControllerIntegrationTests(
             .andExpect(status().is3xxRedirection)
     }
 
+    @Test
+    fun `shared header distinguishes game environment and user on desktop and mobile`() {
+        initializer.initialize()
+
+        listOf("test-user" to "USER", "test-admin" to "ADMIN").forEach { (username, role) ->
+            val html =
+                mockMvc.perform(get("/").with(user(username).roles(role)))
+                    .andExpect(status().isOk)
+                    .andReturn().response.contentAsString
+
+            assertThat(html)
+                .contains("aria-label=\"Primary\"")
+                .contains("aria-label=\"Mobile navigation\"")
+                .contains("<details class=\"mobile-navigation\">")
+                .contains("<summary class=\"mobile-menu-toggle\">")
+                .contains("Game environment:")
+                .contains("href=\"/environment\"")
+                .contains("3.30 SC SSF Development SSF league")
+                .contains("Signed in as <strong>$username</strong>")
+                .contains("action=\"/logout\"")
+                .contains("name=\"_csrf\"")
+        }
+
+        selectionRepository.deleteAll()
+
+        val withoutSelection =
+            mockMvc.perform(get("/").with(user("test-user").roles("USER")))
+                .andExpect(status().isOk)
+                .andReturn().response.contentAsString
+
+        assertThat(withoutSelection)
+            .contains("Not selected")
+            .contains("aria-label=\"Select game environment\"")
+    }
+
+    @Test
+    fun `home explains each player journey without promising complete drop knowledge`() {
+        val html =
+            mockMvc.perform(get("/").with(user("test-user").roles("USER")))
+                .andExpect(status().isOk)
+                .andReturn().response.contentAsString
+
+        assertThat(html)
+            .contains("Explore Builds")
+            .contains("Compare a Build")
+            .contains("Unique Collection")
+            .contains("switching leagues does not overwrite your progress")
+            .contains("Acquisition Sources")
+            .contains("missing knowledge does not mean a drop is impossible")
+    }
+
     private fun group(
         importance: RequirementImportance,
         logic: RequirementLogic,

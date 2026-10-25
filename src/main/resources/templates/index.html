@@ -10,21 +10,30 @@
 <header th:replace="~{fragments/site-header :: siteHeader('home', ${page.username})}"></header>
 
 <main>
-    <section class="panel">
+    <section class="panel home-panel">
         <h1>Your Path of Exile planning companion</h1>
-        <p>Explore builds, track your Unique collection, and discover where missing items can drop.</p>
+        <p class="home-intro">
+            See which Unique items your Builds need, keep track of the ones you own,
+            and explore what is known about finding the ones you are missing.
+        </p>
         <nav aria-label="Explore PoE Companion" class="home-journey">
             <div>
                 <h2><a th:href="@{/builds}">Explore Builds</a></h2>
-                <p class="small-muted">Find out which Unique requirements are satisfied and which are missing.</p>
+                <p>Compare a Build's required Uniques with your recorded collection.
+                    See which requirements you already meet, what is still missing,
+                    and which upgrades are optional.</p>
             </div>
             <div>
                 <h2><a th:href="@{/uniques}">Unique Collection</a></h2>
-                <p class="small-muted">Browse known Uniques and the selected account's recorded ownership.</p>
+                <p>Record how many copies of each Unique you own.
+                    Your collection is kept separately for your game environments,
+                    so switching leagues does not overwrite your progress.</p>
             </div>
             <div>
                 <h2><a th:href="@{/acquisitions}">Acquisition Sources</a></h2>
-                <p class="small-muted">Discover recorded drop relationships and supported probability estimates.</p>
+                <p>Explore known sources and their recorded Unique drop relationships.
+                    When a fixed drop estimate is available, preview your chances over multiple attempts;
+                    missing knowledge does not mean a drop is impossible.</p>
             </div>
         </nav>
     </section>

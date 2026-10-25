@@ -4,7 +4,7 @@
 <header class="site-header" th:fragment="siteHeader(activeSection, username)">
     <div class="brand-and-navigation">
         <a class="site-name" th:href="@{/}">PoE Companion</a>
-        <nav class="app-navigation" aria-label="Primary">
+        <nav class="app-navigation desktop-navigation" aria-label="Primary">
             <a th:href="@{/}" th:classappend="${activeSection == 'home'} ? ' is-active' : ''"
                th:attr="aria-current=${activeSection == 'home'} ? 'page' : null">Home</a>
             <a th:href="@{/builds}" th:classappend="${activeSection == 'builds'} ? ' is-active' : ''"
@@ -13,19 +13,50 @@
                th:attr="aria-current=${activeSection == 'uniques'} ? 'page' : null">Uniques</a>
             <a th:href="@{/acquisitions}" th:classappend="${activeSection == 'acquisitions'} ? ' is-active' : ''"
                th:attr="aria-current=${activeSection == 'acquisitions'} ? 'page' : null">Acquisition</a>
-            <a th:href="@{/environment}" th:classappend="${activeSection == 'environment'} ? ' is-active' : ''"
-               th:attr="aria-current=${activeSection == 'environment'} ? 'page' : null"
-               th:text="${environmentLabel != null ? environmentLabel : 'Select game environment'}">
-                Select game environment
-            </a>
         </nav>
     </div>
-    <div class="session-actions">
-        <p class="session-details">Signed in as <strong th:text="${username}">user</strong></p>
-        <form th:action="@{/logout}" method="post">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-            <button type="submit">Log out</button>
-        </form>
+    <div class="header-actions">
+        <a class="environment-switch" th:href="@{/environment}"
+           th:classappend="${environmentLabel == null} ? ' environment-unselected' : ''"
+           th:attr="aria-current=${activeSection == 'environment'} ? 'page' : null,
+                    aria-label=${environmentLabel != null ? 'Game environment: ' + environmentLabel : 'Select game environment'}"
+           th:title="${environmentLabel != null ? environmentLabel : 'Select game environment'}">
+            <span class="environment-caption">Game environment</span>
+            <span class="environment-name"
+                  th:text="${environmentLabel != null ? environmentLabel : 'Not selected'}">Not selected</span>
+        </a>
+        <div class="session-actions desktop-session">
+            <p class="session-details">Signed in as <strong th:text="${username}">user</strong></p>
+            <form th:action="@{/logout}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button type="submit">Log out</button>
+            </form>
+        </div>
+        <details class="mobile-navigation">
+            <summary class="mobile-menu-toggle">
+                <span aria-hidden="true" class="mobile-menu-icon">☰</span>
+                <span>Menu</span>
+            </summary>
+            <div class="mobile-menu-panel">
+                <nav class="mobile-menu-links" aria-label="Mobile navigation">
+                    <a th:href="@{/}" th:classappend="${activeSection == 'home'} ? ' is-active' : ''"
+                       th:attr="aria-current=${activeSection == 'home'} ? 'page' : null">Home</a>
+                    <a th:href="@{/builds}" th:classappend="${activeSection == 'builds'} ? ' is-active' : ''"
+                       th:attr="aria-current=${activeSection == 'builds'} ? 'page' : null">Builds</a>
+                    <a th:href="@{/uniques}" th:classappend="${activeSection == 'uniques'} ? ' is-active' : ''"
+                       th:attr="aria-current=${activeSection == 'uniques'} ? 'page' : null">Uniques</a>
+                    <a th:href="@{/acquisitions}" th:classappend="${activeSection == 'acquisitions'} ? ' is-active' : ''"
+                       th:attr="aria-current=${activeSection == 'acquisitions'} ? 'page' : null">Acquisition</a>
+                </nav>
+                <div class="mobile-session-actions">
+                    <p class="session-details">Signed in as <strong th:text="${username}">user</strong></p>
+                    <form th:action="@{/logout}" method="post">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                        <button type="submit">Log out</button>
+                    </form>
+                </div>
+            </div>
+        </details>
     </div>
 </header>
 </body>
