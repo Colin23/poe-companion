@@ -1011,6 +1011,11 @@ a:focus-visible {
     border-color: #b69a74;
 }
 
+.unique-source-status--unknown {
+    color: #c0c7d0;
+    border-color: #818b98;
+}
+
 .unique-source-knowledge {
     color: #d2ced0;
     font-size: 0.9rem;
@@ -1052,3 +1057,220 @@ a:focus-visible {
     }
 }
 
+
+/* Acquisition source discovery, personal attempts, and probability presentation. */
+.acquisition-browser-panel {
+    max-width: 60rem;
+    margin-inline: auto;
+}
+
+.acquisition-source-list li {
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+}
+
+.acquisition-source-identity {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.acquisition-source-identity .acquisition-name {
+    font-size: 1.05rem;
+    overflow-wrap: anywhere;
+}
+
+.source-availability-status {
+    display: inline-block;
+    padding: 0.3rem 0.6rem;
+    border: 1px solid #777d86;
+    border-radius: 0.35rem;
+    color: #d0ccdf;
+    font-size: 0.86rem;
+    font-weight: 600;
+}
+
+.source-availability-status--available {
+    color: #9bd3b3;
+    border-color: #6b9e83;
+}
+
+.source-availability-status--unavailable {
+    color: #e2b77d;
+    border-color: #b69a74;
+}
+
+.acquisition-detail-summary h1 {
+    margin-bottom: 0.75rem;
+}
+
+.acquisition-detail-summary .muted {
+    margin-top: 0.7rem;
+}
+
+.acquisition-tools {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 1.75rem;
+}
+
+.acquisition-tool-card {
+    padding: 1.25rem;
+    border: 1px solid #434951;
+    border-radius: 0.5rem;
+    background: #25282e;
+    min-width: 0;
+}
+
+.acquisition-tool-card h2 {
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+.acquisition-tool-card .attempt-form {
+    align-items: stretch;
+    flex-direction: column;
+}
+
+.acquisition-tool-card .attempt-form input {
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.acquisition-tool-card .attempt-form button {
+    align-self: flex-start;
+}
+
+.acquisition-attempt-summary {
+    font-size: 1.12rem;
+    font-weight: 600;
+}
+
+.acquisition-attempt-summary strong {
+    font-size: 1.55rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.acquisition-tool-card button.secondary-action {
+    background: transparent;
+    color: #ece8df;
+    border: 1px solid #777d86;
+}
+
+.acquisition-relationships {
+    margin-top: 2rem;
+}
+
+.acquisition-drop-card {
+    margin: 1rem 0;
+    padding: 1.25rem;
+    border: 1px solid #434951;
+    border-radius: 0.5rem;
+    background: #25282e;
+    scroll-margin-top: 1.5rem;
+}
+
+.acquisition-drop-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    margin-bottom: 1rem;
+}
+
+.acquisition-drop-heading h3 {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.acquisition-primary-results,
+.acquisition-secondary-results {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.acquisition-result-stat,
+.acquisition-secondary-results > div {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+}
+
+.acquisition-result-stat strong {
+    font-size: 1.7rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.acquisition-secondary-results {
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid #434951;
+}
+
+.acquisition-secondary-results strong {
+    font-size: 1.2rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.acquisition-result-stat span,
+.acquisition-secondary-results span {
+    color: #b9bdc5;
+    font-size: 0.9rem;
+}
+
+.acquisition-more-details {
+    margin-top: 1rem;
+    border-top: 1px solid #434951;
+    padding-top: 0.75rem;
+}
+
+.acquisition-more-details summary {
+    cursor: pointer;
+    font-weight: 600;
+    width: fit-content;
+}
+
+.acquisition-source-list a:focus-visible,
+.acquisition-drop-card a:focus-visible,
+.acquisition-more-details summary:focus-visible {
+    outline: 0.2rem solid #d9a441;
+    outline-offset: 0.2rem;
+}
+
+.acquisition-more-details code {
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 40rem) {
+    .acquisition-tools,
+    .acquisition-primary-results,
+    .acquisition-secondary-results {
+        grid-template-columns: 1fr;
+    }
+
+    .acquisition-source-list li {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .acquisition-drop-card,
+    .acquisition-tool-card {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 24rem) {
+    .acquisition-source-list li {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}

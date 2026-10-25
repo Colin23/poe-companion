@@ -14,35 +14,35 @@
         <span aria-hidden="true"> / </span>
         <span aria-current="page">Acquisition Sources</span>
     </nav>
-    <section class="panel">
+    <section class="panel acquisition-browser-panel">
         <h1>Acquisition Sources</h1>
         <p class="muted" th:if="${page.environmentSelected}" th:text="${page.selectionLabel}">Selected environment</p>
         <p class="notice" th:unless="${page.environmentSelected}">
-            No environment selected. Sources remain browsable, but contextual applicability is unknown.
+            No game environment selected. These source identities are recorded, but their contextual names,
+            availability and drop knowledge cannot yet be evaluated.
             <a th:href="@{/environment}">Select a game environment</a>.
-        </p>
-        <p class="small-muted" th:if="${page.environmentSelected and !page.accountSelected}">
-            No saved personal attempts exist for this environment. Applicable game knowledge remains available.
         </p>
         <p class="notice" th:if="${page.sources.isEmpty()}">
             No acquisition sources are known yet. No development fixture is loaded automatically.
         </p>
-        <ul class="acquisition-list" th:unless="${page.sources.isEmpty()}">
+        <ul class="acquisition-list acquisition-source-list" th:unless="${page.sources.isEmpty()}">
             <li th:each="source : ${page.sources}">
-                <div>
+                <div class="acquisition-source-identity">
                     <a class="acquisition-name" th:href="@{/acquisitions/{id}(id=${source.id})}"
                        th:text="${source.displayName}">Boss Y</a>
+                    <span class="small-muted" th:if="${source.nameExplanation != null}"
+                          th:text="${source.nameExplanation}">Name not evaluated without a game environment</span>
                     <span class="small-muted">
-                        <span th:text="${source.relationshipCount}">1</span> known Unique relationships
+                        <span th:text="${source.relationshipCount}">1</span> recorded Unique relationships
                     </span>
-                    <span class="small-muted" th:if="${source.displayName == 'Acquisition source (name unavailable)'}"
-                          th:text="${source.id}">Source UUID</span>
                 </div>
-                <span class="readiness-status" th:text="${source.availability}">AVAILABLE</span>
+                <span class="source-availability-status"
+                      th:classappend="| source-availability-status--${source.availabilityCssClass}|"
+                      th:text="${source.availability}">Available</span>
             </li>
         </ul>
         <p class="small-muted">
-            A known acquisition source is not proof that it is available or currently drops any particular Unique.
+            A recorded relationship does not prove that an encounter is available or currently drops a particular Unique.
         </p>
     </section>
 </main>

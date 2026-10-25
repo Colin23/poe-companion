@@ -1720,3 +1720,16 @@ No public guest access, new migration, or production fixture startup is introduc
 - Without a selected game environment, canonical Acquisition source identities and relationships remain browsable, but contextual eligibility and calculations stay unknown. Browser knowledge labels refer to the missing game environment, not a missing personal account.
 - The Acquisition source detail hides the recorded-attempt field and both saved-attempt and probability-preview forms until an environment is selected. Once selected, absent saved attempts and explicit saved zero remain distinct.
 - An explicit non-negative probability preview query with no environment returns HTTP 409 and a link to the environment selector on the source detail page. Browsing without a preview query remains read-only and successful; no AccountContext is created. Acquisition's knowledge, probability and persistence behavior remains unchanged.
+
+
+## 43. Contextual Acquisition Source Names and Presentation (Milestone 5.2 PR D)
+
+**Authority:** V2.1.2 Acquisition amendment, §§3–5 and 11–13; implementation decisions §§10, 17, 20, 27 and 42. This records Browser presentation, not a change to source identity or accepted knowledge.
+
+- A stable `AcquisitionSource` is known independently of its context-scoped `BossEncounterKnowledgeSnapshot.displayLabel`. Browser displays a label only when accepted encounter knowledge resolves unambiguously for the selected game environment. It must not select the latest/arbitrary snapshot or infer a source name from a participating `BossDefinition`.
+- Where no contextual label resolves, Browser uses an explicitly non-identifying fallback: page-local numbered `Acquisition source N` on the list, and `Acquisition source` on detail. UUIDs remain navigation keys, not player-facing metadata. Presentation state determines whether the name resolved; string comparison against fallback text is not allowed.
+- Without a selected environment, explain prominently that source identities exist but their contextual names, availability and drop information have **not been evaluated**; link to the selector. With an environment but missing, unknown, non-applicable or ambiguous knowledge, explain the actual outcome instead—selecting an environment is not guaranteed to resolve a label.
+- Source availability, relationship state and estimate remain independent. A recorded accepted fixed estimate is still visible when not actionable. Display applicable chances and probability outcomes prominently, with complete thresholds and estimate provenance/evidence/timestamps in accessible secondary disclosure. Presentation formatting must not round a small positive cumulative chance to 0% or a sub-certain one to 100%.
+- Saved AvailableAttempts (including explicit zero) and the optional GET-only hypothetical preview remain separate; no presentation change may mutate calculated eligibility, owner-scoped persistence, first-write rules or authorization.
+
+**Deferred:** A separately curated, context-independent source discovery label and richer encounter/access ingestion require a future Acquisition-specific design and workflow. This is not automatically covered by Milestone 7 Unique Catalog ingestion. See [issue #22's detailed examples and revisit triggers](https://github.com/Colin23/poe-companion/issues/22#issuecomment-6402358187).

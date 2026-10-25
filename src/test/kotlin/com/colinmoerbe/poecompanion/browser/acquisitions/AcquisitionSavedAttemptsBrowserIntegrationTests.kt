@@ -112,7 +112,7 @@ internal class AcquisitionSavedAttemptsBrowserIntegrationTests(
         assertThat(recorded.effectiveAttempts).isZero()
         val html = mvc.perform(get(sourceUri).with(user("test-user")))
             .andExpect(content().string(containsString("Remove saved count")))
-            .andExpect(content().string(containsString("0 means none available")))
+            .andExpect(content().string(containsString("Saving 0 records none available")))
             .andReturn().response.contentAsString
         assertThat(html).contains("Save available attempts")
 
