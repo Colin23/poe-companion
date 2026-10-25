@@ -19,7 +19,29 @@ internal data class UniqueBrowserEntry(
     val displayName: String,
     val developmentLabel: Boolean,
     val ownedQuantity: Int?,
-)
+) {
+    val ownershipLabel: String
+        get() = when {
+            ownedQuantity == null -> "Ownership unknown"
+            ownedQuantity == 0 -> "Missing"
+            else -> "Owned"
+        }
+
+    val ownershipCssClass: String
+        get() = when {
+            ownedQuantity == null -> "unknown"
+            ownedQuantity == 0 -> "missing"
+            else -> "owned"
+        }
+
+    val quantityLabel: String
+        get() = when (val quantity = ownedQuantity) {
+            null -> "No personal collection"
+            0 -> "0 copies owned"
+            1 -> "1 copy owned"
+            else -> "$quantity copies owned"
+        }
+}
 
 internal data class UniqueCollectionPage(
     val items: List<UniqueBrowserEntry>,
@@ -30,16 +52,29 @@ internal data class UniqueCollectionPage(
     val ownedCount: Int?,
     val missingCount: Int?,
     val filter: String,
-)
+) {
+    val hasDevelopmentLabels: Boolean
+        get() = items.any { it.developmentLabel }
+}
 
+/** Presentation-only state, independent of canonical acquisition identities. */
 internal data class UniqueAcquisitionCandidate(
     val sourceId: UUID,
     val displayName: String,
-    val availability: String,
-    val relationship: String,
-    val estimate: String,
+    val nameAvailable: Boolean,
+    val unnamedOrdinal: Int?,
+    val availabilityLabel: String,
+    val relationshipLabel: String,
+    val estimateLabel: String,
+    val recordedChance: String?,
     val actionableChance: String?,
-)
+    val statusLabel: String,
+    val statusCssClass: String,
+    val explanation: String,
+) {
+    val linkLabel: String
+        get() = if (nameAvailable) displayName else "Unnamed source ${unnamedOrdinal ?: 1}"
+}
 
 internal data class UniqueDetailPage(
     val item: UniqueBrowserEntry,

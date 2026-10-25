@@ -119,7 +119,7 @@ internal class GameEnvironmentBrowserIntegrationTests(
             .andExpect(content().string(containsString("Save available attempts")))
 
         mvc.perform(get("/uniques/${ids.uniqueC.value}").with(user("test-user").roles("USER")))
-            .andExpect(content().string(containsString("Unknown — no personal collection")))
+            .andExpect(content().string(containsString("Ownership unknown")))
         assertThat(countContexts()).isEqualTo(initialCount)
     }
 
@@ -132,7 +132,7 @@ internal class GameEnvironmentBrowserIntegrationTests(
         mvc.perform(get("/builds/${ids.variant.value}").with(user("test-user").roles("USER")))
             .andExpect(content().string(containsString("Partial")))
         mvc.perform(get("/uniques/${ids.uniqueA.value}").with(user("test-user").roles("USER")))
-            .andExpect(content().string(containsString("Owned ·")))
+            .andExpect(content().string(containsString("1 copy owned")))
     }
 
     @Test

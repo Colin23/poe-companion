@@ -108,7 +108,7 @@ internal class AcquisitionBrowserControllerIntegrationTests(
         assertThat(unique.syntheticLabel).isTrue()
         assertThat(unique.relationshipStatus).isEqualTo("CAN_DROP")
         assertThat(unique.probabilityStatus).isEqualTo("Accepted fixed estimate")
-        assertThat(unique.chancePerAttempt).isEqualTo("10.000%")
+        assertThat(unique.chancePerAttempt).isEqualTo("10%")
         assertThat(unique.estimateProvenance).isEqualTo("MEASURED")
         assertThat(unique.evidenceReference).contains("synthetic-development-fixture")
         assertThat(unique.actionable).isTrue()

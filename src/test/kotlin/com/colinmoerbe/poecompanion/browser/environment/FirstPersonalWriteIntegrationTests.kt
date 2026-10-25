@@ -94,7 +94,7 @@ internal class FirstPersonalWriteIntegrationTests(
         mvc.perform(get(uri).with(user("test-user").roles("USER")))
             .andExpect(status().isOk)
             .andExpect(content().string(containsString("Save ownership")))
-            .andExpect(content().string(containsString("Unknown — no personal collection")))
+            .andExpect(content().string(containsString("Ownership unknown")))
 
         mvc.perform(post("$uri/ownership").param("quantity", "1").with(user("test-user")).with(csrf()))
             .andExpect(status().is3xxRedirection)
@@ -104,7 +104,7 @@ internal class FirstPersonalWriteIntegrationTests(
         assertThat(SecurityTestActors.asUser { currentOwnership.getCurrentOwnership(id).quantityOf(ids.uniqueC) })
             .isEqualTo(1)
         mvc.perform(get(uri).with(user("test-user")))
-            .andExpect(content().string(containsString("Owned ·")))
+            .andExpect(content().string(containsString("1 copy owned")))
 
         // Editing zero afterwards preserves the established context and sparse ownership.
         mvc.perform(post("$uri/ownership").param("quantity", "0").with(user("test-user")).with(csrf()))
