@@ -1721,7 +1721,7 @@ No public guest access, new migration, or production fixture startup is introduc
 - The Acquisition source detail hides the recorded-attempt field and both saved-attempt and probability-preview forms until an environment is selected. Once selected, absent saved attempts and explicit saved zero remain distinct.
 - An explicit non-negative probability preview query with no environment returns HTTP 409 and a link to the environment selector on the source detail page. Browsing without a preview query remains read-only and successful; no AccountContext is created. Acquisition's knowledge, probability and persistence behavior remains unchanged.
 
- 
+
 ## 43. Contextual Acquisition Source Names and Presentation (Milestone 5.2 PR D)
 
 **Authority:** V2.1.2 Acquisition amendment, §§3–5 and 11–13; implementation decisions §§10, 17, 20, 27 and 42. This records Browser presentation, not a change to source identity or accepted knowledge.
