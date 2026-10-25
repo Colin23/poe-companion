@@ -84,19 +84,19 @@ internal class AcquisitionBrowserControllerIntegrationTests(
         assertThat(list.sources).hasSize(4)
         val bossY = list.sources.single { it.id == ids.source.value }
         assertThat(bossY.displayName).isEqualTo("Boss Y")
-        assertThat(bossY.availability).isEqualTo("AVAILABLE")
+        assertThat(bossY.availability).isEqualTo("Available")
         assertThat(bossY.relationshipCount).isEqualTo(1)
 
         val bossP = list.sources.single { it.id == ids.sourceP.value }
         assertThat(bossP.displayName).isEqualTo("Boss P")
-        assertThat(bossP.availability).isEqualTo("AVAILABLE")
+        assertThat(bossP.availability).isEqualTo("Available")
         assertThat(bossP.relationshipCount).isEqualTo(2)
 
         val expandedPage = detailPage(id = ids.sourceP)
         assertThat(expandedPage.displayName).isEqualTo("Boss P")
         assertThat(expandedPage.relationships).hasSize(2)
         assertThat(expandedPage.relationships.map { it.relationshipStatus })
-            .containsExactlyInAnyOrder("CAN_DROP", "CANNOT_DROP")
+            .containsExactlyInAnyOrder("Can drop", "Cannot drop")
 
         val page = detailPage()
         assertThat(page.displayName).isEqualTo("Boss Y")
@@ -106,10 +106,10 @@ internal class AcquisitionBrowserControllerIntegrationTests(
         val unique = page.relationships.single()
         assertThat(unique.displayName).isEqualTo("Unique C")
         assertThat(unique.syntheticLabel).isTrue()
-        assertThat(unique.relationshipStatus).isEqualTo("CAN_DROP")
+        assertThat(unique.relationshipStatus).isEqualTo("Can drop")
         assertThat(unique.probabilityStatus).isEqualTo("Accepted fixed estimate")
         assertThat(unique.chancePerAttempt).isEqualTo("10%")
-        assertThat(unique.estimateProvenance).isEqualTo("MEASURED")
+        assertThat(unique.estimateProvenance).isEqualTo("Measured")
         assertThat(unique.evidenceReference).contains("synthetic-development-fixture")
         assertThat(unique.actionable).isTrue()
         assertThat(unique.probabilityWithinAttempts).isEqualTo("71.8%")
@@ -118,7 +118,7 @@ internal class AcquisitionBrowserControllerIntegrationTests(
 
         mockMvc.perform(get("/acquisitions/${ids.source.value}").with(user("test-user")))
             .andExpect(content().string(containsString("71.8%")))
-            .andExpect(content().string(containsString("Synthetic development item")))
+            .andExpect(content().string(containsString("Some Unique names are development placeholders.")))
             .andExpect(content().string(containsString("/uniques/${ids.uniqueC.value}")))
             .andExpect(content().string(containsString("synthetic-development-fixture")))
     }
@@ -171,7 +171,8 @@ internal class AcquisitionBrowserControllerIntegrationTests(
         assertThat(list.environmentSelected).isFalse()
         assertThat(list.sources).hasSize(5)
         assertThat(list.sources.single { it.id == orphan.value }.relationshipCount).isZero()
-        assertThat(list.sources).allMatch { it.availability.contains("no game environment selected") }
+        assertThat(list.sources).allMatch { it.availability == "Not evaluated" && !it.nameResolved }
+        assertThat(list.sources.map { it.displayName }).allMatch { it.startsWith("Acquisition source ") }
 
         val known = detailPage()
         assertThat(known.accountSelected).isFalse()
@@ -180,7 +181,8 @@ internal class AcquisitionBrowserControllerIntegrationTests(
 
         val noRelationships = detailPage(id = orphan)
         assertThat(noRelationships.relationships).isEmpty()
-        assertThat(noRelationships.displayName).contains("name unavailable")
+        assertThat(noRelationships.displayName).isEqualTo("Acquisition source")
+        assertThat(noRelationships.nameExplanation).contains("Name not evaluated")
     }
 
     @Test
@@ -247,7 +249,7 @@ internal class AcquisitionBrowserControllerIntegrationTests(
         }
 
         val page = detailPage()
-        assertThat(page.availability).isEqualTo("Ambiguous encounter scope")
+        assertThat(page.availability).isEqualTo("Ambiguous")
         assertThat(page.relationships.single().actionable).isFalse()
         assertThat(page.relationships.single().probabilityWithinAttempts).isNull()
     }
@@ -282,8 +284,8 @@ internal class AcquisitionBrowserControllerIntegrationTests(
         }
 
         val page = detailPage(id = source)
-        assertThat(page.availability).isEqualTo("AVAILABLE")
-        assertThat(page.relationships.single().relationshipStatus).isEqualTo("CANNOT_DROP")
+        assertThat(page.availability).isEqualTo("Available")
+        assertThat(page.relationships.single().relationshipStatus).isEqualTo("Cannot drop")
         assertThat(page.relationships.single().actionable).isFalse()
     }
 
@@ -315,6 +317,57 @@ internal class AcquisitionBrowserControllerIntegrationTests(
             .andExpect(header().string(HttpHeaders.LOCATION, containsString("/login")))
         mockMvc.perform(get("/acquisitions/${ids.source.value}"))
             .andExpect(status().is3xxRedirection)
+    }
+
+    @Test
+    fun `source list and detail explain why encounter names cannot be evaluated`() {
+        initializer.initialize()
+        selection.deleteAllInBatch()
+        val listHtml = mockMvc.perform(get("/acquisitions").with(user("test-user")))
+            .andExpect(status().isOk)
+            .andReturn().response.contentAsString
+        assertThat(listHtml).contains(
+            "No game environment selected",
+            "contextual names",
+            "Name not evaluated",
+            "Acquisition source 1",
+        ).doesNotContain("Acquisition source ID", "Source UUID")
+
+        val detailHtml = mockMvc.perform(get("/acquisitions/${ids.source.value}").with(user("test-user")))
+            .andExpect(status().isOk)
+            .andReturn().response.contentAsString
+        assertThat(detailHtml).contains("its contextual name", "Select a game environment")
+            .doesNotContain("Acquisition source ID")
+    }
+
+    @Test
+    fun `unavailable Boss R keeps recorded estimate but cannot show a farming outlook`() {
+        initializer.initialize()
+        val page = detailPage(id = ids.sourceR)
+        assertThat(page.availability).isEqualTo("Unavailable")
+        val unique = page.relationships.single()
+        assertThat(unique.chancePerAttempt).isEqualTo("5%")
+        assertThat(unique.actionable).isFalse()
+        assertThat(unique.probabilityWithinAttempts).isNull()
+
+        val html = mockMvc.perform(get("/acquisitions/${ids.sourceR.value}").with(user("test-user")))
+            .andExpect(status().isOk)
+            .andReturn().response.contentAsString
+        assertThat(html).contains("Recorded fixed estimate:", "Not currently actionable.")
+            .doesNotContain("Applicable fixed chance per completed encounter")
+    }
+
+    @Test
+    fun `probability details remain available in accessible native disclosures`() {
+        initializer.initialize()
+        val html = mockMvc.perform(get("/acquisitions/${ids.source.value}").with(user("test-user")))
+            .andExpect(status().isOk)
+            .andReturn().response.contentAsString
+        assertThat(html).contains(
+            "<details", "<summary>All probability thresholds</summary>",
+            "<summary>Estimate evidence and review details</summary>",
+            "71.8%", "29", "synthetic-development-fixture",
+        )
     }
 
     private fun listPage(): AcquisitionBrowserListPage {

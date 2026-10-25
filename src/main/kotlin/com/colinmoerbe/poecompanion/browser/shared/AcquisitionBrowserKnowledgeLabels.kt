@@ -84,6 +84,77 @@ internal object AcquisitionBrowserKnowledgeLabels {
         }
     }
 
+    /** Browser-only interpretation of an encounter label; null knowledge means no environment. */
+    fun sourceNameResolved(knowledge: ScopedAcquisitionKnowledge<BossEncounterKnowledgeResolution>?): Boolean =
+        (knowledge as? ScopedAcquisitionKnowledge.Selected<*>)?.resolution is BossEncounterKnowledgeResolution.Resolved
+
+    fun sourceNameExplanation(knowledge: ScopedAcquisitionKnowledge<BossEncounterKnowledgeResolution>?): String? =
+        when (knowledge) {
+            null -> "Name not evaluated"
+            ScopedAcquisitionKnowledge.Missing -> "No accepted encounter name is recorded for this environment"
+            ScopedAcquisitionKnowledge.Ambiguous -> "Accepted encounter knowledge is ambiguous for this environment"
+            is ScopedAcquisitionKnowledge.Selected -> when (knowledge.resolution) {
+                is BossEncounterKnowledgeResolution.Resolved -> null
+                BossEncounterKnowledgeResolution.Unknown -> "Encounter name unknown for the selected patch"
+                BossEncounterKnowledgeResolution.DoesNotApply -> "No applicable encounter name for this environment"
+            }
+        }
+
+    fun readableSourceAvailability(knowledge: ScopedAcquisitionKnowledge<BossEncounterKnowledgeResolution>?): String {
+        val resolution = (knowledge as? ScopedAcquisitionKnowledge.Selected<*>)?.resolution
+        return when (resolution) {
+            is BossEncounterKnowledgeResolution.Resolved -> when (resolution.snapshot.availability) {
+                AcquisitionSourceAvailability.AVAILABLE -> "Available"
+                AcquisitionSourceAvailability.UNAVAILABLE -> "Unavailable"
+            }
+            BossEncounterKnowledgeResolution.DoesNotApply -> "Not applicable"
+            else -> when (knowledge) {
+                null -> "Not evaluated"
+                ScopedAcquisitionKnowledge.Ambiguous -> "Ambiguous"
+                else -> "Unknown"
+            }
+        }
+    }
+
+    fun sourceAvailabilityCssClass(knowledge: ScopedAcquisitionKnowledge<BossEncounterKnowledgeResolution>?): String =
+        when (readableSourceAvailability(knowledge)) {
+            "Available" -> "available"
+            "Unavailable" -> "unavailable"
+            "Ambiguous" -> "ambiguous"
+            "Not evaluated" -> "not-evaluated"
+            "Not applicable" -> "not-applicable"
+            else -> "unknown"
+        }
+
+    fun readableRelationship(knowledge: ScopedAcquisitionKnowledge<DropRelationshipResolution>?): String {
+        val resolution = (knowledge as? ScopedAcquisitionKnowledge.Selected<*>)?.resolution
+        return when (resolution) {
+            is DropRelationshipResolution.Resolved -> when (resolution.snapshot.state) {
+                DropRelationshipState.CAN_DROP -> "Can drop"
+                DropRelationshipState.CANNOT_DROP -> "Cannot drop"
+            }
+            else -> relationship(knowledge)
+        }
+    }
+
+    fun relationshipCssClass(knowledge: ScopedAcquisitionKnowledge<DropRelationshipResolution>?): String =
+        when (readableRelationship(knowledge)) {
+            "Can drop" -> "can-drop"
+            "Cannot drop" -> "cannot-drop"
+            else -> "unknown"
+        }
+
+    /** A nonzero chance must not render as 0.0%, nor a sub-certain one as 100.0%. */
+    fun cumulativePercent(fraction: Double): String {
+        require(fraction in 0.0..1.0) { "Cumulative probability must be between zero and one" }
+        val percent = fraction * PERCENT_MULTIPLIER
+        return when {
+            percent > 0.0 && percent < 0.05 -> "<0.1%"
+            percent < 100.0 && percent >= 99.95 -> ">99.9%"
+            else -> String.format(Locale.ROOT, "%.1f%%", percent)
+        }
+    }
+
     private const val MIN_VISIBLE_PERCENT = 0.001
     private const val PERCENT_MULTIPLIER = 100.0
 }

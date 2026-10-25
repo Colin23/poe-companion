@@ -1,9 +1,14 @@
 package com.colinmoerbe.poecompanion.browser.acquisitions
 
+import com.colinmoerbe.poecompanion.acquisition.encounter.AcquisitionSourceAvailability
+import com.colinmoerbe.poecompanion.acquisition.encounter.BossEncounterKnowledgeResolution
 import com.colinmoerbe.poecompanion.acquisition.knowledge.ScopedAcquisitionKnowledge
 import com.colinmoerbe.poecompanion.acquisition.probability.FixedDropEstimateResolution
 import com.colinmoerbe.poecompanion.acquisition.readmodel.AcquisitionReadModelService
 import com.colinmoerbe.poecompanion.acquisition.readmodel.AcquisitionSourceRelationshipResult
+import com.colinmoerbe.poecompanion.acquisition.readmodel.AcquisitionSourceAssessment
+import com.colinmoerbe.poecompanion.acquisition.relationship.DropRelationshipResolution
+import com.colinmoerbe.poecompanion.acquisition.relationship.DropRelationshipState
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.AcquisitionSourceId
 import com.colinmoerbe.poecompanion.browser.shared.AcquisitionBrowserKnowledgeLabels
 import com.colinmoerbe.poecompanion.browser.shared.UniqueDisplayLabels
@@ -26,13 +31,20 @@ internal class AcquisitionBrowserReadModelService(
     fun list(): AcquisitionBrowserListPage {
         val result = acquisition.findSources()
         val sources = result.sources.map { entry ->
+            val knowledge = entry.sourceKnowledge
             AcquisitionBrowserSourceEntry(
                 id = entry.source.id.value,
-                displayName = AcquisitionBrowserKnowledgeLabels.sourceLabel(entry.sourceKnowledge),
-                availability = AcquisitionBrowserKnowledgeLabels.sourceAvailability(entry.sourceKnowledge),
+                displayName = AcquisitionBrowserKnowledgeLabels.sourceLabel(knowledge),
+                nameResolved = AcquisitionBrowserKnowledgeLabels.sourceNameResolved(knowledge),
+                nameExplanation = AcquisitionBrowserKnowledgeLabels.sourceNameExplanation(knowledge),
+                availability = AcquisitionBrowserKnowledgeLabels.readableSourceAvailability(knowledge),
+                availabilityCssClass = AcquisitionBrowserKnowledgeLabels.sourceAvailabilityCssClass(knowledge),
                 relationshipCount = entry.relationshipCount,
             )
         }.sortedWith(compareBy<AcquisitionBrowserSourceEntry> { it.displayName.lowercase() }.thenBy { it.id })
+            .mapIndexed { index, entry ->
+                if (entry.nameResolved) entry else entry.copy(displayName = "Acquisition source ${index + 1}")
+            }
         return AcquisitionBrowserListPage(
             sources = sources,
             accountSelected = result.accountEvaluation != null,
@@ -52,8 +64,15 @@ internal class AcquisitionBrowserReadModelService(
         }.sortedWith(ordering)
         return AcquisitionBrowserDetailPage(
             id = sourceId.value,
-            displayName = AcquisitionBrowserKnowledgeLabels.sourceLabel(result.sourceKnowledge),
-            availability = AcquisitionBrowserKnowledgeLabels.sourceAvailability(result.sourceKnowledge),
+            displayName = if (AcquisitionBrowserKnowledgeLabels.sourceNameResolved(result.sourceKnowledge)) {
+                AcquisitionBrowserKnowledgeLabels.sourceLabel(result.sourceKnowledge)
+            } else {
+                "Acquisition source"
+            },
+            nameResolved = AcquisitionBrowserKnowledgeLabels.sourceNameResolved(result.sourceKnowledge),
+            nameExplanation = AcquisitionBrowserKnowledgeLabels.sourceNameExplanation(result.sourceKnowledge),
+            availability = AcquisitionBrowserKnowledgeLabels.readableSourceAvailability(result.sourceKnowledge),
+            availabilityCssClass = AcquisitionBrowserKnowledgeLabels.sourceAvailabilityCssClass(result.sourceKnowledge),
             accountSelected = result.accountEvaluation != null,
             environmentSelected = result.evaluationContext != null,
             attemptsEditable = result.evaluationContext?.let { context ->
@@ -98,33 +117,49 @@ internal class AcquisitionBrowserReadModelService(
             displayName = label.name,
             catalogKnown = id in knownIds,
             syntheticLabel = label.synthetic,
-            relationshipStatus = AcquisitionBrowserKnowledgeLabels.relationship(assessment?.relationshipKnowledge),
+            relationshipStatus = AcquisitionBrowserKnowledgeLabels.readableRelationship(assessment?.relationshipKnowledge),
+            relationshipCssClass = AcquisitionBrowserKnowledgeLabels.relationshipCssClass(assessment?.relationshipKnowledge),
             probabilityStatus = AcquisitionBrowserKnowledgeLabels.estimate(assessment?.probabilityKnowledge),
             chancePerAttempt =
             AcquisitionBrowserKnowledgeLabels.acceptedPerAttemptChance(assessment?.probabilityKnowledge),
-            estimateProvenance = estimate?.provenance?.name,
+            estimateProvenance = estimate?.provenance?.name?.lowercase(Locale.ROOT)
+                ?.replaceFirstChar { it.titlecase(Locale.ROOT) },
             evidenceReference = estimate?.evidenceReference,
             reviewedAt = estimate?.reviewedAt?.toString(),
             actionable = calculation != null,
             probabilityWithinAttempts = calculation?.probabilityWithinAvailableAttempts?.let {
-                percent(it, CUMULATIVE_DECIMALS)
+                AcquisitionBrowserKnowledgeLabels.cumulativePercent(it)
             },
             expectedAttempts = calculation?.expectedAttemptsUntilSuccess?.let(::expected),
             thresholds = thresholds,
+            nonActionableExplanation = nonActionableExplanation(assessment),
         )
     }
 
-    private fun percent(fraction: Double, decimals: Int): String =
-        String.format(Locale.ROOT, "%." + decimals + "f%%", fraction * PERCENT_MULTIPLIER)
+    private fun nonActionableExplanation(assessment: AcquisitionSourceAssessment?): String? {
+        if (assessment?.calculation != null) return null
+        if (assessment == null) return "Select a game environment to evaluate this drop relationship."
+
+        val source = (assessment.sourceKnowledge as? ScopedAcquisitionKnowledge.Selected<*>)?.resolution
+        val relationship = (assessment.relationshipKnowledge as? ScopedAcquisitionKnowledge.Selected<*>)?.resolution
+        val availability = (source as? BossEncounterKnowledgeResolution.Resolved)?.snapshot?.availability
+        val dropState = (relationship as? DropRelationshipResolution.Resolved)?.snapshot?.state
+        return when {
+            availability == AcquisitionSourceAvailability.UNAVAILABLE ->
+                "This source is unavailable in the selected environment. Recorded estimates are not actionable."
+            dropState == DropRelationshipState.CANNOT_DROP ->
+                "This source is recorded as unable to drop this Unique in the selected environment."
+            availability != AcquisitionSourceAvailability.AVAILABLE ->
+                "Source availability is not verified for the selected environment."
+            dropState != DropRelationshipState.CAN_DROP ->
+                "This drop relationship is not verified for the selected environment."
+            else -> "No supported applicable fixed-probability estimate is available."
+        }
+    }
 
     private fun expected(value: Double): String = if (value == value.toLong().toDouble()) {
         value.toLong().toString()
     } else {
         String.format(Locale.ROOT, "%.2f", value)
-    }
-
-    private companion object {
-        const val CUMULATIVE_DECIMALS = 1
-        const val PERCENT_MULTIPLIER = 100.0
     }
 }

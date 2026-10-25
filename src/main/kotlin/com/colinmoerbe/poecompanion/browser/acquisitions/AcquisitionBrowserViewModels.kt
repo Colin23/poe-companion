@@ -5,7 +5,10 @@ import java.util.UUID
 internal data class AcquisitionBrowserSourceEntry(
     val id: UUID,
     val displayName: String,
+    val nameResolved: Boolean,
+    val nameExplanation: String?,
     val availability: String,
+    val availabilityCssClass: String,
     val relationshipCount: Int,
 )
 
@@ -24,6 +27,7 @@ internal data class AcquisitionBrowserRelationshipEntry(
     val catalogKnown: Boolean,
     val syntheticLabel: Boolean,
     val relationshipStatus: String,
+    val relationshipCssClass: String,
     val probabilityStatus: String,
     val chancePerAttempt: String?,
     val estimateProvenance: String?,
@@ -33,12 +37,19 @@ internal data class AcquisitionBrowserRelationshipEntry(
     val probabilityWithinAttempts: String?,
     val expectedAttempts: String?,
     val thresholds: List<AcquisitionBrowserThreshold>,
-)
+    val nonActionableExplanation: String?,
+) {
+    val attemptsFor95Percent: Int?
+        get() = thresholds.firstOrNull { it.percentage == 95 }?.attempts
+}
 
 internal data class AcquisitionBrowserDetailPage(
     val id: UUID,
     val displayName: String,
+    val nameResolved: Boolean,
+    val nameExplanation: String?,
     val availability: String,
+    val availabilityCssClass: String,
     val accountSelected: Boolean,
     val environmentSelected: Boolean,
     val attemptsEditable: Boolean,
@@ -47,4 +58,7 @@ internal data class AcquisitionBrowserDetailPage(
     val previewAttempts: Int?,
     val effectiveAttempts: Int?,
     val relationships: List<AcquisitionBrowserRelationshipEntry>,
-)
+) {
+    val hasSyntheticLabels: Boolean
+        get() = relationships.any { it.syntheticLabel }
+}

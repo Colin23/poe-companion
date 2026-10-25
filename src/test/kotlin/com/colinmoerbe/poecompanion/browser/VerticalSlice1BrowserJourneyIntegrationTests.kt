@@ -82,11 +82,11 @@ internal class VerticalSlice1BrowserJourneyIntegrationTests(
 
         val boss = acquisitionDetail(sourceUrl)
         assertThat(boss.displayName).isEqualTo("Boss Y")
-        assertThat(boss.availability).isEqualTo("AVAILABLE")
+        assertThat(boss.availability).isEqualTo("Available")
         assertThat(boss.savedAttempts).isEqualTo(12)
         val drop = boss.relationships.single()
         assertThat(drop.uniqueId).isEqualTo(ids.uniqueC.value)
-        assertThat(drop.relationshipStatus).isEqualTo("CAN_DROP")
+        assertThat(drop.relationshipStatus).isEqualTo("Can drop")
         assertThat(drop.actionable).isTrue()
         assertThat(drop.chancePerAttempt).isEqualTo("10%")
         assertThat(drop.probabilityWithinAttempts).isEqualTo("71.8%")
