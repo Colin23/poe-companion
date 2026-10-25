@@ -16,75 +16,98 @@
         <span aria-hidden="true"> / </span>
         <span aria-current="page" th:text="${page.displayName}">Build X</span>
     </nav>
-    <section class="panel">
-        <h1 th:text="${page.displayName}">Build X</h1>
-        <p class="readiness-status" th:text="${page.state.title}">Partial</p>
-        <p th:text="${page.explanation}">Enabling requirements satisfied; core incomplete.</p>
-        <dl class="detail-facts">
-            <div>
-                <dt>Build variant ID</dt>
-                <dd><code th:text="${page.id}">UUID</code></dd>
-            </div>
-            <div>
-                <dt>Compatibility version</dt>
-                <dd th:text="${page.compatibilityVersion ?: 'No environment selected'}">3.30</dd>
-            </div>
-            <div>
-                <dt>Revision verification</dt>
-                <dd th:text="${page.revisionStatus}">Active revision</dd>
-            </div>
-        </dl>
+    <section class="panel builds-panel">
+        <div class="build-detail-summary">
+            <h1 th:text="${page.displayName}">Build X</h1>
+            <span class="readiness-status" th:classappend="| status--${page.statusCssClass}|"
+                  th:text="${page.statusLabel}">Partial</span>
+            <p class="build-compatibility" th:text="${page.compatibilityMessage}">
+                Requirements available for version 3.30.
+            </p>
+            <p class="muted" th:text="${page.explanation}">Some core Uniques are missing.</p>
+        </div>
 
-        <p class="notice" th:if="${page.hasRequiredUniqueGroups == false}">
-            No required Uniques. Upgrade requirements, if any, remain optional for primary readiness.
-        </p>
-        <p class="notice" th:if="${page.hasRequiredUniqueGroups == null}">
-            Requirement ownership cannot be evaluated for this Build in the current selection.
+        <p class="notice" th:if="${page.state.name() == 'NO_PERSONAL'}">
+            Your personal Unique collection is not yet available in this game environment.
+            Required quantities can be viewed, but ownership cannot be evaluated.
         </p>
 
-        <section th:if="${page.hasRequiredUniqueGroups != null}" class="requirements-section">
-            <h2>Unique requirements</h2>
-            <div class="requirement-group" th:each="group : ${page.groups}">
-                <div class="group-heading">
-                    <h3><span th:text="${group.importance}">CORE</span> — <span th:text="${group.logic}">ALL</span></h3>
-                    <span class="readiness-status"
-                          th:text="${group.satisfied == null} ? 'Not evaluated' : (${group.satisfied} ? 'Group satisfied' : 'Group incomplete')">Group incomplete</span>
+        <div th:if="${page.hasRequiredUniqueGroups != null}">
+            <p class="build-placeholder-note" th:if="${page.hasSyntheticLabels}">
+                Some Unique names are development placeholders.
+            </p>
+
+            <section class="requirements-section" th:if="${page.hasRequiredUniqueGroups}">
+                <h2>Required Uniques</h2>
+                <p class="small-muted">Build-enabling requirements determine whether a Build is blocked.
+                    Core requirements determine whether it is ready once enabling items are owned.</p>
+
+                <div class="requirement-group requirement-group--required" th:each="group : ${page.groups}"
+                     th:if="${group.importance != 'UPGRADE'}">
+                    <div class="group-heading">
+                        <h3 th:text="${group.title}">Core Uniques</h3>
+                        <span class="readiness-status" th:classappend="| status--${group.statusCssClass}|"
+                              th:text="${group.statusLabel}">Missing items</span>
+                    </div>
+                    <p class="small-muted" th:if="${group.guidance != null}"
+                       th:text="${group.guidance}">All listed Uniques are needed to complete this group.</p>
+                    <ul class="requirement-list">
+                        <li th:each="requirement : ${group.requirements}">
+                            <div>
+                                <a th:if="${requirement.catalogKnown}"
+                                   th:href="@{/uniques/{id}(id=${requirement.id})}"
+                                   th:text="${requirement.displayName}">Unique C</a>
+                                <span th:unless="${requirement.catalogKnown}"
+                                      th:text="${requirement.displayName}">Unique (name unavailable)</span>
+                            </div>
+                            <div class="requirement-quantity">
+                                <span th:text="${requirement.quantityLabel}">1 / 2 owned</span>
+                                <span class="requirement-outcome"
+                                      th:classappend="| requirement-outcome--${requirement.statusCssClass}|"
+                                      th:text="${requirement.statusLabel}">Missing 1 copy</span>
+                            </div>
+                        </li>
+                    </ul>
                 </div>
-                <p class="small-muted" th:if="${group.logic == 'ANY'}">
-                    Any one of the alternatives can satisfy this group.
-                </p>
-                <p class="small-muted" th:if="${group.importance == 'UPGRADE'}">
-                    Upgrades do not affect primary Unique readiness.
-                </p>
-                <ul class="requirement-list">
-                    <li th:each="requirement : ${group.requirements}">
-                        <div>
-                            <a th:if="${requirement.catalogKnown}" th:href="@{/uniques/{id}(id=${requirement.id})}"
-                               th:text="${requirement.displayName}">Unique C</a>
-                            <span th:unless="${requirement.catalogKnown}"
-                                  th:text="${requirement.displayName}">Unique (name unavailable)</span>
-                            <span class="small-muted" th:if="${requirement.syntheticLabel}">
-                                Synthetic development item
-                            </span>
-                            <span class="small-muted" th:unless="${requirement.syntheticLabel}"
-                                  th:text="${requirement.id}">UUID</span>
-                        </div>
-                        <span class="requirement-quantity">
-                            <span th:text="${requirement.ownedQuantity != null ? requirement.ownedQuantity : '—'}">0</span>
-                            /
-                            <span th:text="${requirement.requiredQuantity}">1</span>
-                            <span th:text="${requirement.satisfied == null} ? ' · not evaluated' : (${requirement.satisfied} ? ' · satisfied' : ' · missing copies')">
-                                · missing copies
-                            </span>
-                        </span>
-                    </li>
-                </ul>
-            </div>
-        </section>
-        <section class="upcoming-section">
-            <h2>Build references</h2>
-            <p class="small-muted">Build guide and PoB references are not available yet.</p>
-        </section>
+            </section>
+
+            <section class="requirements-section" th:if="${page.hasOptionalGroups}">
+                <h2>Optional upgrades</h2>
+                <p class="small-muted">These Unique upgrades are aspirational. None is required for primary Unique readiness.</p>
+
+                <div class="requirement-group requirement-group--optional" th:each="group : ${page.groups}"
+                     th:if="${group.importance == 'UPGRADE'}">
+                    <div class="group-heading">
+                        <h3 th:text="${group.title}">Upgrade options</h3>
+                        <span class="readiness-status" th:classappend="| status--${group.statusCssClass}|"
+                              th:text="${group.statusLabel}">Not collected yet</span>
+                    </div>
+                    <p class="small-muted" th:if="${group.guidance != null}"
+                       th:text="${group.guidance}">Owning any one of these Uniques completes this group.</p>
+                    <ul class="requirement-list">
+                        <li th:each="requirement : ${group.requirements}">
+                            <div>
+                                <a th:if="${requirement.catalogKnown}"
+                                   th:href="@{/uniques/{id}(id=${requirement.id})}"
+                                   th:text="${requirement.displayName}">Unique I</a>
+                                <span th:unless="${requirement.catalogKnown}"
+                                      th:text="${requirement.displayName}">Unique (name unavailable)</span>
+                            </div>
+                            <div class="requirement-quantity">
+                                <span th:text="${requirement.quantityLabel}">0 / 1 owned</span>
+                                <span class="requirement-outcome"
+                                      th:classappend="| requirement-outcome--${requirement.statusCssClass}|"
+                                      th:text="${requirement.statusLabel}">Missing 1 copy</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+            <p class="notice" th:if="${page.groups.isEmpty()}">
+                This Build has no recorded Unique requirements.
+            </p>
+        </div>
+
         <p><a th:href="@{/builds}">Back to Builds</a></p>
     </section>
 </main>

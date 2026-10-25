@@ -36,9 +36,11 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.context.annotation.Import
 import org.springframework.http.HttpHeaders
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -106,9 +108,12 @@ internal class BuildBrowserControllerIntegrationTests(
         assertThat(detail.groups[1].requirements.map { it.displayName }).containsExactly("Unique B", "Unique C")
 
         mockMvc.perform(get("/builds/${ids.variant.value}").with(user("test-user")))
-            .andExpect(content().string(containsString("Synthetic development item")))
+            .andExpect(content().string(containsString("Some Unique names are development placeholders.")))
             .andExpect(content().string(containsString("/uniques/${ids.uniqueC.value}")))
-            .andExpect(content().string(containsString("Group incomplete")))
+            .andExpect(content().string(containsString("Missing items")))
+            .andExpect(content().string(containsString("Required Uniques")))
+            .andExpect(content().string(containsString("Requirements available for version 3.30")))
+            .andExpect(content().string(containsString("Missing 1 copy")))
     }
 
     @Test
@@ -134,9 +139,9 @@ internal class BuildBrowserControllerIntegrationTests(
         assertThat(buildR.hasRequiredUniqueGroups).isFalse()
 
         listOf(
-            ids.variantP to "Any one of the alternatives",
-            ids.variantQ to "missing copies",
-            ids.variantR to "Upgrades do not affect primary Unique readiness.",
+            ids.variantP to "Owning any one of these Uniques completes this group.",
+            ids.variantQ to "Missing 1 copy",
+            ids.variantR to "None is required for primary Unique readiness.",
         ).forEach { (id, marker) ->
             mockMvc.perform(get("/builds/${id.value}").with(user("test-user")))
                 .andExpect(status().isOk)
@@ -210,8 +215,74 @@ internal class BuildBrowserControllerIntegrationTests(
         assertThat(detailPage(empty).hasRequiredUniqueGroups).isFalse()
         mockMvc.perform(get("/builds/${empty.value}").with(user("test-user")))
             .andExpect(content().string(containsString("No required Uniques")))
-        assertThat(listPage().sections.single { it.state == BuildBrowserState.UNIQUE_READY }.entries)
-            .anyMatch { it.explanation == "No required Uniques" }
+        val noRequired = listPage().sections.single { it.category == BuildBrowserListCategory.NO_REQUIRED }
+        assertThat(noRequired.entries.map { it.displayName })
+            .contains("Upgrades Only", "No Requirements")
+        assertThat(noRequired.entries).allMatch { it.state == BuildBrowserState.UNIQUE_READY }
+    }
+
+    @Test
+    fun `Build list separates no required Uniques from readiness without changing domain states`() {
+        initializer.initialize()
+        fixtureActor.asLegacyUser { ownership.setOwnedQuantity(ids.account, ids.uniqueC, 1) }
+
+        val categories = listPage().sections.map { it.category }
+        assertThat(categories).containsExactly(
+            BuildBrowserListCategory.NO_REQUIRED,
+            BuildBrowserListCategory.UNIQUE_READY,
+            BuildBrowserListCategory.PARTIAL,
+            BuildBrowserListCategory.BLOCKED,
+        )
+        assertThat(listPage().sections.single { it.category == BuildBrowserListCategory.NO_REQUIRED }.entries)
+            .anyMatch { it.displayName == "Build R" && it.state == BuildBrowserState.UNIQUE_READY }
+
+        val listHtml = mockMvc.perform(get("/builds").with(user("test-user")))
+            .andExpect(status().isOk)
+            .andReturn().response.contentAsString
+        assertThat(listHtml).contains("No required Uniques", "Unique ready", "Partial", "Blocked")
+            .doesNotContain("All enabling and core Unique requirements are satisfied.</span>")
+    }
+
+    @Test
+    fun `optional upgrade groups stay visually distinct and do not imply required failure`() {
+        initializer.initialize()
+
+        val html = mockMvc.perform(get("/builds/${ids.variantR.value}").with(user("test-user")))
+            .andExpect(status().isOk)
+            .andReturn().response.contentAsString
+
+        assertThat(html).contains("No required Uniques", "Optional upgrades", "Not collected yet")
+            .contains("All listed Uniques are needed to complete this group.")
+            .doesNotContain("Build variant ID", "Revision verification", "CORE — ALL", "UPGRADE — ANY")
+
+        val anyUpgrade = mockMvc.perform(get("/builds/${ids.variantQ.value}").with(user("test-user")))
+            .andExpect(status().isOk)
+            .andReturn().response.contentAsString
+        assertThat(anyUpgrade).contains("Required Uniques", "Optional upgrades")
+            .contains("Owning any one of these Uniques completes this group.")
+    }
+
+    @Test
+    fun `unknown personal ownership shows required quantities without pretending missing copies`() {
+        initializer.initialize()
+        // Standard is recognized and has compatible requirements, but USER has no personal context there.
+        mockMvc.perform(
+            post("/environment").with(user("test-user").roles("USER")).with(csrf())
+                .param("version", "3.30")
+                .param("type", "STANDARD")
+                .param("mortality", "SOFTCORE")
+                .param("participation", "SSF")
+                .param("ruleset", "NORMAL"),
+        ).andExpect(status().is3xxRedirection)
+
+        assertThat(detailPage(ids.variant).state).isEqualTo(BuildBrowserState.NO_PERSONAL)
+        val html = mockMvc.perform(get("/builds/${ids.variant.value}").with(user("test-user").roles("USER")))
+            .andExpect(status().isOk)
+            .andReturn().response.contentAsString
+        assertThat(html).contains("Requirements available for version 3.30")
+            .contains("Requires 1 copy")
+            .contains("Ownership not evaluated")
+            .doesNotContain("Build variant ID")
     }
 
     @Test
@@ -221,14 +292,18 @@ internal class BuildBrowserControllerIntegrationTests(
         val draft = createBuild("Draft Build", emptyList(), activate = false)
         assertThat(detailPage(otherVersion).state).isEqualTo(BuildBrowserState.NO_ACTIVE_REVISION)
         assertThat(detailPage(draft).state).isEqualTo(BuildBrowserState.NO_ACTIVE_REVISION)
-        assertThat(listPage().sections.any { it.state == BuildBrowserState.NO_ACTIVE_REVISION }).isTrue()
+        val incompatible = listPage().sections.single {
+            it.category == BuildBrowserListCategory.NO_ACTIVE_REVISION
+        }
+        assertThat(incompatible.entries.map { it.id })
+            .containsExactlyInAnyOrder(otherVersion.value, draft.value)
 
         selectionRepository.deleteAllInBatch()
         assertThat(detailPage(ids.variant).state).isEqualTo(BuildBrowserState.NO_ACCOUNT)
         assertThat(detailPage(ids.variant).hasRequiredUniqueGroups).isNull()
         val listing = listPage()
         assertThat(listing.environmentSelected).isFalse()
-        assertThat(listing.sections.single().state).isEqualTo(BuildBrowserState.NO_ACCOUNT)
+        assertThat(listing.sections.single().category).isEqualTo(BuildBrowserListCategory.NO_ACCOUNT)
     }
 
     @Test
