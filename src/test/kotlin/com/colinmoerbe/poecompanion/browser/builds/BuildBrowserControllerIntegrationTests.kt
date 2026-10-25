@@ -278,6 +278,75 @@ internal class BuildBrowserControllerIntegrationTests(
             .andExpect(status().is3xxRedirection)
     }
 
+    @Test
+    fun `shared header distinguishes game environment and user on desktop and mobile`() {
+        initializer.initialize()
+
+        listOf("test-user" to "USER", "test-admin" to "ADMIN").forEach { (username, role) ->
+            val html =
+                mockMvc.perform(get("/").with(user(username).roles(role)))
+                    .andExpect(status().isOk)
+                    .andReturn().response.contentAsString
+
+            assertThat(html)
+                .contains("aria-label=\"Primary\"")
+                .contains("aria-label=\"Mobile navigation\"")
+                .contains("<details class=\"mobile-navigation\">")
+                .contains("src=\"/js/mobile-navigation.js\"")
+                .contains("<summary class=\"mobile-menu-toggle\">")
+                .contains("Game environment:")
+                .contains("href=\"/environment\"")
+                .contains("3.30 SC SSF Development SSF league")
+                .contains("Signed in as <strong>$username</strong>")
+                .contains("action=\"/logout\"")
+                .contains("name=\"_csrf\"")
+        }
+
+        val environmentPage =
+            mockMvc.perform(get("/environment").with(user("test-user").roles("USER")))
+                .andExpect(status().isOk)
+                .andReturn().response.contentAsString
+        assertThat(environmentPage)
+            .contains("class=\"environment-switch is-active\"")
+            .contains("aria-current=\"page\"")
+
+        selectionRepository.deleteAll()
+
+        val withoutSelection =
+            mockMvc.perform(get("/").with(user("test-user").roles("USER")))
+                .andExpect(status().isOk)
+                .andReturn().response.contentAsString
+
+        assertThat(withoutSelection)
+            .contains("Not selected")
+            .contains("aria-label=\"Select game environment\"")
+    }
+
+    @Test
+    fun `mobile menu dismissal script is served for outside clicks and Escape`() {
+        mockMvc.perform(get("/js/mobile-navigation.js").with(user("test-user").roles("USER")))
+            .andExpect(status().isOk)
+            .andExpect(content().string(containsString("document.addEventListener(\"click\"")))
+            .andExpect(content().string(containsString("document.addEventListener(\"focusin\"")))
+            .andExpect(content().string(containsString("event.key === \"Escape\"")))
+    }
+
+    @Test
+    fun `home explains each player journey without promising complete drop knowledge`() {
+        val html =
+            mockMvc.perform(get("/").with(user("test-user").roles("USER")))
+                .andExpect(status().isOk)
+                .andReturn().response.contentAsString
+
+        assertThat(html)
+            .contains("Explore Builds")
+            .contains("Compare a Build")
+            .contains("Unique Collection")
+            .contains("switching leagues does not overwrite your progress")
+            .contains("Acquisition Sources")
+            .contains("missing knowledge does not mean a drop is impossible")
+    }
+
     private fun group(
         importance: RequirementImportance,
         logic: RequirementLogic,

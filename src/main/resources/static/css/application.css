@@ -448,3 +448,222 @@ a:focus-visible {
         gap: 0.25rem;
     }
 }
+
+/* Shared header: primary destinations, selected environment and account are distinct. */
+.header-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1rem;
+    min-width: 0;
+}
+
+.environment-switch {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    max-width: 19rem;
+    padding: 0.35rem 0.75rem;
+    border: 1px solid #555b63;
+    border-radius: 0.35rem;
+    color: #ece8df;
+    text-decoration: none;
+}
+
+.environment-switch:hover,
+.environment-switch:focus-visible {
+    border-color: #e2b77d;
+}
+
+.environment-switch.is-active {
+    border-color: #e2b77d;
+    background: #383024;
+}
+
+.environment-caption {
+    font-size: 0.72rem;
+    color: #b9bdc5;
+}
+
+.environment-name {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.environment-unselected .environment-name {
+    color: #e2b77d;
+}
+
+.mobile-navigation {
+    display: none;
+}
+
+/* Home introduces the player journeys without adding dashboard features. */
+.home-panel {
+    padding: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.home-panel h1 {
+    margin-top: 0;
+}
+
+.home-intro {
+    max-width: 65ch;
+    color: #d7d2c9;
+}
+
+.home-journey > div {
+    padding: 1.35rem;
+}
+
+.home-journey p {
+    line-height: 1.6;
+}
+
+/* Switch to compact navigation before the desktop header becomes cramped. */
+@media (max-width: 72rem) {
+    .site-header {
+        position: relative;
+        display: grid;
+        grid-template-columns: max-content minmax(0, 1fr) auto;
+        align-items: center;
+        column-gap: 0.65rem;
+        padding: 0.75rem 1rem;
+    }
+
+    .brand-and-navigation {
+        display: block;
+        min-width: 0;
+    }
+
+    .site-name {
+        font-size: 1rem;
+        white-space: nowrap;
+    }
+
+    .desktop-navigation,
+    .desktop-session {
+        display: none;
+    }
+
+    .header-actions {
+        display: contents;
+    }
+
+    .environment-switch {
+        max-width: none;
+        padding: 0.3rem 0.4rem;
+    }
+
+    .environment-caption {
+        font-size: 0.65rem;
+    }
+
+    .environment-name {
+        font-size: 0.75rem;
+    }
+
+    .mobile-navigation {
+        display: block;
+    }
+
+    .mobile-menu-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.3rem;
+        min-height: 2.75rem;
+        padding: 0.5rem;
+        border: 1px solid #777d86;
+        border-radius: 0.35rem;
+        cursor: pointer;
+        list-style: none;
+    }
+
+    .mobile-menu-toggle::-webkit-details-marker {
+        display: none;
+    }
+
+    .mobile-menu-toggle:hover,
+    .mobile-navigation[open] .mobile-menu-toggle {
+        border-color: #e2b77d;
+    }
+
+    .mobile-menu-toggle:focus-visible {
+        outline: 0.2rem solid #d9a441;
+        outline-offset: 0.2rem;
+    }
+
+    .mobile-menu-icon {
+        font-size: 1.2rem;
+        line-height: 1;
+    }
+
+    .mobile-menu-panel {
+        position: absolute;
+        z-index: 10;
+        top: calc(100% - 1px);
+        right: 0;
+        left: 0;
+        padding: 1rem;
+        background: #202328;
+        border: 1px solid #393d44;
+        box-shadow: 0 0.75rem 1.25rem #0008;
+    }
+
+    .mobile-menu-links {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .mobile-menu-links a {
+        display: block;
+        padding: 0.75rem;
+        color: #ece8df;
+        text-decoration: none;
+        border-radius: 0.35rem;
+    }
+
+    .mobile-menu-links a:hover,
+    .mobile-menu-links a.is-active {
+        background: #383024;
+        color: #ffe0b4;
+    }
+
+    .mobile-menu-links a.is-active {
+        font-weight: 700;
+    }
+
+    .mobile-session-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-top: 0.75rem;
+        padding: 1rem 0.75rem 0;
+        border-top: 1px solid #393d44;
+    }
+
+    .mobile-session-actions .session-details {
+        overflow-wrap: anywhere;
+    }
+}
+
+@media (max-width: 24rem) {
+    .mobile-menu-toggle span:last-child {
+        /* Keep the text in the accessibility tree when only the icon is visible. */
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+        border: 0;
+    }
+}
