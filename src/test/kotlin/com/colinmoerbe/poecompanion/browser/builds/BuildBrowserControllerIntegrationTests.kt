@@ -292,6 +292,7 @@ internal class BuildBrowserControllerIntegrationTests(
                 .contains("aria-label=\"Primary\"")
                 .contains("aria-label=\"Mobile navigation\"")
                 .contains("<details class=\"mobile-navigation\">")
+                .contains("src=\"/js/mobile-navigation.js\"")
                 .contains("<summary class=\"mobile-menu-toggle\">")
                 .contains("Game environment:")
                 .contains("href=\"/environment\"")
@@ -311,6 +312,15 @@ internal class BuildBrowserControllerIntegrationTests(
         assertThat(withoutSelection)
             .contains("Not selected")
             .contains("aria-label=\"Select game environment\"")
+    }
+
+    @Test
+    fun `mobile menu dismissal script is served for outside clicks and Escape`() {
+        mockMvc.perform(get("/js/mobile-navigation.js").with(user("test-user").roles("USER")))
+            .andExpect(status().isOk)
+            .andExpect(content().string(containsString("document.addEventListener(\"click\"")))
+            .andExpect(content().string(containsString("document.addEventListener(\"focusin\"")))
+            .andExpect(content().string(containsString("event.key === \"Escape\"")))
     }
 
     @Test
