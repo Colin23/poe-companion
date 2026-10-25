@@ -108,7 +108,7 @@ internal class BuildBrowserControllerIntegrationTests(
         assertThat(detail.groups[1].requirements.map { it.displayName }).containsExactly("Unique B", "Unique C")
 
         mockMvc.perform(get("/builds/${ids.variant.value}").with(user("test-user")))
-            .andExpect(content().string(containsString("Synthetic development item")))
+            .andExpect(content().string(containsString("Some Unique names are development placeholders.")))
             .andExpect(content().string(containsString("/uniques/${ids.uniqueC.value}")))
             .andExpect(content().string(containsString("Missing items")))
             .andExpect(content().string(containsString("Required Uniques")))
@@ -286,7 +286,7 @@ internal class BuildBrowserControllerIntegrationTests(
         val draft = createBuild("Draft Build", emptyList(), activate = false)
         assertThat(detailPage(otherVersion).state).isEqualTo(BuildBrowserState.NO_ACTIVE_REVISION)
         assertThat(detailPage(draft).state).isEqualTo(BuildBrowserState.NO_ACTIVE_REVISION)
-        assertThat(listPage().sections.any { it.state == BuildBrowserState.NO_ACTIVE_REVISION }).isTrue()
+        assertThat(listPage().sections.any { it.category == BuildBrowserListCategory.NO_ACTIVE_REVISION }).isTrue()
 
         selectionRepository.deleteAllInBatch()
         assertThat(detailPage(ids.variant).state).isEqualTo(BuildBrowserState.NO_ACCOUNT)
