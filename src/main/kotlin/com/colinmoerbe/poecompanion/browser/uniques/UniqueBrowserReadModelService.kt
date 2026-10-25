@@ -98,26 +98,8 @@ internal class UniqueBrowserReadModelService(
             sourceKnowledge == ScopedAcquisitionKnowledge.Ambiguous ||
                 relationshipKnowledge == ScopedAcquisitionKnowledge.Ambiguous
 
-        val statusLabel = when {
-            availability == AcquisitionSourceAvailability.UNAVAILABLE -> "Unavailable"
-            dropState == DropRelationshipState.CANNOT_DROP -> "Cannot drop"
-            dropState == DropRelationshipState.CAN_DROP -> "Can drop"
-            ambiguous -> "Ambiguous"
-            else -> "Unknown"
-        }
-        val explanation = when {
-            assessment == null -> "Select a game environment to evaluate source availability and drop knowledge."
-            availability == AcquisitionSourceAvailability.UNAVAILABLE ->
-                "This source is unavailable in the selected environment. Recorded drop knowledge is not actionable."
-            dropState == DropRelationshipState.CANNOT_DROP ->
-                "This source is recorded as unable to drop this Unique under the selected conditions."
-            actionableChance != null ->
-                "This source is available, and an accepted fixed estimate applies under the selected conditions."
-            ambiguous -> "Accepted knowledge cannot be resolved unambiguously for this environment."
-            dropState == DropRelationshipState.CAN_DROP ->
-                "The drop relationship is recorded, but no supported actionable fixed chance is available."
-            else -> "There is not enough accepted knowledge to determine drop eligibility for this source."
-        }
+        val statusLabel = sourceStatus(availability, dropState, ambiguous)
+        val explanation = sourceExplanation(assessment, availability, dropState, actionableChance, ambiguous)
 
         return UniqueAcquisitionCandidate(
             sourceId = sourceId,
@@ -141,6 +123,38 @@ internal class UniqueBrowserReadModelService(
             statusCssClass = statusLabel.lowercase().replace(' ', '-'),
             explanation = explanation,
         )
+    }
+
+    private fun sourceStatus(
+        availability: AcquisitionSourceAvailability?,
+        dropState: DropRelationshipState?,
+        ambiguous: Boolean,
+    ): String = when {
+        availability == AcquisitionSourceAvailability.UNAVAILABLE -> "Unavailable"
+        dropState == DropRelationshipState.CANNOT_DROP -> "Cannot drop"
+        dropState == DropRelationshipState.CAN_DROP -> "Can drop"
+        ambiguous -> "Ambiguous"
+        else -> "Unknown"
+    }
+
+    private fun sourceExplanation(
+        assessment: AcquisitionSourceAssessment?,
+        availability: AcquisitionSourceAvailability?,
+        dropState: DropRelationshipState?,
+        actionableChance: String?,
+        ambiguous: Boolean,
+    ): String = when {
+        assessment == null -> "Select a game environment to evaluate source availability and drop knowledge."
+        availability == AcquisitionSourceAvailability.UNAVAILABLE ->
+            "This source is unavailable in the selected environment. Recorded drop knowledge is not actionable."
+        dropState == DropRelationshipState.CANNOT_DROP ->
+            "This source is recorded as unable to drop this Unique under the selected conditions."
+        actionableChance != null ->
+            "This source is available, and an accepted fixed estimate applies under the selected conditions."
+        ambiguous -> "Accepted knowledge cannot be resolved unambiguously for this environment."
+        dropState == DropRelationshipState.CAN_DROP ->
+            "The drop relationship is recorded, but no supported actionable fixed chance is available."
+        else -> "There is not enough accepted knowledge to determine drop eligibility for this source."
     }
 
     private fun entry(id: UniqueDefinitionId, ownership: CurrentOwnership?): UniqueBrowserEntry {

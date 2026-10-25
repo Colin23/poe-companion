@@ -77,8 +77,11 @@ internal object AcquisitionBrowserKnowledgeLabels {
         val resolution = (knowledge as? ScopedAcquisitionKnowledge.Selected<*>)?.resolution
         val estimate = (resolution as? FixedDropEstimateResolution.Resolved)?.snapshot ?: return null
         val percent = estimate.model.probabilityPerAttempt * PERCENT_MULTIPLIER
-        if (percent > 0.0 && percent < MIN_VISIBLE_PERCENT) return "<0.001%"
-        return String.format(Locale.ROOT, "%.3f", percent).trimEnd('0').trimEnd('.') + "%"
+        return if (percent > 0.0 && percent < MIN_VISIBLE_PERCENT) {
+            "<0.001%"
+        } else {
+            String.format(Locale.ROOT, "%.3f", percent).trimEnd('0').trimEnd('.') + "%"
+        }
     }
 
     private const val MIN_VISIBLE_PERCENT = 0.001
