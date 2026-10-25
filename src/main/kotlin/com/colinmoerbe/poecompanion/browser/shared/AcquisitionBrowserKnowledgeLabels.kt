@@ -144,17 +144,6 @@ internal object AcquisitionBrowserKnowledgeLabels {
             else -> "unknown"
         }
 
-    /** A nonzero chance must not render as 0.0%, nor a sub-certain one as 100.0%. */
-    fun cumulativePercent(fraction: Double): String {
-        require(fraction in 0.0..1.0) { "Cumulative probability must be between zero and one" }
-        val percent = fraction * PERCENT_MULTIPLIER
-        return when {
-            percent > 0.0 && percent < 0.05 -> "<0.1%"
-            percent < 100.0 && percent >= 99.95 -> ">99.9%"
-            else -> String.format(Locale.ROOT, "%.1f%%", percent)
-        }
-    }
-
     private const val MIN_VISIBLE_PERCENT = 0.001
     private const val PERCENT_MULTIPLIER = 100.0
 }

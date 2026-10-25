@@ -5,12 +5,13 @@ import com.colinmoerbe.poecompanion.acquisition.encounter.BossEncounterKnowledge
 import com.colinmoerbe.poecompanion.acquisition.knowledge.ScopedAcquisitionKnowledge
 import com.colinmoerbe.poecompanion.acquisition.probability.FixedDropEstimateResolution
 import com.colinmoerbe.poecompanion.acquisition.readmodel.AcquisitionReadModelService
-import com.colinmoerbe.poecompanion.acquisition.readmodel.AcquisitionSourceRelationshipResult
 import com.colinmoerbe.poecompanion.acquisition.readmodel.AcquisitionSourceAssessment
+import com.colinmoerbe.poecompanion.acquisition.readmodel.AcquisitionSourceRelationshipResult
 import com.colinmoerbe.poecompanion.acquisition.relationship.DropRelationshipResolution
 import com.colinmoerbe.poecompanion.acquisition.relationship.DropRelationshipState
 import com.colinmoerbe.poecompanion.acquisition.sourceidentity.AcquisitionSourceId
 import com.colinmoerbe.poecompanion.browser.shared.AcquisitionBrowserKnowledgeLabels
+import com.colinmoerbe.poecompanion.browser.shared.AcquisitionBrowserProbabilityLabels
 import com.colinmoerbe.poecompanion.browser.shared.UniqueDisplayLabels
 import com.colinmoerbe.poecompanion.catalog.UniqueCatalogQueryService
 import com.colinmoerbe.poecompanion.catalog.UniqueDefinitionId
@@ -117,8 +118,10 @@ internal class AcquisitionBrowserReadModelService(
             displayName = label.name,
             catalogKnown = id in knownIds,
             syntheticLabel = label.synthetic,
-            relationshipStatus = AcquisitionBrowserKnowledgeLabels.readableRelationship(assessment?.relationshipKnowledge),
-            relationshipCssClass = AcquisitionBrowserKnowledgeLabels.relationshipCssClass(assessment?.relationshipKnowledge),
+            relationshipStatus =
+            AcquisitionBrowserKnowledgeLabels.readableRelationship(assessment?.relationshipKnowledge),
+            relationshipCssClass =
+            AcquisitionBrowserKnowledgeLabels.relationshipCssClass(assessment?.relationshipKnowledge),
             probabilityStatus = AcquisitionBrowserKnowledgeLabels.estimate(assessment?.probabilityKnowledge),
             chancePerAttempt =
             AcquisitionBrowserKnowledgeLabels.acceptedPerAttemptChance(assessment?.probabilityKnowledge),
@@ -128,7 +131,7 @@ internal class AcquisitionBrowserReadModelService(
             reviewedAt = estimate?.reviewedAt?.toString(),
             actionable = calculation != null,
             probabilityWithinAttempts = calculation?.probabilityWithinAvailableAttempts?.let {
-                AcquisitionBrowserKnowledgeLabels.cumulativePercent(it)
+                AcquisitionBrowserProbabilityLabels.cumulativePercent(it)
             },
             expectedAttempts = calculation?.expectedAttemptsUntilSuccess?.let(::expected),
             thresholds = thresholds,
@@ -136,24 +139,25 @@ internal class AcquisitionBrowserReadModelService(
         )
     }
 
-    private fun nonActionableExplanation(assessment: AcquisitionSourceAssessment?): String? {
-        if (assessment?.calculation != null) return null
-        if (assessment == null) return "Select a game environment to evaluate this drop relationship."
-
-        val source = (assessment.sourceKnowledge as? ScopedAcquisitionKnowledge.Selected<*>)?.resolution
-        val relationship = (assessment.relationshipKnowledge as? ScopedAcquisitionKnowledge.Selected<*>)?.resolution
-        val availability = (source as? BossEncounterKnowledgeResolution.Resolved)?.snapshot?.availability
-        val dropState = (relationship as? DropRelationshipResolution.Resolved)?.snapshot?.state
-        return when {
-            availability == AcquisitionSourceAvailability.UNAVAILABLE ->
-                "This source is unavailable in the selected environment. Recorded estimates are not actionable."
-            dropState == DropRelationshipState.CANNOT_DROP ->
-                "This source is recorded as unable to drop this Unique in the selected environment."
-            availability != AcquisitionSourceAvailability.AVAILABLE ->
-                "Source availability is not verified for the selected environment."
-            dropState != DropRelationshipState.CAN_DROP ->
-                "This drop relationship is not verified for the selected environment."
-            else -> "No supported applicable fixed-probability estimate is available."
+    private fun nonActionableExplanation(assessment: AcquisitionSourceAssessment?): String? = when {
+        assessment == null -> "Select a game environment to evaluate this drop relationship."
+        assessment.calculation != null -> null
+        else -> {
+            val source = (assessment.sourceKnowledge as? ScopedAcquisitionKnowledge.Selected<*>)?.resolution
+            val relationship = (assessment.relationshipKnowledge as? ScopedAcquisitionKnowledge.Selected<*>)?.resolution
+            val availability = (source as? BossEncounterKnowledgeResolution.Resolved)?.snapshot?.availability
+            val dropState = (relationship as? DropRelationshipResolution.Resolved)?.snapshot?.state
+            when {
+                availability == AcquisitionSourceAvailability.UNAVAILABLE ->
+                    "This source is unavailable in the selected environment. Recorded estimates are not actionable."
+                dropState == DropRelationshipState.CANNOT_DROP ->
+                    "This source is recorded as unable to drop this Unique in the selected environment."
+                availability != AcquisitionSourceAvailability.AVAILABLE ->
+                    "Source availability is not verified for the selected environment."
+                dropState != DropRelationshipState.CAN_DROP ->
+                    "This drop relationship is not verified for the selected environment."
+                else -> "No supported applicable fixed-probability estimate is available."
+            }
         }
     }
 
