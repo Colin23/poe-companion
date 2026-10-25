@@ -396,6 +396,7 @@ internal class AcquisitionBrowserControllerIntegrationTests(
             "<summary>Estimate evidence and review details</summary>",
             "71.8%",
             "29",
+            "rounded to one decimal place",
             "synthetic-development-fixture",
         )
     }

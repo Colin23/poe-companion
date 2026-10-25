@@ -1058,7 +1058,7 @@ a:focus-visible {
 }
 
 
-/* Acquisition UX PR D: contextual discovery, distinct attempt actions and probability outcomes. */
+/* Acquisition source discovery, personal attempts, and probability presentation. */
 .acquisition-browser-panel {
     max-width: 60rem;
     margin-inline: auto;
