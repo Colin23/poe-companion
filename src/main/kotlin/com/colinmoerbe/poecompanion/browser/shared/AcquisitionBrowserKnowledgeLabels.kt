@@ -121,15 +121,23 @@ internal object AcquisitionBrowserKnowledgeLabels {
         }
     }
 
-    fun sourceAvailabilityCssClass(knowledge: ScopedAcquisitionKnowledge<BossEncounterKnowledgeResolution>?): String =
-        when (readableSourceAvailability(knowledge)) {
-            "Available" -> "available"
-            "Unavailable" -> "unavailable"
-            "Ambiguous" -> "ambiguous"
-            "Not evaluated" -> "not-evaluated"
-            "Not applicable" -> "not-applicable"
-            else -> "unknown"
+    fun sourceAvailabilityCssClass(knowledge: ScopedAcquisitionKnowledge<BossEncounterKnowledgeResolution>?): String {
+        val resolution = (knowledge as? ScopedAcquisitionKnowledge.Selected<*>)?.resolution
+        return when (resolution) {
+            is BossEncounterKnowledgeResolution.Resolved -> when (resolution.snapshot.availability) {
+                AcquisitionSourceAvailability.AVAILABLE -> "available"
+                AcquisitionSourceAvailability.UNAVAILABLE -> "unavailable"
+            }
+
+            BossEncounterKnowledgeResolution.DoesNotApply -> "not-applicable"
+
+            else -> when (knowledge) {
+                null -> "not-evaluated"
+                ScopedAcquisitionKnowledge.Ambiguous -> "ambiguous"
+                else -> "unknown"
+            }
         }
+    }
 
     fun readableRelationship(knowledge: ScopedAcquisitionKnowledge<DropRelationshipResolution>?): String {
         val resolution = (knowledge as? ScopedAcquisitionKnowledge.Selected<*>)?.resolution
@@ -143,12 +151,17 @@ internal object AcquisitionBrowserKnowledgeLabels {
         }
     }
 
-    fun relationshipCssClass(knowledge: ScopedAcquisitionKnowledge<DropRelationshipResolution>?): String =
-        when (readableRelationship(knowledge)) {
-            "Can drop" -> "can-drop"
-            "Cannot drop" -> "cannot-drop"
+    fun relationshipCssClass(knowledge: ScopedAcquisitionKnowledge<DropRelationshipResolution>?): String {
+        val resolution = (knowledge as? ScopedAcquisitionKnowledge.Selected<*>)?.resolution
+        return when (resolution) {
+            is DropRelationshipResolution.Resolved -> when (resolution.snapshot.state) {
+                DropRelationshipState.CAN_DROP -> "can-drop"
+                DropRelationshipState.CANNOT_DROP -> "cannot-drop"
+            }
+
             else -> "unknown"
         }
+    }
 
     private const val MIN_VISIBLE_PERCENT = 0.001
     private const val PERCENT_MULTIPLIER = 100.0

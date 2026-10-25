@@ -320,6 +320,32 @@ internal class AcquisitionBrowserControllerIntegrationTests(
     }
 
     @Test
+    fun `fallback source labels only count unnamed entries in a mixed source list`() {
+        initializer.initialize()
+        val alphabeticallyEarlySource = AcquisitionSourceId.generate()
+        val unnamedSource = AcquisitionSourceId.generate()
+        sourceAccess.saveSource(AcquisitionSource(alphabeticallyEarlySource))
+        sourceAccess.saveSource(AcquisitionSource(unnamedSource))
+        SecurityTestActors.asAdmin {
+            encounters.recordSnapshot(
+                alphabeticallyEarlySource,
+                AcquisitionKnowledgeScope(CompatibilityVersion(3, 30), Ruleset.NORMAL),
+                BossEncounterKnowledgeSnapshot(
+                    null,
+                    "Aardvark encounter",
+                    AcquisitionSourceAvailability.AVAILABLE,
+                    BossParticipation.ConfigurationDependent,
+                ),
+                null,
+            )
+        }
+
+        val entries = listPage().sources
+        assertThat(entries.first().displayName).isEqualTo("Aardvark encounter")
+        assertThat(entries.single { it.id == unnamedSource.value }.displayName).isEqualTo("Acquisition source 1")
+    }
+
+    @Test
     fun `source list and detail explain why encounter names cannot be evaluated`() {
         initializer.initialize()
         selection.deleteAllInBatch()

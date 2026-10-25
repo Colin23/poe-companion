@@ -43,11 +43,17 @@ internal class AcquisitionBrowserReadModelService(
                 relationshipCount = entry.relationshipCount,
             )
         }.sortedWith(compareBy<AcquisitionBrowserSourceEntry> { it.displayName.lowercase() }.thenBy { it.id })
-            .mapIndexed { index, entry ->
-                if (entry.nameResolved) entry else entry.copy(displayName = "Acquisition source ${index + 1}")
+        var unnamedCount = 0
+        val numberedSources = sources.map { entry ->
+            if (entry.nameResolved) {
+                entry
+            } else {
+                unnamedCount++
+                entry.copy(displayName = "Acquisition source $unnamedCount")
             }
+        }
         return AcquisitionBrowserListPage(
-            sources = sources,
+            sources = numberedSources,
             accountSelected = result.accountEvaluation != null,
             environmentSelected = result.evaluationContext != null,
             selectionLabel = environments.current()?.label,
@@ -113,15 +119,14 @@ internal class AcquisitionBrowserReadModelService(
                 AcquisitionBrowserThreshold(99, calculation.attemptsFor99Percent),
             )
         }
+        val relationshipKnowledge = assessment?.relationshipKnowledge
         return AcquisitionBrowserRelationshipEntry(
             uniqueId = id.value,
             displayName = label.name,
             catalogKnown = id in knownIds,
             syntheticLabel = label.synthetic,
-            relationshipStatus =
-            AcquisitionBrowserKnowledgeLabels.readableRelationship(assessment?.relationshipKnowledge),
-            relationshipCssClass =
-            AcquisitionBrowserKnowledgeLabels.relationshipCssClass(assessment?.relationshipKnowledge),
+            relationshipStatus = AcquisitionBrowserKnowledgeLabels.readableRelationship(relationshipKnowledge),
+            relationshipCssClass = AcquisitionBrowserKnowledgeLabels.relationshipCssClass(relationshipKnowledge),
             probabilityStatus = AcquisitionBrowserKnowledgeLabels.estimate(assessment?.probabilityKnowledge),
             chancePerAttempt =
             AcquisitionBrowserKnowledgeLabels.acceptedPerAttemptChance(assessment?.probabilityKnowledge),
@@ -155,6 +160,12 @@ internal class AcquisitionBrowserReadModelService(
 
                 dropState == DropRelationshipState.CANNOT_DROP ->
                     "This source is recorded as unable to drop this Unique in the selected environment."
+
+                source == BossEncounterKnowledgeResolution.DoesNotApply ->
+                    "This source's encounter knowledge does not apply to the selected environment."
+
+                relationship == DropRelationshipResolution.DoesNotApply ->
+                    "This drop relationship does not apply to the selected environment."
 
                 availability != AcquisitionSourceAvailability.AVAILABLE ->
                     "Source availability is not verified for the selected environment."
