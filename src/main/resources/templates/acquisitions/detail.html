@@ -48,9 +48,6 @@
                     <strong th:text="${page.savedAttempts}">12</strong> saved attempts
                 </p>
                 <p class="acquisition-attempt-summary" th:unless="${page.savedAttempts != null}">Not recorded</p>
-                <p class="small-muted" th:if="${!page.accountSelected and page.attemptsEditable}">
-                    No personal count has been recorded for this environment.
-                </p>
                 <form method="post" th:if="${page.attemptsEditable}"
                       th:action="@{/acquisitions/{id}/attempts(id=${page.id})}" class="attempt-form">
                     <label for="saved-attempts">Number of available attempts</label>
