@@ -860,3 +860,195 @@ a:focus-visible {
         text-align: left;
     }
 }
+/* Unique collection: compact ownership summary and scannable catalog rows. */
+.unique-collection-panel,
+.unique-detail-panel {
+    max-width: 60rem;
+    margin-inline: auto;
+}
+
+.collection-totals {
+    gap: 0.75rem;
+    align-items: stretch;
+}
+
+.collection-totals > div {
+    display: flex;
+    flex: 1 1 8rem;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 1rem;
+    background: #292d34;
+    border: 1px solid #434951;
+    border-radius: 0.45rem;
+}
+
+.collection-totals strong {
+    font-size: 1.65rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.collection-totals span {
+    color: #b9bdc5;
+    font-size: 0.85rem;
+}
+
+.collection-filters a:focus-visible,
+.unique-source-card a:focus-visible,
+.unique-collection-list a:focus-visible {
+    outline: 0.2rem solid #d9a441;
+    outline-offset: 0.2rem;
+}
+
+.unique-collection-list li {
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+}
+
+.unique-row-identity {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 0.2rem;
+}
+
+.unique-row-identity .unique-name {
+    font-size: 1.05rem;
+    font-weight: 650;
+    overflow-wrap: anywhere;
+}
+
+.ownership-status {
+    display: inline-block;
+    padding: 0.3rem 0.6rem;
+    border: 1px solid #777d86;
+    border-radius: 0.35rem;
+    white-space: normal;
+    font-weight: 600;
+}
+
+.ownership-status.owned {
+    border-color: #6b9e83;
+}
+
+.ownership-status.missing {
+    border-color: #b17c70;
+}
+
+.ownership-status.unknown {
+    color: #d0ccdf;
+}
+
+.unique-detail-summary h1 {
+    margin-bottom: 0.75rem;
+}
+
+.unique-ownership-summary {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+}
+
+.unique-detail-section {
+    margin-top: 2rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid #393d44;
+}
+
+.unique-detail-section h2 {
+    margin-top: 0;
+}
+
+.unique-detail-section .ownership-form label {
+    width: 100%;
+}
+
+.unique-source-card {
+    margin-top: 1rem;
+    padding: 1.25rem;
+    background: #25282e;
+    border: 1px solid #434951;
+    border-radius: 0.5rem;
+}
+
+.unique-source-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+}
+
+.unique-source-heading h3 {
+    margin: 0;
+    font-size: 1.07rem;
+    overflow-wrap: anywhere;
+}
+
+.unique-source-status {
+    padding: 0.25rem 0.55rem;
+    border: 1px solid #777d86;
+    border-radius: 0.35rem;
+    color: #d0ccdf;
+    font-size: 0.83rem;
+    font-weight: 600;
+}
+
+.unique-source-status--can-drop {
+    color: #9bd3b3;
+    border-color: #6b9e83;
+}
+
+.unique-source-status--cannot-drop {
+    color: #e7ad9e;
+    border-color: #b17c70;
+}
+
+.unique-source-status--unavailable {
+    color: #e2b77d;
+    border-color: #b69a74;
+}
+
+.unique-source-knowledge {
+    color: #d2ced0;
+    font-size: 0.9rem;
+}
+
+.unique-source-chance {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.75rem;
+}
+
+.unique-source-chance strong {
+    font-size: 1.7rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.unique-source-chance span,
+.unique-source-recorded span {
+    color: #b9bdc5;
+}
+
+@media (max-width: 40rem) {
+    .unique-collection-list li {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .unique-source-card {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 24rem) {
+    .unique-collection-list li {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+

@@ -75,7 +75,7 @@ internal class VerticalSlice1BrowserJourneyIntegrationTests(
         val uniqueHtml = mockMvc.perform(get(uniqueUrl).with(user("test-user")))
             .andExpect(status().isOk)
             .andExpect(view().name("uniques/detail"))
-            .andExpect(content().string(containsString("Missing · 0 copies")))
+            .andExpect(content().string(containsString("0 copies owned")))
             .andExpect(content().string(containsString("Save ownership")))
             .andReturn().response.contentAsString
         assertThat(uniqueHtml).contains("Boss Y", "$sourceUrl#unique-${ids.uniqueC.value}")
@@ -88,7 +88,7 @@ internal class VerticalSlice1BrowserJourneyIntegrationTests(
         assertThat(drop.uniqueId).isEqualTo(ids.uniqueC.value)
         assertThat(drop.relationshipStatus).isEqualTo("CAN_DROP")
         assertThat(drop.actionable).isTrue()
-        assertThat(drop.chancePerAttempt).isEqualTo("10.000%")
+        assertThat(drop.chancePerAttempt).isEqualTo("10%")
         assertThat(drop.probabilityWithinAttempts).isEqualTo("71.8%")
         assertThat(drop.thresholds.single { it.percentage == 95 }.attempts).isEqualTo(29)
 
@@ -97,7 +97,7 @@ internal class VerticalSlice1BrowserJourneyIntegrationTests(
             .andExpect(header().string(HttpHeaders.LOCATION, uniqueUrl))
         mockMvc.perform(get(uniqueUrl).with(user("test-user")))
             .andExpect(status().isOk)
-            .andExpect(content().string(containsString("Owned · <span>1</span> copies")))
+            .andExpect(content().string(containsString("1 copy owned")))
 
         val updatedBuild = buildDetail(buildUrl)
         assertThat(updatedBuild.state).isEqualTo(BuildBrowserState.UNIQUE_READY)
@@ -107,7 +107,7 @@ internal class VerticalSlice1BrowserJourneyIntegrationTests(
         val bossAfterOwnership = acquisitionDetail(sourceUrl)
         assertThat(bossAfterOwnership.savedAttempts).isEqualTo(12)
         val dropAfterOwnership = bossAfterOwnership.relationships.single()
-        assertThat(dropAfterOwnership.chancePerAttempt).isEqualTo("10.000%")
+        assertThat(dropAfterOwnership.chancePerAttempt).isEqualTo("10%")
         assertThat(dropAfterOwnership.probabilityWithinAttempts).isEqualTo("71.8%")
         assertThat(
             fixtureActor.asLegacyUser { attempts.getAvailableAttempts(ids.account, ids.source) }?.count,

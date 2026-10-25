@@ -16,89 +16,82 @@
         <span aria-hidden="true"> / </span>
         <span aria-current="page" th:text="${page.item.displayName}">Unique C</span>
     </nav>
-    <section class="panel">
-        <h1 th:text="${page.item.displayName}">Unique C</h1>
-        <p class="muted" th:if="${page.item.developmentLabel}">Synthetic development item — not a real PoE name.</p>
-        <p class="muted" th:unless="${page.item.developmentLabel}">
-            Canonical display metadata has not been imported yet.
-        </p>
-        <dl class="detail-facts">
-            <div>
-                <dt>Unique definition ID</dt>
-                <dd><code th:text="${page.item.id}">UUID</code></dd>
+    <section class="panel unique-detail-panel">
+        <div class="unique-detail-summary">
+            <h1 th:text="${page.item.displayName}">Unique C</h1>
+            <div class="unique-ownership-summary">
+                <span class="ownership-status" th:classappend="| ${page.item.ownershipCssClass}|"
+                      th:text="${page.item.ownershipLabel}">Missing</span>
+                <span th:text="${page.item.quantityLabel}">0 copies owned</span>
             </div>
-            <div>
-                <dt>Game environment</dt>
-                <dd th:if="${page.environmentSelected}" th:text="${page.selectionLabel}">Selected environment</dd>
-                <dd th:unless="${page.environmentSelected}"><a th:href="@{/environment}">Select an environment</a></dd>
-            </div>
-            <div>
-                <dt>Current ownership</dt>
-                <dd th:if="${page.item.ownedQuantity == null}">Unknown — no personal collection</dd>
-                <dd th:if="${page.item.ownedQuantity != null and page.item.ownedQuantity > 0}">
-                    Owned · <span th:text="${page.item.ownedQuantity}">1</span> copies
-                </dd>
-                <dd th:if="${page.item.ownedQuantity != null and page.item.ownedQuantity == 0}">
-                    Missing · 0 copies
-                </dd>
-            </div>
-        </dl>
-        <section class="upcoming-section" aria-labelledby="ownership-edit-heading">
-            <h2 id="ownership-edit-heading">Edit owned quantity</h2>
+            <p class="small-muted" th:if="${page.item.developmentLabel}">Development fixture name</p>
+            <p class="small-muted" th:unless="${page.item.developmentLabel}">
+                Canonical display metadata has not been imported yet.
+            </p>
+        </div>
+
+        <section class="unique-detail-section" aria-labelledby="ownership-edit-heading">
+            <h2 id="ownership-edit-heading">Update your collection</h2>
             <form class="ownership-form" th:if="${page.ownershipEditable}"
                   th:action="@{/uniques/{id}/ownership(id=${page.item.id})}" method="post">
-                <label for="owned-quantity">Owned quantity</label>
+                <label for="owned-quantity">Number of copies owned</label>
                 <input id="owned-quantity" name="quantity" type="number" min="0" step="1" required
                        th:value="${page.item.ownedQuantity}">
                 <button type="submit">Save ownership</button>
             </form>
-            <p class="small-muted" th:if="${page.ownershipEditable}">
-                Saving a positive quantity starts a personal collection if needed.
-                Set the quantity to 0 to mark this Unique as missing in an existing collection.
+            <p class="small-muted" th:if="${page.accountSelected}">
+                Enter 0 to mark this Unique as missing in your existing collection.
+            </p>
+            <p class="small-muted" th:if="${page.ownershipEditable and !page.accountSelected}">
+                Saving a positive quantity creates your personal collection.
+                Saving 0 without a collection makes no changes.
+            </p>
+            <p class="notice" th:unless="${page.environmentSelected}">
+                <a th:href="@{/environment}">Select a game environment</a> to record ownership.
             </p>
             <p class="notice" th:if="${page.environmentSelected and !page.ownershipEditable}">
                 This saved environment is no longer among the recognized choices for creating personal data.
                 <a th:href="@{/environment}">Choose a curated environment</a>.
             </p>
         </section>
-        <section class="upcoming-section">
-            <h2>Known acquisition sources</h2>
+
+        <section class="unique-detail-section" aria-labelledby="unique-acquisition-heading">
+            <h2 id="unique-acquisition-heading">Where can I get it?</h2>
             <p class="notice" th:if="${page.acquisitionSources.isEmpty()}">
-                No acquisition sources recorded yet. This does not mean the Unique cannot be acquired.
+                No acquisition sources are recorded for this Unique yet.
+                That does not mean it cannot be obtained.
             </p>
-            <div class="relationship-panel" th:each="source : ${page.acquisitionSources}">
-                <h3>
-                    <a th:href="@{/acquisitions/{id}(id=${source.sourceId})} + '#unique-' + ${page.item.id}"
-                       th:text="${source.displayName}">Boss Y</a>
-                </h3>
-                <p class="small-muted" th:if="${source.displayName == 'Acquisition source (name unavailable)'}"
-                   th:text="${source.sourceId}">Source UUID</p>
-                <dl class="detail-facts">
-                    <div>
-                        <dt>Source availability</dt>
-                        <dd th:text="${source.availability}">AVAILABLE</dd>
-                    </div>
-                    <div>
-                        <dt>Drop relationship</dt>
-                        <dd th:text="${source.relationship}">CAN_DROP</dd>
-                    </div>
-                    <div>
-                        <dt>Probability knowledge</dt>
-                        <dd th:text="${source.estimate}">Accepted fixed estimate</dd>
-                    </div>
-                    <div th:if="${source.actionableChance != null}">
-                        <dt>Applicable fixed chance per attempt</dt>
-                        <dd th:text="${source.actionableChance}">10.000%</dd>
-                    </div>
-                </dl>
-                <p class="small-muted" th:if="${source.actionableChance == null}">
-                    No applicable supported fixed-probability calculation is available for this source and Unique.
+            <div class="unique-source-card" th:each="source : ${page.acquisitionSources}">
+                <div class="unique-source-heading">
+                    <h3>
+                        <a th:href="@{/acquisitions/{id}(id=${source.sourceId})} + '#unique-' + ${page.item.id}"
+                           th:text="${source.linkLabel}">Boss Y</a>
+                    </h3>
+                    <span class="unique-source-status" th:classappend="| unique-source-status--${source.statusCssClass}|"
+                          th:text="${source.statusLabel}">Can drop</span>
+                </div>
+                <p class="small-muted" th:unless="${source.nameAvailable}"
+                   th:text="${source.displayName}">Acquisition source (name unavailable)</p>
+                <p class="unique-source-knowledge">
+                    <span th:text="|Source: ${source.availabilityLabel}|">Source: Available</span>
+                    <span aria-hidden="true"> · </span>
+                    <span th:text="|Drop: ${source.relationshipLabel}|">Drop: Can drop</span>
+                </p>
+                <div class="unique-source-chance" th:if="${source.actionableChance != null}">
+                    <strong th:text="${source.actionableChance}">10%</strong>
+                    <span>applicable fixed chance per attempt</span>
+                </div>
+                <p class="unique-source-recorded" th:if="${source.recordedChance != null and source.actionableChance == null}">
+                    Recorded fixed estimate: <strong th:text="${source.recordedChance}">5%</strong> per attempt.
+                    <span>Not currently actionable.</span>
+                </p>
+                <p class="small-muted" th:if="${source.recordedChance == null}"
+                   th:text="${source.estimateLabel}">No accepted fixed estimate</p>
+                <p class="small-muted" th:text="${source.explanation}">
+                    Source knowledge under the selected conditions.
                 </p>
             </div>
         </section>
-        <p class="small-muted">
-            Reverse Build associations are not yet available on this page.
-        </p>
         <p><a th:href="@{/uniques}">Back to Unique Collection</a></p>
     </section>
 </main>

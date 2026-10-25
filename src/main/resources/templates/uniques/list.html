@@ -14,13 +14,13 @@
         <span aria-hidden="true"> / </span>
         <span aria-current="page">Unique Collection</span>
     </nav>
-    <section class="panel">
+    <section class="panel unique-collection-panel">
         <h1>Unique Collection</h1>
         <p class="muted" th:if="${page.environmentSelected}" th:text="${page.selectionLabel}">
             Selected game environment
         </p>
         <p class="notice" th:unless="${page.environmentSelected}">
-            No environment selected. The canonical catalog remains browsable.
+            No environment selected. The catalog remains browsable, but ownership cannot be evaluated.
             <a th:href="@{/environment}">Select a game environment</a>.
         </p>
         <p class="notice" th:if="${page.environmentSelected and !page.accountSelected}">
@@ -29,14 +29,17 @@
         </p>
 
         <div class="collection-totals" aria-label="Collection counts">
-            <span><strong th:text="${page.totalCount}">3</strong> catalog entries</span>
-            <span th:if="${page.accountSelected}">
-                <strong th:text="${page.ownedCount}">2</strong> owned
-            </span>
-            <span th:if="${page.accountSelected}">
-                <strong th:text="${page.missingCount}">1</strong> missing
-            </span>
+            <div><strong th:text="${page.totalCount}">12</strong><span>Catalog Uniques</span></div>
+            <div th:if="${page.accountSelected}">
+                <strong th:text="${page.ownedCount}">3</strong><span>Owned Uniques</span>
+            </div>
+            <div th:if="${page.accountSelected}">
+                <strong th:text="${page.missingCount}">9</strong><span>Missing Uniques</span>
+            </div>
         </div>
+        <p class="small-muted" th:if="${page.accountSelected}">
+            Owned and Missing count distinct Unique types, not total item copies.
+        </p>
 
         <nav class="collection-filters" aria-label="Ownership filter">
             <a th:href="@{/uniques(filter='all')}"
@@ -59,27 +62,22 @@
             No Uniques match this ownership filter.
         </p>
 
-        <ul class="unique-list" th:if="${!page.items.isEmpty()}">
+        <p class="small-muted" th:if="${page.hasDevelopmentLabels}">
+            Some Unique names are development placeholders.
+        </p>
+        <ul class="unique-list unique-collection-list" th:if="${!page.items.isEmpty()}">
             <li th:each="item : ${page.items}">
-                <div>
+                <div class="unique-row-identity">
                     <a class="unique-name" th:href="@{/uniques/{id}(id=${item.id})}"
                        th:text="${item.displayName}">Unique C</a>
-                    <span class="small-muted" th:if="${item.developmentLabel}">Synthetic development item</span>
-                    <span class="small-muted" th:unless="${item.developmentLabel}" th:text="${item.id}">
-                        UUID
-                    </span>
+                    <span class="small-muted" th:text="${item.quantityLabel}">0 copies owned</span>
                 </div>
-                <span class="ownership-status" th:if="${item.ownedQuantity == null}">Ownership unknown</span>
-                <span class="ownership-status owned" th:if="${item.ownedQuantity != null and item.ownedQuantity > 0}">
-                    Owned · <span th:text="${item.ownedQuantity}">1</span>
-                </span>
-                <span class="ownership-status missing" th:if="${item.ownedQuantity != null and item.ownedQuantity == 0}">
-                    Missing · 0
-                </span>
+                <span class="ownership-status" th:classappend="| ${item.ownershipCssClass}|"
+                      th:text="${item.ownershipLabel}">Missing</span>
             </li>
         </ul>
-        <p class="small-muted">
-            Missing means zero owned copies in your recorded collection, not that an item is obtainable in this league.
+        <p class="small-muted" th:if="${page.accountSelected}">
+            Missing means no owned copies in your recorded collection; it does not describe drop availability.
         </p>
     </section>
 </main>

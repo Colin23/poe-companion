@@ -103,9 +103,9 @@ internal class UniqueBrowserControllerIntegrationTests(
             .andExpect(content().string(containsString(">Unique A</a>")))
             .andExpect(content().string(containsString(">Unique B</a>")))
             .andExpect(content().string(containsString(">Unique C</a>")))
-            .andExpect(content().string(containsString("3</strong> owned")))
-            .andExpect(content().string(containsString("9</strong> missing")))
-            .andExpect(content().string(containsString("Synthetic development item")))
+            .andExpect(content().string(containsString("3</strong><span>Owned Uniques")))
+            .andExpect(content().string(containsString("9</strong><span>Missing Uniques")))
+            .andExpect(content().string(containsString("Some Unique names are development placeholders.")))
     }
 
     @Test
@@ -116,8 +116,8 @@ internal class UniqueBrowserControllerIntegrationTests(
             .andExpect(status().isOk)
             .andExpect(view().name("uniques/detail"))
             .andExpect(content().string(containsString("Boss P")))
-            .andExpect(content().string(containsString("CAN_DROP")))
-            .andExpect(content().string(containsString("AVAILABLE")))
+            .andExpect(content().string(containsString("Drop: Can drop")))
+            .andExpect(content().string(containsString("Source: Available")))
             .andReturn().response.contentAsString
         assertThat(html).contains("/acquisitions/${ids.sourceP.value}#unique-${ids.uniqueD.value}")
     }
@@ -147,13 +147,13 @@ internal class UniqueBrowserControllerIntegrationTests(
         mockMvc.perform(get(uri).with(user("test-user")))
             .andExpect(status().isOk)
             .andExpect(view().name("uniques/detail"))
-            .andExpect(content().string(containsString("Missing · 0 copies")))
+            .andExpect(content().string(containsString("0 copies owned")))
 
         fixtureActor.asLegacyUser { ownership.setOwnedQuantity(ids.account, ids.uniqueC, 1) }
 
         mockMvc.perform(get(uri).with(user("test-user")))
             .andExpect(status().isOk)
-            .andExpect(content().string(containsString("Owned · <span>1</span> copies")))
+            .andExpect(content().string(containsString("1 copy owned")))
     }
 
     @Test
@@ -169,8 +169,8 @@ internal class UniqueBrowserControllerIntegrationTests(
 
         mockMvc.perform(get("/uniques/${ids.uniqueC.value}").with(user("test-user")))
             .andExpect(status().isOk)
-            .andExpect(content().string(containsString("Select an environment")))
-            .andExpect(content().string(containsString("Unknown — no personal collection")))
+            .andExpect(content().string(containsString("Select a game environment")))
+            .andExpect(content().string(containsString("Ownership unknown")))
             .andExpect(content().string(not(containsString("Change game environment"))))
 
         mockMvc.perform(get("/uniques").param("filter", "missing").with(user("test-user")))
@@ -193,7 +193,7 @@ internal class UniqueBrowserControllerIntegrationTests(
 
         mockMvc.perform(get(uri).with(user("test-user")))
             .andExpect(status().isOk)
-            .andExpect(content().string(containsString("Owned · <span>1</span> copies")))
+            .andExpect(content().string(containsString("1 copy owned")))
         mockMvc.perform(get("/uniques").param("filter", "owned").with(user("test-user")))
             .andExpect(content().string(containsString(">Unique C</a>")))
         assertThat(
@@ -211,7 +211,7 @@ internal class UniqueBrowserControllerIntegrationTests(
 
         assertThat(manualOwnershipAdapter.findBy(ids.account, ids.uniqueA)).isNull()
         mockMvc.perform(get("/uniques/${ids.uniqueA.value}").with(user("test-user")))
-            .andExpect(content().string(containsString("Missing · 0 copies")))
+            .andExpect(content().string(containsString("0 copies owned")))
     }
 
     @Test
@@ -250,7 +250,7 @@ internal class UniqueBrowserControllerIntegrationTests(
 
         mockMvc.perform(get(uri).with(user("test-user")))
             .andExpect(status().isOk)
-            .andExpect(content().string(containsString("Select an environment")))
+            .andExpect(content().string(containsString("Select a game environment")))
             .andExpect(content().string(not(containsString("Change game environment"))))
             .andExpect(content().string(not(containsString("Save ownership"))))
 
@@ -345,9 +345,9 @@ internal class UniqueBrowserControllerIntegrationTests(
             .andExpect(status().isOk)
             .andExpect(content().string(containsString("Known acquisition sources")))
             .andExpect(content().string(containsString("Boss Y")))
-            .andExpect(content().string(containsString("CAN_DROP")))
-            .andExpect(content().string(containsString("AVAILABLE")))
-            .andExpect(content().string(containsString("10.000%")))
+            .andExpect(content().string(containsString("Drop: Can drop")))
+            .andExpect(content().string(containsString("Source: Available")))
+            .andExpect(content().string(containsString("10%")))
             .andReturn().response.contentAsString
         assertThat(html).contains("/acquisitions/${ids.source.value}#unique-${ids.uniqueC.value}")
 
@@ -363,8 +363,8 @@ internal class UniqueBrowserControllerIntegrationTests(
         listOf(ids.uniqueA, ids.uniqueB).forEach { id ->
             mockMvc.perform(get("/uniques/${id.value}").with(user("test-user")))
                 .andExpect(status().isOk)
-                .andExpect(content().string(containsString("No acquisition sources recorded yet")))
-                .andExpect(content().string(containsString("does not mean the Unique cannot be acquired")))
+                .andExpect(content().string(containsString("No acquisition sources are recorded for this Unique yet.")))
+                .andExpect(content().string(containsString("does not mean it cannot be obtained")))
                 .andExpect(content().string(not(containsString("Boss Y"))))
         }
     }
@@ -380,7 +380,7 @@ internal class UniqueBrowserControllerIntegrationTests(
             .andExpect(content().string(containsString(expectedLink)))
             .andExpect(content().string(containsString("Unknown — no game environment selected")))
             .andExpect(content().string(containsString("Acquisition source (name unavailable)")))
-            .andExpect(content().string(not(containsString("10.000%"))))
+            .andExpect(content().string(not(containsString("10%"))))
     }
 
     @Test
@@ -404,9 +404,9 @@ internal class UniqueBrowserControllerIntegrationTests(
         mockMvc.perform(get("/uniques/${ids.uniqueC.value}").with(user("test-user")))
             .andExpect(status().isOk)
             .andExpect(content().string(containsString("Ambiguous encounter scope")))
-            .andExpect(content().string(containsString("CAN_DROP")))
-            .andExpect(content().string(containsString("No applicable supported fixed-probability calculation")))
-            .andExpect(content().string(not(containsString("10.000%"))))
+            .andExpect(content().string(containsString("Drop: Can drop")))
+            .andExpect(content().string(containsString("Accepted knowledge cannot be resolved unambiguously")))
+            .andExpect(content().string(not(containsString("10%"))))
     }
 
     @Test
@@ -451,11 +451,35 @@ internal class UniqueBrowserControllerIntegrationTests(
         val html = mockMvc.perform(get("/uniques/${ids.uniqueC.value}").with(user("test-user")))
             .andExpect(status().isOk)
             .andReturn().response.contentAsString
-        assertThat(html).contains("Cannot Drop Encounter", "CANNOT_DROP")
-        assertThat(html).contains("Unavailable Encounter", "UNAVAILABLE")
+        assertThat(html).contains("Cannot Drop Encounter", "Cannot drop")
+        assertThat(html).contains("Unavailable Encounter", "Unavailable")
         assertThat(html).contains("Unknown — no accepted encounter knowledge")
         assertThat(html).contains("Unknown — no accepted relationship knowledge")
-        assertThat(html).contains("No applicable supported fixed-probability calculation")
+        assertThat(html).contains("No accepted fixed estimate")
+    }
+
+    @Test
+    fun `unavailable source retains recorded estimate without an actionable chance`() {
+        initializer.initialize()
+        val html = mockMvc.perform(get("/uniques/${ids.uniqueK.value}").with(user("test-user")))
+            .andExpect(status().isOk)
+            .andReturn().response.contentAsString
+
+        assertThat(html).contains("Boss R", "Unavailable", "Recorded fixed estimate:", "5%")
+            .contains("Not currently actionable.")
+            .doesNotContain("applicable fixed chance per attempt")
+    }
+
+    @Test
+    fun `source name fallback does not leak an extra UUID or depend on display text comparisons`() {
+        initializer.initialize()
+        selectionRepository.deleteAllInBatch()
+        val html = mockMvc.perform(get("/uniques/${ids.uniqueC.value}").with(user("test-user")))
+            .andExpect(status().isOk)
+            .andReturn().response.contentAsString
+
+        assertThat(html).contains("Unnamed source 1", "Acquisition source (name unavailable)")
+            .doesNotContain("Unique definition ID", "Reverse Build associations")
     }
 
     @Test
