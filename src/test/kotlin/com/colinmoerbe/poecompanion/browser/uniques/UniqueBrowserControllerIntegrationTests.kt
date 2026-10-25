@@ -343,7 +343,7 @@ internal class UniqueBrowserControllerIntegrationTests(
 
         val html = mockMvc.perform(get("/uniques/${ids.uniqueC.value}").with(user("test-user")))
             .andExpect(status().isOk)
-            .andExpect(content().string(containsString("Known acquisition sources")))
+            .andExpect(content().string(containsString("Where can I get it?")))
             .andExpect(content().string(containsString("Boss Y")))
             .andExpect(content().string(containsString("Drop: Can drop")))
             .andExpect(content().string(containsString("Source: Available")))
@@ -406,7 +406,9 @@ internal class UniqueBrowserControllerIntegrationTests(
             .andExpect(content().string(containsString("Ambiguous encounter scope")))
             .andExpect(content().string(containsString("Drop: Can drop")))
             .andExpect(content().string(containsString("Accepted knowledge cannot be resolved unambiguously")))
-            .andExpect(content().string(not(containsString("10%"))))
+            .andExpect(content().string(containsString("Recorded fixed estimate:")))
+            .andExpect(content().string(containsString("Not currently actionable.")))
+            .andExpect(content().string(not(containsString("applicable fixed chance per attempt"))))
     }
 
     @Test
