@@ -115,7 +115,9 @@ internal data class BuildBrowserGroup(
         get() = when {
             logic == "ANY" ->
                 "Owning any one of these Uniques completes this group. You can still collect more than one."
+
             requirements.size > 1 -> "All listed Uniques are needed to complete this group."
+
             else -> null
         }
 
@@ -159,8 +161,10 @@ internal data class BuildBrowserDetailPage(
     val compatibilityMessage: String
         get() = when (state) {
             BuildBrowserState.NO_ACCOUNT -> "Select a game environment to view Build requirements."
+
             BuildBrowserState.NO_ACTIVE_REVISION ->
                 "No active Build requirements for version ${compatibilityVersion ?: "the selected environment"}."
+
             else -> "Requirements available for version ${compatibilityVersion ?: "the selected environment"}."
         }
 
