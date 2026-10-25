@@ -139,8 +139,8 @@ internal class BuildBrowserControllerIntegrationTests(
         assertThat(buildR.hasRequiredUniqueGroups).isFalse()
 
         listOf(
-            ids.variantP to "Any one of the alternatives",
-            ids.variantQ to "missing copies",
+            ids.variantP to "Owning any one of these Uniques completes this group.",
+            ids.variantQ to "Missing 1 copy",
             ids.variantR to "None is required for primary Unique readiness.",
         ).forEach { (id, marker) ->
             mockMvc.perform(get("/builds/${id.value}").with(user("test-user")))
@@ -252,8 +252,14 @@ internal class BuildBrowserControllerIntegrationTests(
             .andReturn().response.contentAsString
 
         assertThat(html).contains("No required Uniques", "Optional upgrades", "Not collected yet")
-            .contains("Owning any one of these Uniques completes this group.")
+            .contains("All listed Uniques are needed to complete this group.")
             .doesNotContain("Build variant ID", "Revision verification", "CORE — ALL", "UPGRADE — ANY")
+
+        val anyUpgrade = mockMvc.perform(get("/builds/${ids.variantQ.value}").with(user("test-user")))
+            .andExpect(status().isOk)
+            .andReturn().response.contentAsString
+        assertThat(anyUpgrade).contains("Required Uniques", "Optional upgrades")
+            .contains("Owning any one of these Uniques completes this group.")
     }
 
     @Test
