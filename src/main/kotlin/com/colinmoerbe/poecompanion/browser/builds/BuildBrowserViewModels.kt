@@ -24,13 +24,22 @@ internal enum class BuildBrowserListCategory(
     PARTIAL("Partial", "Enabling requirements are met, but some core Uniques are still missing.", "partial", "◐"),
     BLOCKED("Blocked", "At least one essential enabling requirement is missing.", "blocked", "!"),
     NO_PERSONAL(
-        "Ownership not evaluated", "Requirements are available, but your personal collection is not.", "unknown", "?",
+        "Ownership not evaluated",
+        "Requirements are available, but your personal collection is not.",
+        "unknown",
+        "?",
     ),
     NO_ACTIVE_REVISION(
-        "No compatible requirements", "No active requirements match the selected game version.", "unknown", "?",
+        "No compatible requirements",
+        "No active requirements match the selected game version.",
+        "unknown",
+        "?",
     ),
     NO_ACCOUNT(
-        "Select a game environment", "Choose a game environment to see applicable requirements.", "unknown", "?",
+        "Select a game environment",
+        "Choose a game environment to see applicable requirements.",
+        "unknown",
+        "?",
     ),
 }
 
@@ -71,10 +80,12 @@ internal data class BuildBrowserRequirement(
     val statusLabel: String
         get() = when (satisfied) {
             true -> "Complete"
+
             false -> {
                 val missing = requiredQuantity - requireNotNull(ownedQuantity)
                 "Missing $missing ${if (missing == 1) "copy" else "copies"}"
             }
+
             null -> "Ownership not evaluated"
         }
 

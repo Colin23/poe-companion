@@ -160,14 +160,13 @@ internal class BuildBrowserReadModelService(
         },
     )
 
-    private fun categoryOf(
-        result: BuildReadinessQueryResult,
-        state: BuildBrowserState,
-    ): BuildBrowserListCategory {
+    private fun categoryOf(result: BuildReadinessQueryResult, state: BuildBrowserState): BuildBrowserListCategory {
         val noRequired = when (result) {
             is BuildReadinessQueryResult.Evaluated -> !result.readiness.hasRequiredUniqueGroups
+
             is BuildReadinessQueryResult.PersonalOwnershipUnavailable ->
                 result.revision.requirementGroups.none { it.importance != RequirementImportance.UPGRADE }
+
             else -> false
         }
         if (noRequired) return BuildBrowserListCategory.NO_REQUIRED
