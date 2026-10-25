@@ -98,9 +98,7 @@ internal object AcquisitionBrowserKnowledgeLabels {
 
             is ScopedAcquisitionKnowledge.Selected -> when (knowledge.resolution) {
                 is BossEncounterKnowledgeResolution.Resolved -> null
-
                 BossEncounterKnowledgeResolution.Unknown -> "Encounter name unknown for the selected patch"
-
                 BossEncounterKnowledgeResolution.DoesNotApply -> "No applicable encounter name for this environment"
             }
         }
@@ -117,9 +115,7 @@ internal object AcquisitionBrowserKnowledgeLabels {
 
             else -> when (knowledge) {
                 null -> "Not evaluated"
-
                 ScopedAcquisitionKnowledge.Ambiguous -> "Ambiguous"
-
                 else -> "Unknown"
             }
         }
