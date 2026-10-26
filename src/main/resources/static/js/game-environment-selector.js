@@ -30,6 +30,7 @@ if (environmentForm && environmentRegistry) {
     const previewName = document.querySelector("#environment-preview-name");
     const previewDescription = document.querySelector("#environment-preview-description");
     const submit = environmentForm.querySelector('button[type="submit"]');
+    const error = document.querySelector(".environment-error");
 
     const friendly = {
         CHALLENGE: "Challenge",
@@ -110,10 +111,24 @@ if (environmentForm && environmentRegistry) {
         showPreview("Recognized environment", selected.name, description, true);
     }
 
-    for (const dimension of dimensions) {
-        selectors[dimension.name].addEventListener("change", refreshOptions);
+    function onSelectionChanged() {
+        if (error) {
+            error.hidden = true;
+        }
+        refreshOptions();
+        preview.hidden = false;
     }
-    specificLeague.addEventListener("change", refreshOptions);
-    refreshOptions();
-    preview.hidden = false;
+
+    for (const dimension of dimensions) {
+        selectors[dimension.name].addEventListener("change", onSelectionChanged);
+    }
+    specificLeague.addEventListener("change", onSelectionChanged);
+
+    if (environmentForm.dataset.rejectedSubmission === "true") {
+        // Keep rejected server-rendered values visible until the player changes the draft.
+        submit.disabled = true;
+    } else {
+        refreshOptions();
+        preview.hidden = false;
+    }
 }

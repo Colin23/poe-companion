@@ -118,6 +118,29 @@ internal class GameEnvironmentBrowserIntegrationTests(
     }
 
     @Test
+    fun `non PC curated options do not appear as selectable browser environments`() {
+        val consoleLeague = LeagueDefinition(
+            LeagueDefinitionId(UUID.randomUUID()),
+            "Development console league",
+            LeagueType.CHALLENGE,
+            LeagueParticipation.SSF,
+            LeagueMortality.SOFTCORE,
+            GameRealm.XBOX,
+        )
+        SecurityTestActors.asAdmin { leagues.saveLeague(consoleLeague) }
+        leagues.recognizeVersion(consoleLeague.id, CompatibilityVersion(3, 30))
+        assertThat(optionCount()).isEqualTo(3L)
+
+        val result = mvc.perform(get("/environment").with(user("test-user").roles("USER")))
+            .andExpect(status().isOk)
+            .andReturn()
+        assertThat(result.response.contentAsString)
+            .contains("data-league-name=\"Development SSF league\"")
+            .doesNotContain("Development console league")
+        assertThat(result.response.contentAsString.split("data-environment-option").size - 1).isEqualTo(2)
+    }
+
+    @Test
     fun `invalid submitted settings retain the draft without replacing the saved environment`() {
         val before = SecurityTestActors.asUser { selections.getSelected() }
         val result = mvc.perform(
@@ -137,6 +160,7 @@ internal class GameEnvironmentBrowserIntegrationTests(
             "Current environment",
             "Development SSF league",
             "value=\"3.29\"",
+            "data-rejected-submission=\"true\"",
             "not among the curated game environments",
         )
         assertThat(SecurityTestActors.asUser { selections.getSelected() }).isEqualTo(before)

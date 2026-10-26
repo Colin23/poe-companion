@@ -43,7 +43,8 @@
             <h2 id="environment-picker-heading">Choose an environment</h2>
             <p class="small-muted">Select from curated options. Changes here are only a preview until you save.</p>
 
-            <form method="post" th:action="@{/environment}" class="environment-form" data-environment-selector>
+            <form method="post" th:action="@{/environment}" class="environment-form" data-environment-selector
+                  th:attr="data-rejected-submission=${errorMessage != null ? 'true' : null}">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                 <input type="hidden" name="ruleset" value="NORMAL">
                 <div class="environment-form-grid">

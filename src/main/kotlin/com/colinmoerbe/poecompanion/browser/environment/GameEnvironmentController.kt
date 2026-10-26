@@ -2,6 +2,7 @@ package com.colinmoerbe.poecompanion.browser.environment
 
 import com.colinmoerbe.poecompanion.league.GameEnvironmentOption
 import com.colinmoerbe.poecompanion.league.GameEnvironmentOptionService
+import com.colinmoerbe.poecompanion.league.GameRealm
 import com.colinmoerbe.poecompanion.league.Ruleset
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Controller
@@ -44,7 +45,7 @@ internal class GameEnvironmentController(private val environments: GameEnvironme
         submitted: GameEnvironmentFormInput? = null,
         error: String? = null,
     ): ModelAndView {
-        val options = environments.findAll()
+        val options = environments.findAll().filter { it.league.realm == GameRealm.PC }
         val current = environments.current()
         val saved = current?.context?.takeIf { it.ruleset == Ruleset.NORMAL }
         val preferred = options.firstOrNull {
