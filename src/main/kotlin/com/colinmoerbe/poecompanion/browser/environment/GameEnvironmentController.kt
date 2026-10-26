@@ -1,10 +1,10 @@
 package com.colinmoerbe.poecompanion.browser.environment
 
-import com.colinmoerbe.poecompanion.league.GameEnvironmentOption
+import com.colinmoerbe.poecompanion.league.CurrentGameEnvironment
 import com.colinmoerbe.poecompanion.league.GameEnvironmentLabels
+import com.colinmoerbe.poecompanion.league.GameEnvironmentOption
 import com.colinmoerbe.poecompanion.league.GameEnvironmentOptionService
 import com.colinmoerbe.poecompanion.league.GameRealm
-import com.colinmoerbe.poecompanion.league.CurrentGameEnvironment
 import com.colinmoerbe.poecompanion.league.Ruleset
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Controller
