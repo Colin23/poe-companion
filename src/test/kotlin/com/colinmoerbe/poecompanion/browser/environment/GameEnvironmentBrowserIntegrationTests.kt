@@ -114,18 +114,21 @@ internal class GameEnvironmentBrowserIntegrationTests(
         ).doesNotContain("Recognized choices", "onchange=", "onclick=")
         assertThat(html.split("data-environment-option").size - 1).isEqualTo(2)
         assertThat(result.modelAndView!!.model["draftPreviewReady"]).isEqualTo(true)
-        assertThat(result.modelAndView!!.model["draftPreviewName"]).isEqualTo("Development SSF league")
+        assertThat(result.modelAndView!!.model["draftPreviewName"])
+            .isEqualTo("3.30 SC SSF Development SSF league")
     }
 
     @Test
-    fun `compact Standard label and curated fixture name are presented as separate concepts`() {
+    fun `current and proposed Standard environments use the same player-facing label`() {
         select("STANDARD")
         val page = mvc.perform(get("/environment").with(user("test-user").roles("USER")))
             .andExpect(status().isOk)
             .andReturn()
         assertThat(page.modelAndView!!.model["currentLabel"]).isEqualTo("3.30 SC SSF Standard")
-        assertThat(page.modelAndView!!.model["draftPreviewName"]).isEqualTo("Development Standard SSF")
-        assertThat(page.response.contentAsString).contains("Curated league name")
+        assertThat(page.modelAndView!!.model["draftPreviewName"]).isEqualTo("3.30 SC SSF Standard")
+        assertThat(page.response.contentAsString)
+            .contains("data-display-label=\"3.30 SC SSF Standard\"")
+            .doesNotContain("Curated league name")
     }
 
     @Test
@@ -263,6 +266,7 @@ internal class GameEnvironmentBrowserIntegrationTests(
             .andReturn().modelAndView!!.model
         assertThat(page["currentRecognized"]).isEqualTo(true)
         assertThat(page["selectedVersion"]).isEqualTo("3.30")
+        assertThat(page["draftPreviewName"]).isEqualTo(page["currentLabel"])
 
         select("CHALLENGE")
         assertThat(SecurityTestActors.asUser { selections.getSelected()?.gamePatch }).isEqualTo(patch)

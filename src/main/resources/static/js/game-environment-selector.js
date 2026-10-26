@@ -12,6 +12,7 @@ if (environmentForm && environmentRegistry) {
         participation: entry.dataset.participation,
         leagueId: entry.dataset.leagueId,
         name: entry.dataset.leagueName,
+        displayLabel: entry.dataset.displayLabel,
     }));
 
     const dimensions = [
@@ -28,7 +29,6 @@ if (environmentForm && environmentRegistry) {
     const preview = document.querySelector(".environment-preview");
     const previewStatus = document.querySelector("#environment-preview-status");
     const previewName = document.querySelector("#environment-preview-name");
-    const previewNameLabel = document.querySelector("#environment-preview-name-label");
     const previewDescription = document.querySelector("#environment-preview-description");
     const submit = environmentForm.querySelector('button[type="submit"]');
     const error = document.querySelector(".environment-error");
@@ -46,9 +46,10 @@ if (environmentForm && environmentRegistry) {
         const chosen = values.includes(previous) ? previous : values.length === 1 ? values[0] : "";
         const available = values.length > 0;
         const optionsForSelect = values.map((value) => new Option(friendly[value] || value, value));
-        if (values.length !== 1) {
+        if (chosen === "") {
             const prompt = new Option(placeholder, "");
             prompt.disabled = true;
+            prompt.hidden = available;
             optionsForSelect.unshift(prompt);
         }
         select.replaceChildren(...optionsForSelect);
@@ -59,7 +60,6 @@ if (environmentForm && environmentRegistry) {
     function showPreview(status, name, description, canSave) {
         previewStatus.textContent = status;
         previewName.textContent = name;
-        previewNameLabel.hidden = !canSave;
         previewDescription.textContent = description;
         submit.disabled = !canSave;
         preview.classList.toggle("environment-preview--incomplete", !canSave);
@@ -86,10 +86,16 @@ if (environmentForm && environmentRegistry) {
         specificLeague.disabled = matches.length <= 1;
         if (matches.length > 1) {
             const previous = specificLeague.value;
-            const prompt = new Option("Choose a specific league", "");
-            prompt.disabled = true;
-            specificLeague.replaceChildren(prompt, ...matches.map((entry) => new Option(entry.name, entry.leagueId)));
-            specificLeague.value = matches.some((entry) => entry.leagueId === previous) ? previous : "";
+            const choices = matches.map((entry) => new Option(entry.name, entry.leagueId));
+            const selectedLeagueId = matches.some((entry) => entry.leagueId === previous) ? previous : "";
+            if (selectedLeagueId === "") {
+                const prompt = new Option("Choose a specific league", "");
+                prompt.disabled = true;
+                prompt.hidden = true;
+                choices.unshift(prompt);
+            }
+            specificLeague.replaceChildren(...choices);
+            specificLeague.value = selectedLeagueId;
         } else {
             specificLeague.value = "";
         }
@@ -109,7 +115,7 @@ if (environmentForm && environmentRegistry) {
         }
 
         const description = dimensions.map(({ name }) => friendly[selected[name]] || selected[name]).join(" · ");
-        showPreview("Recognized environment", selected.name, description, true);
+        showPreview("Recognized environment", selected.displayLabel, description, true);
     }
 
     function onSelectionChanged() {

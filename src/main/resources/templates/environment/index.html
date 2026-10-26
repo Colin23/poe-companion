@@ -116,8 +116,6 @@
                           th:text="${draftPreviewReady ? 'Recognized environment' : 'Choose a recognized environment'}">
                         Recognized environment
                     </span>
-                    <span class="small-muted" id="environment-preview-name-label"
-                          th:attr="hidden=${!draftPreviewReady ? 'hidden' : null}">Curated league name</span>
                     <strong class="environment-preview-name" id="environment-preview-name"
                             th:text="${draftPreviewName != null ? draftPreviewName : 'Complete the selection above'}">
                         Development SSF league
@@ -142,7 +140,8 @@
                                data-mortality=${option.mortality},
                                data-participation=${option.participation},
                                data-league-id=${option.leagueId},
-                               data-league-name=${option.name}"></span>
+                               data-league-name=${option.name},
+                               data-display-label=${option.displayLabel}"></span>
             </div>
             <noscript>
                 <p class="small-muted">Without JavaScript, all recognized field values remain selectable.
