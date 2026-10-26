@@ -25,6 +25,7 @@ if (environmentForm && environmentRegistry) {
     );
     const specificLeagueField = document.querySelector("#environment-specific-league-field");
     const specificLeague = environmentForm.elements.namedItem("leagueId");
+    const preview = document.querySelector(".environment-preview");
     const previewStatus = document.querySelector("#environment-preview-status");
     const previewName = document.querySelector("#environment-preview-name");
     const previewDescription = document.querySelector("#environment-preview-description");
@@ -114,4 +115,5 @@ if (environmentForm && environmentRegistry) {
     }
     specificLeague.addEventListener("change", refreshOptions);
     refreshOptions();
+    preview.hidden = false;
 }
