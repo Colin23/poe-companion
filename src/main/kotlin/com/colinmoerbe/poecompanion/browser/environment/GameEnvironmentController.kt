@@ -66,6 +66,7 @@ internal class GameEnvironmentController(private val environments: GameEnvironme
             }
 
             matches.size == 1 -> matches.single()
+
             else -> null
         }
         val model = mapOf(
