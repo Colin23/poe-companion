@@ -118,6 +118,17 @@ internal class GameEnvironmentBrowserIntegrationTests(
     }
 
     @Test
+    fun `compact Standard label and curated fixture name are presented as separate concepts`() {
+        select("STANDARD")
+        val page = mvc.perform(get("/environment").with(user("test-user").roles("USER")))
+            .andExpect(status().isOk)
+            .andReturn()
+        assertThat(page.modelAndView!!.model["currentLabel"]).isEqualTo("3.30 SC SSF Standard")
+        assertThat(page.modelAndView!!.model["draftPreviewName"]).isEqualTo("Development Standard SSF")
+        assertThat(page.response.contentAsString).contains("Curated league name")
+    }
+
+    @Test
     fun `non PC curated options do not appear as selectable browser environments`() {
         val consoleLeague = LeagueDefinition(
             LeagueDefinitionId(UUID.randomUUID()),

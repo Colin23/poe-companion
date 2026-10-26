@@ -116,6 +116,8 @@
                           th:text="${draftPreviewReady ? 'Recognized environment' : 'Choose a recognized environment'}">
                         Recognized environment
                     </span>
+                    <span class="small-muted" id="environment-preview-name-label"
+                          th:attr="hidden=${!draftPreviewReady ? 'hidden' : null}">Curated league name</span>
                     <strong class="environment-preview-name" id="environment-preview-name"
                             th:text="${draftPreviewName != null ? draftPreviewName : 'Complete the selection above'}">
                         Development SSF league

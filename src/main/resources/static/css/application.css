@@ -1373,6 +1373,15 @@ a:focus-visible {
     display: none;
 }
 
+.environment-preview--incomplete {
+    background: #292d34;
+    border-color: #5b626b;
+}
+
+.environment-preview--incomplete .environment-preview-eyebrow {
+    color: #bec3cc;
+}
+
 .environment-preview-eyebrow {
     font-size: 0.85rem;
     font-weight: 600;

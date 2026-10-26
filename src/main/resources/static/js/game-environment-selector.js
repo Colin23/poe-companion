@@ -28,6 +28,7 @@ if (environmentForm && environmentRegistry) {
     const preview = document.querySelector(".environment-preview");
     const previewStatus = document.querySelector("#environment-preview-status");
     const previewName = document.querySelector("#environment-preview-name");
+    const previewNameLabel = document.querySelector("#environment-preview-name-label");
     const previewDescription = document.querySelector("#environment-preview-description");
     const submit = environmentForm.querySelector('button[type="submit"]');
     const error = document.querySelector(".environment-error");
@@ -46,7 +47,9 @@ if (environmentForm && environmentRegistry) {
         const available = values.length > 0;
         const optionsForSelect = values.map((value) => new Option(friendly[value] || value, value));
         if (values.length !== 1) {
-            optionsForSelect.unshift(new Option(placeholder, ""));
+            const prompt = new Option(placeholder, "");
+            prompt.disabled = true;
+            optionsForSelect.unshift(prompt);
         }
         select.replaceChildren(...optionsForSelect);
         select.value = chosen;
@@ -56,8 +59,10 @@ if (environmentForm && environmentRegistry) {
     function showPreview(status, name, description, canSave) {
         previewStatus.textContent = status;
         previewName.textContent = name;
+        previewNameLabel.hidden = !canSave;
         previewDescription.textContent = description;
         submit.disabled = !canSave;
+        preview.classList.toggle("environment-preview--incomplete", !canSave);
     }
 
     function refreshOptions() {
@@ -68,12 +73,9 @@ if (environmentForm && environmentRegistry) {
                     selectors[name].value !== "" && entry[name] === selectors[name].value),
             );
             const values = [...new Set(candidates.map((entry) => entry[dimension.name]))];
-            replaceChoices(
-                selectors[dimension.name],
-                values,
-                selectors[dimension.name].value,
-                "Choose " + dimension.label,
-            );
+            const missingParent = dimensions.slice(0, index).find(({ name }) => selectors[name].value === "");
+            const prompt = missingParent ? "Select " + missingParent.label + " first" : "Choose " + dimension.label;
+            replaceChoices(selectors[dimension.name], values, selectors[dimension.name].value, prompt);
         }
 
         const matches = options.filter((entry) =>
@@ -84,10 +86,9 @@ if (environmentForm && environmentRegistry) {
         specificLeague.disabled = matches.length <= 1;
         if (matches.length > 1) {
             const previous = specificLeague.value;
-            specificLeague.replaceChildren(
-                new Option("Choose a specific league", ""),
-                ...matches.map((entry) => new Option(entry.name, entry.leagueId)),
-            );
+            const prompt = new Option("Choose a specific league", "");
+            prompt.disabled = true;
+            specificLeague.replaceChildren(prompt, ...matches.map((entry) => new Option(entry.name, entry.leagueId)));
             specificLeague.value = matches.some((entry) => entry.leagueId === previous) ? previous : "";
         } else {
             specificLeague.value = "";

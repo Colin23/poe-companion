@@ -33,6 +33,9 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6
 
+      - name: Test environment selector interactions
+        run: node --test src/test/js/game-environment-selector.test.cjs
+
       - name: Build and verify
         run: ./gradlew build
 
