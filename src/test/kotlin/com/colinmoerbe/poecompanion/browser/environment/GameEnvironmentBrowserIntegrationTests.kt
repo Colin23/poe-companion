@@ -92,8 +92,54 @@ internal class GameEnvironmentBrowserIntegrationTests(
             .andExpect(content().string(containsString("id=\"environment-version\"")))
             .andExpect(content().string(containsString("id=\"environment-mortality\"")))
             .andExpect(content().string(containsString("id=\"environment-participation\"")))
+            .andExpect(content().string(containsString("game-environment-selector.js")))
+            .andExpect(content().string(containsString("data-environment-option")))
         mvc.perform(get("/environment").with(anonymous()))
             .andExpect(status().is3xxRedirection)
+    }
+
+    @Test
+    fun `selector offers one guided form backed by actual curated choices`() {
+        val result = mvc.perform(get("/environment").with(user("test-user").roles("USER")))
+            .andExpect(status().isOk)
+            .andReturn()
+        val html = result.response.contentAsString
+        assertThat(html).contains(
+            "Current environment",
+            "Choose an environment",
+            "data-environment-option",
+            "data-league-name=\"Development SSF league\"",
+            "data-league-name=\"Development Standard SSF\"",
+            "id=\"environment-preview-name\"",
+        ).doesNotContain("Recognized choices", "onchange=", "onclick=")
+        assertThat(html.split("data-environment-option").size - 1).isEqualTo(2)
+        assertThat(result.modelAndView!!.model["draftPreviewReady"]).isEqualTo(true)
+        assertThat(result.modelAndView!!.model["draftPreviewName"]).isEqualTo("Development SSF league")
+    }
+
+    @Test
+    fun `invalid submitted settings retain the draft without replacing the saved environment`() {
+        val before = SecurityTestActors.asUser { selections.getSelected() }
+        val result = mvc.perform(
+            post("/environment").with(user("test-user").roles("USER")).with(csrf())
+                .param("version", "3.29")
+                .param("type", "STANDARD")
+                .param("mortality", "SOFTCORE")
+                .param("participation", "SSF")
+                .param("ruleset", "NORMAL"),
+        )
+            .andExpect(status().isBadRequest)
+            .andReturn()
+        val model = result.modelAndView!!.model
+        assertThat(model["selectedVersion"]).isEqualTo("3.29")
+        assertThat(model["draftPreviewReady"]).isEqualTo(false)
+        assertThat(result.response.contentAsString).contains(
+            "Current environment",
+            "Development SSF league",
+            "value=\"3.29\"",
+            "not among the curated game environments",
+        )
+        assertThat(SecurityTestActors.asUser { selections.getSelected() }).isEqualTo(before)
     }
 
     @Test
@@ -164,7 +210,7 @@ internal class GameEnvironmentBrowserIntegrationTests(
             .andExpect(status().isBadRequest)
 
         mvc.perform(get("/environment").with(user("test-user").roles("USER")))
-            .andExpect(content().string(containsString("Current selection:")))
+            .andExpect(content().string(containsString("Current environment")))
             .andExpect(content().string(containsString("Development SSF league")))
     }
 

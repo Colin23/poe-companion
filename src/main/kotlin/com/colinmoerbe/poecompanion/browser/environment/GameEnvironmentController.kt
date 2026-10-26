@@ -59,6 +59,15 @@ internal class GameEnvironmentController(private val environments: GameEnvironme
             participation = initial?.league?.participation?.name.orEmpty(),
         )
         val matches = GameEnvironmentFormParser.parse(input)?.let(environments::findMatching).orEmpty()
+        val selectedLeagueId = submitted?.leagueId ?: preferred?.league?.id?.value?.toString().orEmpty()
+        val preview = when {
+            selectedLeagueId.isNotBlank() -> matches.singleOrNull {
+                it.league.id.value.toString() == selectedLeagueId
+            }
+
+            matches.size == 1 -> matches.single()
+            else -> null
+        }
         val model = mapOf(
             "username" to principal.name,
             "options" to options.map(::toView),
@@ -72,14 +81,24 @@ internal class GameEnvironmentController(private val environments: GameEnvironme
             "selectedParticipation" to input.participation,
             "currentLabel" to current?.label,
             "currentRecognized" to (preferred != null),
-            "selectedLeagueId" to (submitted?.leagueId ?: preferred?.league?.id?.value?.toString().orEmpty()),
+            "selectedLeagueId" to selectedLeagueId,
             "ambiguousOptions" to if (matches.size > 1) matches.map(::toView) else emptyList(),
+            "draftPreviewReady" to (preview != null),
+            "draftPreviewName" to preview?.league?.name,
+            "draftPreviewDescription" to preview?.let(::describe),
             "errorMessage" to error,
         )
         return ModelAndView("environment/index", model).apply {
             if (error != null) setStatus(HttpStatus.BAD_REQUEST)
         }
     }
+
+    private fun describe(option: GameEnvironmentOption): String = listOf(
+        option.compatibilityVersion.toString(),
+        option.league.type.name.lowercase().replaceFirstChar { it.titlecase() },
+        option.league.mortality.name.lowercase().replaceFirstChar { it.titlecase() },
+        option.league.participation.name.lowercase().replaceFirstChar { it.titlecase() },
+    ).joinToString(" · ")
 
     private fun toView(option: GameEnvironmentOption): SelectableGameEnvironmentView = SelectableGameEnvironmentView(
         version = option.compatibilityVersion.toString(),
