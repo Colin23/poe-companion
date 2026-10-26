@@ -270,7 +270,7 @@ internal class GameEnvironmentBrowserIntegrationTests(
         accountEvaluation.select(ids.account, unknownVersion)
 
         mvc.perform(get("/environment").with(user("test-user").roles("USER")))
-            .andExpect(content().string(containsString("not among currently curated choices")))
+            .andExpect(content().string(containsString("no longer among currently curated choices")))
         fixture.initialize()
         assertThat(
             SecurityTestActors.asUser {
