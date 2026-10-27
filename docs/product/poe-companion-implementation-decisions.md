@@ -1733,3 +1733,16 @@ No public guest access, new migration, or production fixture startup is introduc
 - Saved AvailableAttempts (including explicit zero) and the optional GET-only hypothetical preview remain separate; no presentation change may mutate calculated eligibility, owner-scoped persistence, first-write rules or authorization.
 
 **Deferred:** A separately curated, context-independent source discovery label and richer encounter/access ingestion require a future Acquisition-specific design and workflow. This is not automatically covered by Milestone 7 Unique Catalog ingestion. See [issue #22's detailed examples and revisit triggers](https://github.com/Colin23/poe-companion/issues/22#issuecomment-6402358187).
+
+## 44. Progressive Enhancement of Curated Game-Environment Selection (Milestone 5.2)
+
+**Authority:** Canonical V2.1.3 game-context/identity amendment §2 and implementation decision §39. This is a Browser interaction refinement, not a change to environment identity, applicability, or owner-scoped state.
+
+- Keep the single player-facing selector structured by compatibility version, Challenge/Standard type, mortality and participation; Normal ruleset and PC realm remain fixed while they are the only supported choices. Avoid a flat card/list for every recognized environment: the interface should remain navigable as the curated registry grows.
+- The League module's actual `GameEnvironmentOption` entries are the **only** source of eligible combinations. Browser renders that list as escaped HTML data attributes; a dedicated external script filters downstream native `select` options and previews an exact match. Never construct a cross-product of independent values and present it as automatically recognized.
+- Keep a previously selected downstream value only if it remains valid after an upstream change. Automatically choose an alternative only when exactly one value remains; otherwise require an explicit choice. Where multiple real curated leagues share the same structured dimensions, require an explicit league identity. A draft selection never changes the saved environment without an explicit submit.
+- The browser JavaScript is a small, focused progressive enhancement analogous to the mobile navigation script. It belongs in a separate static `.js` file, with no inline event handlers, frontend framework, or client-side persistence. It may handle UI filtering and accessible preview text; `GameEnvironmentFormParser` and `GameEnvironmentOptionService.select()` remain the authoritative HTTP/domain validation and save boundary.
+- Without JavaScript, the server-rendered form must remain usable: it renders all curated dimension values, validates complete submissions, redisplays invalid inputs and errors, and reveals an explicit league choice when a submitted combination is ambiguous. JavaScript is not a security or domain-integrity prerequisite.
+- Preserve CSRF and POST/Redirect/GET, selection ownership, old selections absent from the current registry, exact-patch preservation for reselection of the same league/version, and the rule that selection never initializes `AccountContext` or triggers synchronization.
+
+**Non-scope:** Real league lifecycle discovery, historical league search, Ruthless, GGG integration, new persistence/schema, a general JavaScript architecture, or replacing the server-rendered Browser.

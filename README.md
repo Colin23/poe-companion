@@ -33,6 +33,7 @@ Install:
 - Git
 - Docker with Docker Compose
 - JDK 25 for local/IDE use
+- Node.js 24 to run the frontend JavaScript tests locally (not needed to run the Spring Boot application)
 
 The Gradle wrapper is included, so a separate Gradle installation is not required. The configured Gradle toolchain can
 also provision a matching JDK when necessary.
@@ -121,13 +122,20 @@ docker compose down --volumes
 
 ## Build and verification
 
-Run the complete local verification with dependency verification made explicit:
+Run backend verification with dependency verification made explicit:
 
 ```bash
 ./gradlew clean build --dependency-verification=strict
 ```
 
-Docker must be available because integration tests use PostgreSQL through Testcontainers.
+Run frontend JavaScript tests separately, using Node.js 24 and its built-in test runner (no npm install required):
+
+```bash
+node --test src/test/js/game-environment-selector.test.mjs
+```
+
+Run both commands for the full local CI-equivalent verification. Docker must be available because backend integration
+tests use PostgreSQL through Testcontainers.
 
 Useful focused commands:
 
@@ -222,8 +230,10 @@ Build an OCI image with Spring Boot buildpacks:
 
 ## Continuous integration
 
-GitHub Actions runs `Build and verify` on pushes to `main`, pull requests, and manual workflow dispatches. Successful
-builds upload the executable JAR and CycloneDX SBOM; failed builds upload diagnostic reports when available.
+GitHub Actions runs two independent jobs on pushes to `main`, pull requests, and manual workflow dispatches:
+`Build and verify` checks the Kotlin/Gradle backend and uploads the executable JAR and CycloneDX SBOM on success,
+or diagnostic reports on failure. `Frontend checks` runs the JavaScript interaction tests with Node.js 24.
+The jobs have no dependency on each other and can run in parallel.
 
 The default branch also requires signed commits and is protected by required CI and CodeQL checks.
 

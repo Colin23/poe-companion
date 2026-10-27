@@ -1,7 +1,10 @@
 package com.colinmoerbe.poecompanion.browser.environment
 
+import com.colinmoerbe.poecompanion.league.CurrentGameEnvironment
+import com.colinmoerbe.poecompanion.league.GameEnvironmentLabels
 import com.colinmoerbe.poecompanion.league.GameEnvironmentOption
 import com.colinmoerbe.poecompanion.league.GameEnvironmentOptionService
+import com.colinmoerbe.poecompanion.league.GameRealm
 import com.colinmoerbe.poecompanion.league.Ruleset
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Controller
@@ -44,7 +47,7 @@ internal class GameEnvironmentController(private val environments: GameEnvironme
         submitted: GameEnvironmentFormInput? = null,
         error: String? = null,
     ): ModelAndView {
-        val options = environments.findAll()
+        val options = environments.findAll().filter { it.league.realm == GameRealm.PC }
         val current = environments.current()
         val saved = current?.context?.takeIf { it.ruleset == Ruleset.NORMAL }
         val preferred = options.firstOrNull {
@@ -59,9 +62,19 @@ internal class GameEnvironmentController(private val environments: GameEnvironme
             participation = initial?.league?.participation?.name.orEmpty(),
         )
         val matches = GameEnvironmentFormParser.parse(input)?.let(environments::findMatching).orEmpty()
+        val selectedLeagueId = submitted?.leagueId ?: preferred?.league?.id?.value?.toString().orEmpty()
+        val preview = when {
+            selectedLeagueId.isNotBlank() -> matches.singleOrNull {
+                it.league.id.value.toString() == selectedLeagueId
+            }
+
+            matches.size == 1 -> matches.single()
+
+            else -> null
+        }
         val model = mapOf(
             "username" to principal.name,
-            "options" to options.map(::toView),
+            "options" to options.map { toView(it, current) },
             "versions" to options.map { it.compatibilityVersion.toString() }.distinct(),
             "types" to options.map { it.league.type.name }.distinct(),
             "mortalities" to options.map { it.league.mortality.name }.distinct(),
@@ -72,8 +85,11 @@ internal class GameEnvironmentController(private val environments: GameEnvironme
             "selectedParticipation" to input.participation,
             "currentLabel" to current?.label,
             "currentRecognized" to (preferred != null),
-            "selectedLeagueId" to (submitted?.leagueId ?: preferred?.league?.id?.value?.toString().orEmpty()),
-            "ambiguousOptions" to if (matches.size > 1) matches.map(::toView) else emptyList(),
+            "selectedLeagueId" to selectedLeagueId,
+            "ambiguousOptions" to if (matches.size > 1) matches.map { toView(it, current) } else emptyList(),
+            "draftPreviewReady" to (preview != null),
+            "draftPreviewName" to preview?.let { displayLabel(it, current) },
+            "draftPreviewDescription" to preview?.let(::describe),
             "errorMessage" to error,
         )
         return ModelAndView("environment/index", model).apply {
@@ -81,12 +97,36 @@ internal class GameEnvironmentController(private val environments: GameEnvironme
         }
     }
 
-    private fun toView(option: GameEnvironmentOption): SelectableGameEnvironmentView = SelectableGameEnvironmentView(
+    private fun describe(option: GameEnvironmentOption): String = listOf(
+        option.compatibilityVersion.toString(),
+        option.league.type.name.lowercase().replaceFirstChar { it.titlecase() },
+        option.league.mortality.name.lowercase().replaceFirstChar { it.titlecase() },
+        option.league.participation.name.lowercase().replaceFirstChar { it.titlecase() },
+    ).joinToString(" · ")
+
+    private fun displayLabel(option: GameEnvironmentOption, current: CurrentGameEnvironment?): String {
+        val currentContext = current?.context
+        val stillSelected = currentContext != null &&
+            currentContext.leagueDefinitionId == option.league.id &&
+            currentContext.compatibilityVersion == option.compatibilityVersion &&
+            currentContext.ruleset == Ruleset.NORMAL
+        return if (stillSelected) {
+            current.label
+        } else {
+            GameEnvironmentLabels.compact(option.context, option.league)
+        }
+    }
+
+    private fun toView(
+        option: GameEnvironmentOption,
+        current: CurrentGameEnvironment?,
+    ): SelectableGameEnvironmentView = SelectableGameEnvironmentView(
         version = option.compatibilityVersion.toString(),
         type = option.league.type.name,
         mortality = option.league.mortality.name,
         participation = option.league.participation.name,
         name = option.league.name,
+        displayLabel = displayLabel(option, current),
         leagueId = option.league.id.value.toString(),
     )
 }
@@ -97,5 +137,6 @@ internal data class SelectableGameEnvironmentView(
     val mortality: String,
     val participation: String,
     val name: String,
+    val displayLabel: String,
     val leagueId: String,
 )
