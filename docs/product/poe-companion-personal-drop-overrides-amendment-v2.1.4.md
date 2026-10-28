@@ -64,9 +64,9 @@ Suggestion order chooses a useful **proposal**, not an inference that the drop c
 A candidate suggestion is **not** automatically inserted as a stale database row when the player changes environments.
 
 - **Accept:** explicitly create or replace a confirmed personal override for the *target* exact context using the proposed value. The original source confirmation remains unchanged; later editing either context does not rewrite the other.
-- **Reject/dismiss:** persist the player's decision to decline reusing **that specific source estimate revision** for that target context, without creating a target numeric override or changing the source. The same rejected revision must not repeatedly reappear after reload or future context switches.
+- **Reject/dismiss:** persist the player's decision to decline reusing **that specific source DropRateOverride revision** for that target context, without creating a target numeric override or changing the source. The same rejected revision must not repeatedly reappear after reload or future context switches.
 - Rejecting the best candidate must not automatically cascade to older candidates merely to replace the just-dismissed suggestion.
-- A revised source estimate is a **different revision** and may be suggested again; the dismissal of its previous version does not hide the revised value. A newly confirmed more recent source can also become eligible under the ordinary selection rules.
+- A revised source DropRateOverride is a **different revision** and may be suggested again; the dismissal of its previous version does not hide the revised value. A newly confirmed more recent source can also become eligible under the ordinary selection rules.
 - Rejection must not prevent the player from manually entering a fresh target estimate. Removing or editing a confirmed value affects that target, not unrelated confirmed contexts.
 - Only explicit player writes persist confirmations, changes, dismissals or preferences. Mere browsing never does.
 
@@ -76,10 +76,10 @@ How revisions and dismissals are represented in persistence is an implementation
 
 Preserve the player's **canonical-versus-personal input preference** for the exact context/relationship/model/conditions key. Switching to another context must not overwrite this preference; returning should restore the earlier choice.
 
-A confirmed personal probability **may power a calculation even when no applicable accepted canonical numeric estimate exists**, but only if the source is independently known AVAILABLE, the relationship is independently resolved CAN_DROP, and the fixed independent-attempt model and its conditions are independently supported. A player typing 13% is not evidence for those prerequisites.
+A confirmed personal probability **may power a calculation even when no applicable accepted canonical numeric estimate exists**, but only when applicable knowledge independently establishes that the source is available, that it can produce the target Unique in the selected EvaluationContext, and that the fixed independent-attempt model and its conditions are supported. A player typing 13% is not evidence for those prerequisites.
 
 In particular, a personal rate cannot:
-- change CANNOT_DROP into CAN_DROP, or unknown applicability into a verified drop;
+- turn a relationship known not to produce the target Unique, or unresolved or ambiguous drop applicability, into affirmative drop eligibility;
 - make an unavailable or unknown source actionable;
 - make unsupported modifier-dependent probability mechanics into a supported fixed model;
 - authorize calculation for an otherwise invalid/mismatched context.
