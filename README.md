@@ -183,8 +183,8 @@ module APIs rather than references to another module's internals.
 
 ## Product specification
 
-The canonical V2.1.1 specification is in [`docs/product`](docs/product). Start with
-the [Specification Index](docs/product/poe-companion-spec-index-v2.1.1.md); it defines which document is authoritative
+The canonical V2.1.4 specification is in [`docs/product`](docs/product). Start with
+the [Specification Index](docs/product/poe-companion-spec-index-v2.1.4.md); it defines which document is authoritative
 for product scope, domain semantics, architecture, technology choices, implementation sequencing, and time-sensitive
 feasibility evidence.
 
