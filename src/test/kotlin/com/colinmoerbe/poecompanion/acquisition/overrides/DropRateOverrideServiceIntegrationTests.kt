@@ -44,14 +44,13 @@ import org.springframework.security.concurrent.DelegatingSecurityContextExecutor
 import org.springframework.security.test.context.support.WithMockUser
 import java.util.UUID
 import java.util.concurrent.Callable
-import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 /**
  * PostgreSQL-backed personal override service contract: scope, history, CAS, ownership and first writes.
  */
-@Import(TestcontainersConfiguration::class)
+@Import(TestcontainersConfiguration::class, ConcurrentConfirmationTestConfiguration::class)
 @SpringBootTest(
     properties = [
         "poe-companion.security.user.username=test-user",
@@ -64,6 +63,7 @@ import java.util.concurrent.TimeUnit
 @WithMockUser(username = "test-user")
 internal class DropRateOverrideServiceIntegrationTests(
     @Autowired private val service: DropRateOverrideService,
+    @Autowired private val concurrentConfirmationPort: ConcurrentConfirmationPort,
     @Autowired private val jdbc: JdbcTemplate,
     @Autowired private val repository: SpringDataDropRateOverrideRevisionRepository,
     @Autowired private val selection: GameEnvironmentSelectionService,
@@ -363,28 +363,23 @@ internal class DropRateOverrideServiceIntegrationTests(
             .isEqualTo("SUPERSEDED")
     }
 
-    private fun race(first: () -> Unit, second: () -> Unit): List<Result<Unit>> {
-        val executor = DelegatingSecurityContextExecutorService(Executors.newFixedThreadPool(2))
-        val ready = CountDownLatch(2)
-        val begin = CountDownLatch(1)
-        return try {
-            val actions = listOf(first, second).map { action ->
-                executor.submit(
-                    Callable {
-                        ready.countDown()
-                        check(begin.await(10, TimeUnit.SECONDS)) { "Concurrent test did not start" }
-                        runCatching { action() }
-                    },
-                )
+    /**
+     * Both callbacks enter the service and its transaction before meeting at the persistence port.
+     * The gate fails if either call cannot reach the same write boundary; sequential execution
+     * cannot produce a false-positive successful race test.
+     */
+    private fun race(first: () -> Unit, second: () -> Unit): List<Result<Unit>> =
+        concurrentConfirmationPort.withConcurrentConfirmations {
+            val executor = DelegatingSecurityContextExecutorService(Executors.newFixedThreadPool(2))
+            try {
+                val actions = listOf(first, second).map { action ->
+                    executor.submit(Callable { runCatching { action() } })
+                }
+                actions.map { it.get(60, TimeUnit.SECONDS) }
+            } finally {
+                executor.shutdownNow()
             }
-            check(ready.await(10, TimeUnit.SECONDS)) { "Concurrent calls did not become ready" }
-            begin.countDown()
-            actions.map { it.get(30, TimeUnit.SECONDS) }
-        } finally {
-            begin.countDown()
-            executor.shutdownNow()
         }
-    }
 
     private fun registerLeagueVersion(league: LeagueDefinition) {
         selectableVersions.saveIfAbsent(league.id, version)
