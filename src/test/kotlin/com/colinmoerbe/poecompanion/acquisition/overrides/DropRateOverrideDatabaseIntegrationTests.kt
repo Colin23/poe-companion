@@ -37,7 +37,14 @@ import java.util.UUID
 
 /** Verifies V021 database invariants independently of Kotlin domain validation. */
 @Import(TestcontainersConfiguration::class)
-@SpringBootTest
+@SpringBootTest(
+    properties = [
+        "poe-companion.security.user.username=test-user",
+        "poe-companion.security.user.password=test-password",
+        "poe-companion.security.admin.username=test-admin",
+        "poe-companion.security.admin.password=test-admin-password",
+    ],
+)
 internal class DropRateOverrideDatabaseIntegrationTests(
     @Autowired private val revisions: SpringDataDropRateOverrideRevisionRepository,
     @Autowired private val jdbc: JdbcTemplate,
