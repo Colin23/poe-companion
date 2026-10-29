@@ -28,6 +28,7 @@ import com.colinmoerbe.poecompanion.league.Ruleset
 import com.colinmoerbe.poecompanion.league.persistence.AccountContextPersistenceAdapter
 import com.colinmoerbe.poecompanion.league.persistence.LeagueDefinitionPersistenceAdapter
 import com.colinmoerbe.poecompanion.league.persistence.SelectableLeagueVersionPersistenceAdapter
+import com.colinmoerbe.poecompanion.league.persistence.SpringDataAccountEvaluationSelectionRepository
 import com.colinmoerbe.poecompanion.security.identity.ApplicationUserId
 import com.colinmoerbe.poecompanion.security.identity.ConfiguredApplicationUsers
 import org.assertj.core.api.Assertions.assertThat
@@ -70,11 +71,13 @@ internal class DropRateOverrideServiceIntegrationTests(
     @Autowired private val accountAdapter: AccountContextPersistenceAdapter,
     @Autowired private val leagueAdapter: LeagueDefinitionPersistenceAdapter,
     @Autowired private val selectableVersions: SelectableLeagueVersionPersistenceAdapter,
+    @Autowired private val selectionRepository: SpringDataAccountEvaluationSelectionRepository,
     @Autowired private val sourceAdapter: AcquisitionSourcePersistenceAdapter,
     @Autowired private val uniqueAdapter: UniqueDefinitionPersistenceAdapter,
     @Autowired private val relationshipAdapter: DropRelationshipPersistenceAdapter,
 ) {
     private val version = CompatibilityVersion(3, 30)
+    private val registeredLeagueIds = mutableListOf<LeagueDefinitionId>()
 
     @BeforeEach
     fun cleanBeforeTest() {
@@ -84,6 +87,13 @@ internal class DropRateOverrideServiceIntegrationTests(
     @AfterEach
     fun cleanAfterTest() {
         repository.deleteAllInBatch()
+        selectionRepository.deleteAllInBatch()
+        registeredLeagueIds.forEach { leagueId ->
+            jdbc.update(
+                "DELETE FROM poe_companion.selectable_league_version WHERE league_definition_id = ?",
+                leagueId.value,
+            )
+        }
     }
 
     @Test
@@ -227,7 +237,7 @@ internal class DropRateOverrideServiceIntegrationTests(
     @Test
     fun `first valid confirmation creates its personal context only after validation`() {
         val league = league()
-        selectableVersions.saveIfAbsent(league.id, version)
+        registerLeagueVersion(league)
         val relationship = relationship()
         select(league)
 
@@ -241,7 +251,7 @@ internal class DropRateOverrideServiceIntegrationTests(
     @Test
     fun `invalid rate or unknown relationship must not create an account context`() {
         val league = league()
-        selectableVersions.saveIfAbsent(league.id, version)
+        registerLeagueVersion(league)
         select(league)
 
         assertThatThrownBy { service.confirmForSelectedEnvironment(DropRelationshipId.generate(), 0.13) }
@@ -254,7 +264,7 @@ internal class DropRateOverrideServiceIntegrationTests(
     @Test
     fun `failed first-write replacement rolls back creation of account context`() {
         val league = league()
-        selectableVersions.saveIfAbsent(league.id, version)
+        registerLeagueVersion(league)
         val relationship = relationship()
         select(league)
 
@@ -308,7 +318,7 @@ internal class DropRateOverrideServiceIntegrationTests(
             service.removeForSelectedEnvironment(relationship.id, existing.revisionId)
         }.isInstanceOf(DropRateOverrideConflictException::class.java)
 
-        selectableVersions.saveIfAbsent(league.id, version)
+        registerLeagueVersion(league)
         val adminConfirmation = service.confirmForSelectedEnvironment(relationship.id, 0.11)
         assertThat(adminConfirmation.key.accountContextId).isNotEqualTo(userAccount.id)
         assertThat(service.findConfirmedForSelectedEnvironment(relationship.id)).isEqualTo(adminConfirmation)
@@ -374,6 +384,11 @@ internal class DropRateOverrideServiceIntegrationTests(
             begin.countDown()
             executor.shutdownNow()
         }
+    }
+
+    private fun registerLeagueVersion(league: LeagueDefinition) {
+        selectableVersions.saveIfAbsent(league.id, version)
+        registeredLeagueIds += league.id
     }
 
     private fun selectedContext(league: LeagueDefinition): EvaluationContext =
