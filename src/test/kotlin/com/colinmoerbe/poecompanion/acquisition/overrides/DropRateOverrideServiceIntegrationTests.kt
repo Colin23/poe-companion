@@ -38,6 +38,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService
 import org.springframework.security.test.context.support.WithMockUser
 import java.util.UUID
@@ -62,6 +63,7 @@ import java.util.concurrent.TimeUnit
 @WithMockUser(username = "test-user")
 internal class DropRateOverrideServiceIntegrationTests(
     @Autowired private val service: DropRateOverrideService,
+    @Autowired private val jdbc: JdbcTemplate,
     @Autowired private val repository: SpringDataDropRateOverrideRevisionRepository,
     @Autowired private val selection: GameEnvironmentSelectionService,
     @Autowired private val accountAccess: AccountContextAccessService,
@@ -134,7 +136,11 @@ internal class DropRateOverrideServiceIntegrationTests(
 
         select(challenge)
         assertThat(service.findConfirmedForSelectedEnvironment(relationship.id)).isNull()
-        select(standard, compatibilityVersion = CompatibilityVersion(3, 31))
+        select(
+            standard,
+            patch = GamePatch(CompatibilityVersion(3, 31), 1),
+            compatibilityVersion = CompatibilityVersion(3, 31),
+        )
         assertThat(service.findConfirmedForSelectedEnvironment(relationship.id)).isNull()
         select(standard)
         assertThat(service.findConfirmedForSelectedEnvironment(relationship.id)).isEqualTo(original)
@@ -414,15 +420,23 @@ internal class DropRateOverrideServiceIntegrationTests(
     private fun insertOwnedFixture(override: DropRateOverride) {
         val key = override.key
         // Fixture bypasses service authorization to seed a different owner's stored revision.
-        repository.insertActive(
-            revisionId = override.revisionId.value,
-            accountId = key.accountContextId.value,
-            relationshipId = key.dropRelationshipId.value,
-            major = key.evaluationContext.compatibilityVersion.major,
-            minor = key.evaluationContext.compatibilityVersion.minor,
-            patchNumber = key.evaluationContext.gamePatch?.patch,
-            patchSuffix = key.evaluationContext.gamePatch?.suffix,
-            probability = override.model.probabilityPerAttempt,
+        jdbc.update(
+            """
+            INSERT INTO poe_companion.drop_rate_override_revision (
+                id, account_context_id, drop_relationship_id,
+                compatibility_version_major, compatibility_version_minor,
+                game_patch_number, game_patch_suffix, model_type,
+                probability_per_attempt, status, confirmed_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, 'FIXED_BERNOULLI', ?, 'ACTIVE', CURRENT_TIMESTAMP)
+            """.trimIndent(),
+            override.revisionId.value,
+            key.accountContextId.value,
+            key.dropRelationshipId.value,
+            key.evaluationContext.compatibilityVersion.major,
+            key.evaluationContext.compatibilityVersion.minor,
+            key.evaluationContext.gamePatch?.patch,
+            key.evaluationContext.gamePatch?.suffix,
+            override.model.probabilityPerAttempt,
         )
     }
 }
