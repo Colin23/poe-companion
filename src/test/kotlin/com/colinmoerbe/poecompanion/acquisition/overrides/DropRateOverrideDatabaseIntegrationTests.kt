@@ -146,7 +146,13 @@ internal class DropRateOverrideDatabaseIntegrationTests(
                 probability_per_attempt, status, confirmed_at
             ) VALUES (?, ?, ?, 3, 30, ?, ?, 'FIXED_BERNOULLI', ?, ?, CURRENT_TIMESTAMP)
             """.trimIndent(),
-            UUID.randomUUID(), accountId, relationshipId, patch, suffix, probability, status,
+            UUID.randomUUID(),
+            accountId,
+            relationshipId,
+            patch,
+            suffix,
+            probability,
+            status,
         )
     }
 
