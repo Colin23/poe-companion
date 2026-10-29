@@ -353,10 +353,7 @@ internal class DropRateOverrideServiceIntegrationTests(
             .isEqualTo("SUPERSEDED")
     }
 
-    private fun race(
-        first: () -> Unit,
-        second: () -> Unit,
-    ): List<Result<Unit>> {
+    private fun race(first: () -> Unit, second: () -> Unit): List<Result<Unit>> {
         val executor = DelegatingSecurityContextExecutorService(Executors.newFixedThreadPool(2))
         val ready = CountDownLatch(2)
         val begin = CountDownLatch(1)
@@ -390,15 +387,14 @@ internal class DropRateOverrideServiceIntegrationTests(
         selection.select(EvaluationContext(compatibilityVersion, Ruleset.NORMAL, patch, league.id))
     }
 
-    private fun league(type: LeagueType = LeagueType.STANDARD): LeagueDefinition =
-        LeagueDefinition(
-            id = LeagueDefinitionId.generate(),
-            name = "Override test ${UUID.randomUUID()}",
-            type = type,
-            participation = LeagueParticipation.SSF,
-            mortality = LeagueMortality.HARDCORE,
-            realm = GameRealm.PC,
-        ).also(leagueAdapter::save)
+    private fun league(type: LeagueType = LeagueType.STANDARD): LeagueDefinition = LeagueDefinition(
+        id = LeagueDefinitionId.generate(),
+        name = "Override test ${UUID.randomUUID()}",
+        type = type,
+        participation = LeagueParticipation.SSF,
+        mortality = LeagueMortality.HARDCORE,
+        realm = GameRealm.PC,
+    ).also(leagueAdapter::save)
 
     private fun account(
         league: LeagueDefinition,
