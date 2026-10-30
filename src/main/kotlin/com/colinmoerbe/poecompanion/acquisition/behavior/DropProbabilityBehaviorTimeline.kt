@@ -35,12 +35,11 @@ class DropProbabilityBehaviorTimeline(
     }
 
     /** Insufficient patch precision cannot select a version baseline if later behavior changes are known. */
-    fun resolve(context: EvaluationContext): DropProbabilityBehaviorResolution =
-        when (scope.evaluateAgainst(context)) {
-            ApplicabilityResult.DOES_NOT_APPLY -> DropProbabilityBehaviorResolution.DoesNotApply
-            ApplicabilityResult.UNKNOWN -> DropProbabilityBehaviorResolution.Unknown
-            ApplicabilityResult.APPLIES -> resolvePatch(context)
-        }
+    fun resolve(context: EvaluationContext): DropProbabilityBehaviorResolution = when (scope.evaluateAgainst(context)) {
+        ApplicabilityResult.DOES_NOT_APPLY -> DropProbabilityBehaviorResolution.DoesNotApply
+        ApplicabilityResult.UNKNOWN -> DropProbabilityBehaviorResolution.Unknown
+        ApplicabilityResult.APPLIES -> resolvePatch(context)
+    }
 
     private fun resolvePatch(context: EvaluationContext): DropProbabilityBehaviorResolution {
         val patch = context.gamePatch
@@ -58,10 +57,7 @@ class DropProbabilityBehaviorTimeline(
             ?: DropProbabilityBehaviorResolution.Unknown
     }
 
-    private fun compareByPatch(
-        first: DropProbabilityBehaviorSnapshot,
-        second: DropProbabilityBehaviorSnapshot,
-    ): Int {
+    private fun compareByPatch(first: DropProbabilityBehaviorSnapshot, second: DropProbabilityBehaviorSnapshot): Int {
         val left = first.effectiveFromPatch
         val right = second.effectiveFromPatch
         return when {

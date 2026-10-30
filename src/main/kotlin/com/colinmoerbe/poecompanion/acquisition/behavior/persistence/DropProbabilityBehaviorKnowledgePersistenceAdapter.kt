@@ -74,14 +74,16 @@ internal class DropProbabilityBehaviorKnowledgePersistenceAdapter(
     override fun findAcceptedChangePoints(
         dropRelationshipId: DropRelationshipId,
         scope: AcquisitionKnowledgeScope,
-    ): List<AcceptedDropProbabilityBehaviorChangePoint> =
-        repository.findAcceptedByExactScope(
+    ): List<AcceptedDropProbabilityBehaviorChangePoint> {
+        val entities =
+            repository.findAcceptedByExactScope(
             relationshipId = dropRelationshipId.value,
             major = scope.compatibilityVersion.major,
             minor = scope.compatibilityVersion.minor,
             ruleset = scope.ruleset.name,
             leagueId = scope.leagueDefinitionId?.value,
-        ).map { entity ->
+            )
+        return entities.map { entity ->
             AcceptedDropProbabilityBehaviorChangePoint(
                 snapshot = DropProbabilityBehaviorSnapshot(
                     effectiveFromPatch = entity.effectivePatchNumber?.let { patch ->
@@ -92,6 +94,7 @@ internal class DropProbabilityBehaviorKnowledgePersistenceAdapter(
                 revision = entity.revision,
             )
         }
+    }
 
     private fun translateIntegrityViolation(exception: DataIntegrityViolationException): RuntimeException =
         if (exception.hasConstraintName(CHANGE_POINT_UNIQUE_INDEX)) {
