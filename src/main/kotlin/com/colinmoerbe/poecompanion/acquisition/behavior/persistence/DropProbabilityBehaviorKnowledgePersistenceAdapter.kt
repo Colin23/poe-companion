@@ -77,11 +77,11 @@ internal class DropProbabilityBehaviorKnowledgePersistenceAdapter(
     ): List<AcceptedDropProbabilityBehaviorChangePoint> {
         val entities =
             repository.findAcceptedByExactScope(
-            relationshipId = dropRelationshipId.value,
-            major = scope.compatibilityVersion.major,
-            minor = scope.compatibilityVersion.minor,
-            ruleset = scope.ruleset.name,
-            leagueId = scope.leagueDefinitionId?.value,
+                relationshipId = dropRelationshipId.value,
+                major = scope.compatibilityVersion.major,
+                minor = scope.compatibilityVersion.minor,
+                ruleset = scope.ruleset.name,
+                leagueId = scope.leagueDefinitionId?.value,
             )
         return entities.map { entity ->
             AcceptedDropProbabilityBehaviorChangePoint(

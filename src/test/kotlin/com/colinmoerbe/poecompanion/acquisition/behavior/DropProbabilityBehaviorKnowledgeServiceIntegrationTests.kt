@@ -255,10 +255,8 @@ internal class DropProbabilityBehaviorKnowledgeServiceIntegrationTests(
         behavior: DropProbabilityBehavior = DropProbabilityBehavior.FIXED_INDEPENDENT,
     ): DropProbabilityBehaviorSnapshot = DropProbabilityBehaviorSnapshot(patch, behavior)
 
-    private fun context(
-        patch: GamePatch? = null,
-        leagueDefinitionId: LeagueDefinitionId? = null,
-    ): EvaluationContext = EvaluationContext(version, Ruleset.NORMAL, patch, leagueDefinitionId)
+    private fun context(patch: GamePatch? = null, leagueDefinitionId: LeagueDefinitionId? = null): EvaluationContext =
+        EvaluationContext(version, Ruleset.NORMAL, patch, leagueDefinitionId)
 
     private fun relationship(): DropRelationship {
         val source = AcquisitionSource(AcquisitionSourceId.generate()).also(sources::save)
