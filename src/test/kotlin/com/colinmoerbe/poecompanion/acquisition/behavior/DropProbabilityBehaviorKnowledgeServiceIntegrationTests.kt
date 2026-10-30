@@ -172,7 +172,12 @@ internal class DropProbabilityBehaviorKnowledgeServiceIntegrationTests(
         service.recordSnapshot(id, scope, snapshot(), null)
         service.recordSnapshot(id, ruthless, snapshot(behavior = DropProbabilityBehavior.MODIFIER_DEPENDENT), null)
         service.recordSnapshot(id, nextVersion, snapshot(), null)
-        service.recordSnapshot(id, leagueSpecific, snapshot(behavior = DropProbabilityBehavior.MODIFIER_DEPENDENT), null)
+        service.recordSnapshot(
+            id,
+            leagueSpecific,
+            snapshot(behavior = DropProbabilityBehavior.MODIFIER_DEPENDENT),
+            null,
+        )
 
         assertThat(service.findTimeline(id, scope)?.snapshots).containsExactly(snapshot())
         assertThat(service.findTimeline(id, ruthless)?.snapshots?.single()?.behavior)
