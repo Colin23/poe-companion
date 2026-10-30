@@ -65,13 +65,7 @@ internal class DropProbabilityBehaviorKnowledgePersistenceAdapter(
                 behavior = snapshot.behavior.name,
             )
         } catch (exception: DataIntegrityViolationException) {
-            if (exception.hasConstraintName(CHANGE_POINT_UNIQUE_INDEX)) {
-                throw DropProbabilityBehaviorKnowledgeConflictException(
-                    "Probability behavior has already been curated for this exact change point",
-                    exception,
-                )
-            }
-            throw exception
+            throw translateIntegrityViolation(exception)
         }
         return 0
     }
@@ -97,6 +91,16 @@ internal class DropProbabilityBehaviorKnowledgePersistenceAdapter(
                 ),
                 revision = entity.revision,
             )
+        }
+
+    private fun translateIntegrityViolation(exception: DataIntegrityViolationException): RuntimeException =
+        if (exception.hasConstraintName(CHANGE_POINT_UNIQUE_INDEX)) {
+            DropProbabilityBehaviorKnowledgeConflictException(
+                "Probability behavior has already been curated for this exact change point",
+                exception,
+            )
+        } else {
+            exception
         }
 
     private fun Throwable.hasConstraintName(name: String): Boolean {
