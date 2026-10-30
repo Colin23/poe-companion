@@ -34,7 +34,7 @@ class DropProbabilityBehaviorTimeline(
         this.snapshots = Collections.unmodifiableList(snapshots.sortedWith(Comparator(::compareByPatch)))
     }
 
-    /** Insufficient patch precision cannot select a version baseline if later behavior changes are known. */
+    /** Resolves the applicable behavior fact for a game context; calculator eligibility is evaluated separately. */
     fun resolve(context: EvaluationContext): DropProbabilityBehaviorResolution = when (scope.evaluateAgainst(context)) {
         ApplicabilityResult.DOES_NOT_APPLY -> DropProbabilityBehaviorResolution.DoesNotApply
         ApplicabilityResult.UNKNOWN -> DropProbabilityBehaviorResolution.Unknown

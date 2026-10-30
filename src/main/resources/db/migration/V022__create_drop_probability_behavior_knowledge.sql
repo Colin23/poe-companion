@@ -1,5 +1,5 @@
 -- Curator-confirmed probability-behavior knowledge is independent from CAN_DROP and numeric fixed estimates.
--- Unknown behavior means no unambiguous applicable knowledge, never a persisted UNKNOWN label.
+-- Each stored row has a verified behavior. Missing or conflicting applicable knowledge is resolved by the application, not stored as UNKNOWN.
 CREATE TABLE poe_companion.drop_probability_behavior_knowledge (
     id UUID NOT NULL,
     drop_relationship_id UUID NOT NULL,
