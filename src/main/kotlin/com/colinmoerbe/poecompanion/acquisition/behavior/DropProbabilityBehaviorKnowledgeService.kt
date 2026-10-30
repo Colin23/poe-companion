@@ -37,7 +37,8 @@ class DropProbabilityBehaviorKnowledgeService internal constructor(
     fun findAcceptedChangePoints(
         dropRelationshipId: DropRelationshipId,
         scope: AcquisitionKnowledgeScope,
-    ): List<AcceptedDropProbabilityBehaviorChangePoint> = persistencePort.findAcceptedChangePoints(dropRelationshipId, scope)
+    ): List<AcceptedDropProbabilityBehaviorChangePoint> =
+        persistencePort.findAcceptedChangePoints(dropRelationshipId, scope)
 
     @Transactional(readOnly = true)
     fun findTimeline(
