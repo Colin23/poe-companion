@@ -9,7 +9,7 @@ forbiddenapis = "3.11"
 detekt = "2.0.0-alpha.6"
 cyclonedx-bom = "3.5.1"
 kotlin = "2.4.20"
-spring-boot = "4.1.1"
+spring-boot = "4.1.2"
 
 [libraries]
 # implementation dependencies
