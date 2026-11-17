@@ -1,118 +1,107 @@
 {
-    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-    "extends": [
-        "config:best-practices",
-        ":enableVulnerabilityAlerts"
+    $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+    extends: [
+        'config:best-practices',
+        ':enableVulnerabilityAlerts',
     ],
-    // Interpret schedules in your timezone.
-    "timezone": "Europe/Berlin",
-    // Routine dependency work happens Monday morning.
-    // Vulnerability-alert PRs bypass this schedule.
-    "schedule": [
-        "* 4-8 * * 1"
+    timezone: 'Europe/Berlin',
+    schedule: [
+        '* 4-8 * * 1',
     ],
-    // Central visibility/control surface for pending updates.
-    "dependencyDashboard": true,
-    "dependencyDashboardTitle": "Renovate Dependency Dashboard",
-    // Keep routine update volume bounded. Vulnerability fixes have their own
-    // separate concurrency budget below and always skip the hourly limit.
-    "prConcurrentLimit": 5,
-    "prHourlyLimit": 2,
-    // Use GitHub's API for Renovate commits so GitHub can cryptographically
-    // sign commits made by the Renovate GitHub App.
-    "platformCommit": "enabled",
-    // Let GitHub perform the final merge only after repository rulesets pass.
-    "platformAutomerge": true,
-    "automergeType": "pr",
-    "automergeStrategy": "squash",
-    "rebaseWhen": "behind-base-branch",
-    "separateMinorPatch": true,
-    "ignoreTests": false,
-    "labels": [
-        "dependencies"
-    ],
-    // GitHub vulnerability alerts -> immediate Renovate security PRs.
-    // Keep these manual for now even when CI passes: a security fix can involve
-    // a larger-than-patch upgrade and deserves an explicit review.
-    "vulnerabilityAlerts": {
-        "enabled": true,
-        "labels": [
-            "dependencies",
-            "security"
-        ],
-        "prCreation": "immediate",
-        "vulnerabilityFixStrategy": "lowest",
-        "prConcurrentLimit": 5,
-        "automerge": false
+    dependencyDashboard: {
+        enabled: true,
+        title: 'Renovate Dependency Dashboard',
     },
-    "packageRules": [
+    prConcurrentLimit: 5,
+    prHourlyLimit: 2,
+    platformCommit: 'enabled',
+    platformAutomerge: true,
+    automergeType: 'pr',
+    automergeStrategy: 'squash',
+    rebaseWhen: 'behind-base-branch',
+    separateMinorPatch: true,
+    ignoreTests: false,
+    labels: [
+        'dependencies',
+    ],
+    vulnerabilityAlerts: {
+        enabled: true,
+        labels: [
+            'dependencies',
+            'security',
+        ],
+        prCreation: 'immediate',
+        vulnerabilityFixStrategy: 'lowest',
+        prConcurrentLimit: 5,
+        automerge: false,
+    },
+    packageRules: [
         {
-            "description": "Label GitHub Actions updates",
-            "matchManagers": [
-                "github-actions"
+            description: 'Label GitHub Actions updates',
+            matchManagers: [
+                'github-actions',
             ],
-            "addLabels": [
-                "ci"
-            ]
+            addLabels: [
+                'ci',
+            ],
         },
         {
-            "description": "Automerge immutable SHA/digest pinning after CI",
-            "matchUpdateTypes": [
-                "pinDigest"
+            description: 'Automerge immutable SHA/digest pinning after CI',
+            matchUpdateTypes: [
+                'pinDigest',
             ],
-            "automerge": true
+            automerge: true,
         },
         {
-            "description": "Automerge stable patch updates after a 14-day supply-chain cooldown",
-            "matchUpdateTypes": [
-                "patch"
+            description: 'Automerge stable patch updates after a 14-day supply-chain cooldown',
+            matchUpdateTypes: [
+                'patch',
             ],
-            "matchCurrentVersion": "!/^0/",
-            "minimumReleaseAge": "14 days",
-            "automerge": true
+            matchCurrentVersion: '!/^0/',
+            minimumReleaseAge: '14 days',
+            automerge: true,
         },
         {
-            "description": "Never automerge pre-1.0 dependencies",
-            "matchCurrentVersion": "/^0\\./",
-            "automerge": false
+            description: 'Never automerge pre-1.0 dependencies',
+            matchCurrentVersion: '/^0\\./',
+            automerge: false,
         },
         {
-            "description": "Never automerge prerelease dependencies",
-            "matchCurrentVersion": "/-/",
-            "automerge": false
+            description: 'Never automerge prerelease dependencies',
+            matchCurrentVersion: '/-/',
+            automerge: false,
         },
         {
-            // Automatically updating the verification-metadata.xml for Gradle plugins doesn't work with Renovate.
-            "description": "Require manual review for Gradle plugin updates",
-            "matchManagers": [
-                "gradle"
+            description: 'Require manual review for Gradle plugin updates',
+            matchManagers: [
+                'gradle',
             ],
-            "matchDepTypes": [
-                "plugin"
+            matchDepTypes: [
+                'plugin',
             ],
-            "automerge": false
+            automerge: false,
         },
         {
-            "description": "Require manual review when an existing immutable digest or SHA moves",
-            "matchUpdateTypes": [
-                "digest"
+            description: 'Require manual review when an existing immutable digest or SHA moves',
+            matchUpdateTypes: [
+                'digest',
             ],
-            "addLabels": [
-                "security"
+            addLabels: [
+                'security',
             ],
-            "automerge": false
+            automerge: false,
         },
         {
-            "description": "Group Kotlin Gradle plugins",
-            "matchManagers": [
-                "gradle"
+            description: 'Group Kotlin Gradle plugins',
+            matchManagers: [
+                'gradle',
             ],
-            "matchPackageNames": [
-                "org.jetbrains.kotlin.jvm",
-                "org.jetbrains.kotlin.plugin.jpa",
-                "org.jetbrains.kotlin.plugin.spring"
+            matchPackageNames: [
+                'org.jetbrains.kotlin.jvm',
+                'org.jetbrains.kotlin.plugin.jpa',
+                'org.jetbrains.kotlin.plugin.spring',
             ],
-            "groupName": "Kotlin Gradle plugins"
-        }
-    ]
+            groupName: 'Kotlin Gradle plugins',
+        },
+    ],
 }
