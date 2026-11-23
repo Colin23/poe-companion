@@ -1,7 +1,7 @@
 [versions]
 # library versions
 ktlint = "1.8.0"
-spring-modulith = "2.1.1"
+spring-modulith = "2.1.2"
 
 # plugin versions
 spotless = "8.10.4"
