@@ -8,7 +8,7 @@ spotless = "8.10.4"
 forbiddenapis = "3.11"
 detekt = "2.0.0-alpha.6"
 cyclonedx-bom = "3.5.1"
-kotlin = "2.4.20"
+kotlin = "2.4.21"
 spring-boot = "4.1.1"
 
 [libraries]
